@@ -19,7 +19,7 @@
   "main": "dist/typechain/index.js",
   "types": "dist/typechain/index.d.ts",
   "scripts": {
-    "build": "yarn clean-cache && yarn hardhat compile",
+    "build": "yarn clean-cache && yarn hardhat compile && yarn tsc --skipLibCheck",
     "clean-cache": "yarn hardhat clean",
     "test": "NODE_ENV=test yarn hardhat test",
     "coverage": "yarn hardhat compile --force && node --max_old_space_size=6144 node_modules/.bin/hardhat coverage --testfiles 'test/**/*.ts' --show-stack-traces",
@@ -31,6 +31,7 @@
     "prepublishOnly": "yarn build && yarn tsc"
   },
   "devDependencies": {
+    "@ethersproject/providers": "^5.7.0",
     "@nomiclabs/hardhat-ethers": "^2.1.1",
     "@nomiclabs/hardhat-etherscan": "^3.1.0",
     "@nomiclabs/hardhat-waffle": "^2.0.3",
