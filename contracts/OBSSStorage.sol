@@ -62,14 +62,14 @@ contract OBSSStorage is Ownable {
   // Reactions
   event ReactionAdded(
     address indexed user,
-    uint256 categoryOrProfileId,
-    uint256 postId,
+    uint256 indexed categoryOrProfileId,
+    uint256 indexed postId,
     uint8 reactionType,
     uint256 value
   );
   event ReactionRemoved(
     address indexed user,
-    uint256 categoryOrProfileId,
+    uint256 indexed categoryOrProfileId,
     uint256 postId
   );
 
