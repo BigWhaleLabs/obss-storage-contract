@@ -65,7 +65,7 @@ async function main() {
     'Etherscan URL:',
     `https://${
       chainName !== 'polygon' ? `${chainName}.` : ''
-    }polygonscan.io/address/${address}`
+    }polygonscan.com/address/${address}`
   )
 }
 
