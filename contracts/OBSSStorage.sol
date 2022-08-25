@@ -11,16 +11,67 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract OBSSStorage is Ownable {
   using Counters for Counters.Counter;
 
-  // State
-  string public version;
-  mapping(uint256 => bytes32) public categories;
-  Counters.Counter public lastCategoryId;
-  mapping(uint256 => bytes32[]) public objects;
-  mapping(uint256 => Counters.Counter) public lastObjectIds;
+  // IPFS cid represented in a more efficient way
+  struct CID {
+    bytes32 digest;
+    uint8 hashFunction;
+    uint8 size;
+  }
+  // Post struct
+  struct Post {
+    address author;
+    CID metadata;
+  }
+  // 0 = upvote, 1 = downvote
+  struct Reaction {
+    uint8 reactionType;
+    uint256 value;
+  }
 
-  // Events
-  event CategoryAdded(uint256 categoryId, bytes32 category);
-  event ObjectAdded(uint256 categoryId, uint256 objectId, bytes32 object);
+  /* State */
+  string public version;
+  // Categories
+  CID[] public categories;
+  Counters.Counter public lastCategoryId;
+  mapping(uint256 => Post[]) public categoryPosts;
+  mapping(uint256 => Counters.Counter) public lastCategoryPostIds;
+  // Profiles
+  mapping(address => CID) public profiles;
+  mapping(address => Post[]) public profilePosts;
+  mapping(address => Counters.Counter) public lastProfilePostIds;
+  mapping(address => CID) public subscriptions;
+  // Reactions
+  mapping(bytes32 => mapping(address => Reaction)) public reactions;
+
+  /* Events */
+  // Categories
+  event CategoryAdded(uint256 indexed id, CID metadata);
+  event CategoryPostAdded(
+    uint256 indexed categoryId,
+    uint256 indexed postId,
+    Post post
+  );
+  // Profiles
+  event ProfileAdded(address indexed user, CID metadata);
+  event ProfilePostAdded(
+    address indexed profile,
+    uint256 indexed postId,
+    Post post
+  );
+  event SubsciptionsChanged(address indexed user, CID metadata);
+  // Reactions
+  event ReactionAdded(
+    address indexed user,
+    uint256 categoryOrProfileId,
+    uint256 postId,
+    uint8 reactionType,
+    uint256 value
+  );
+  event ReactionRemoved(
+    address indexed user,
+    uint256 categoryOrProfileId,
+    uint256 postId
+  );
 
   /**
    * @dev Constructor
@@ -34,22 +85,100 @@ contract OBSSStorage is Ownable {
    * @dev Add a new category
    * @param _category The category to add
    */
-  function addCategory(bytes32 _category) external {
+  function addCategory(CID memory _category) external {
     uint256 categoryId = lastCategoryId.current();
-    categories[categoryId] = _category;
+    categories.push(_category);
     emit CategoryAdded(categoryId, _category);
     lastCategoryId.increment();
   }
 
   /**
-   * @dev Add a new object
+   * @dev Add a new category post
    * @param _categoryId The category id
-   * @param _object The object to add
+   * @param _postMetadata The post metadata to add
    */
-  function addObject(uint256 _categoryId, bytes32 _object) external {
-    uint256 objectId = lastObjectIds[_categoryId].current();
-    objects[_categoryId].push(_object);
-    emit ObjectAdded(_categoryId, objectId, _object);
-    lastObjectIds[_categoryId].increment();
+  function addCategoryPost(uint256 _categoryId, CID memory _postMetadata)
+    external
+  {
+    Post memory post = Post(msg.sender, _postMetadata);
+    uint256 objectId = lastCategoryPostIds[_categoryId].current();
+    categoryPosts[_categoryId].push(post);
+    emit CategoryPostAdded(_categoryId, objectId, post);
+    lastCategoryPostIds[_categoryId].increment();
+  }
+
+  /**
+   * @dev Add a new profile
+   * @param _profile The profile to add
+   */
+  function addProfile(CID memory _profile) external {
+    profiles[msg.sender] = _profile;
+    emit ProfileAdded(msg.sender, _profile);
+  }
+
+  /**
+   * @dev Add a new profile post
+   * @param _postMetadata The post metadata to add
+   */
+  function addProfilePost(CID memory _postMetadata) external {
+    Post memory post = Post(msg.sender, _postMetadata);
+    uint256 objectId = lastProfilePostIds[msg.sender].current();
+    profilePosts[msg.sender].push(post);
+    emit ProfilePostAdded(msg.sender, objectId, post);
+    lastProfilePostIds[msg.sender].increment();
+  }
+
+  /**
+   * @dev Change the subscriptions of a user
+   * @param _subscriptions The subscriptions to add
+   */
+  function changeSubscriptions(CID memory _subscriptions) external {
+    subscriptions[msg.sender] = _subscriptions;
+    emit SubsciptionsChanged(msg.sender, _subscriptions);
+  }
+
+  /**
+   * @dev Add a reaction
+   * @param _categoryOrProfileId The category or profile id
+   * @param _postId The post id
+   * @param _reactionType The reaction type
+   */
+  function addReaction(
+    uint256 _categoryOrProfileId,
+    uint256 _postId,
+    uint8 _reactionType
+  ) external payable {
+    Post memory post = categoryPosts[_categoryOrProfileId][_postId];
+    if (post.author == address(0)) {
+      revert("Post not found");
+    }
+    Reaction memory reaction = Reaction(_reactionType, msg.value);
+    reactions[post.metadata.digest][msg.sender] = reaction;
+    if (msg.value > 0) {
+      payable(post.author).transfer(msg.value);
+    }
+    emit ReactionAdded(
+      msg.sender,
+      _categoryOrProfileId,
+      _postId,
+      _reactionType,
+      msg.value
+    );
+  }
+
+  /**
+   * @dev Remove a reaction
+   * @param _categoryOrProfileId The category or profile id
+   * @param _postId The post id
+   */
+  function removeReaction(uint256 _categoryOrProfileId, uint256 _postId)
+    external
+  {
+    Post memory post = categoryPosts[_categoryOrProfileId][_postId];
+    if (post.author == address(0)) {
+      revert("Post not found");
+    }
+    delete reactions[post.metadata.digest][msg.sender];
+    emit ReactionRemoved(msg.sender, _categoryOrProfileId, _postId);
   }
 }
