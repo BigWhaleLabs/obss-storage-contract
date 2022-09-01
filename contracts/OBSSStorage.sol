@@ -3,12 +3,13 @@ pragma solidity ^0.8.14;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@big-whale-labs/versioned-contract/contracts/Versioned.sol";
 
 /**
  * @title OBSSStorage
  * @dev This contract is used to store the data of the OBSS contract
  */
-contract OBSSStorage is Ownable {
+contract OBSSStorage is Ownable, Versioned {
   using Counters for Counters.Counter;
 
   // IPFS cid represented in a more efficient way
@@ -29,7 +30,6 @@ contract OBSSStorage is Ownable {
   }
 
   /* State */
-  string public version;
   // Categories
   CID[] public categories;
   Counters.Counter public lastCategoryId;
@@ -77,9 +77,7 @@ contract OBSSStorage is Ownable {
    * @dev Constructor
    * @param _version Version of the contract
    */
-  constructor(string memory _version) {
-    version = _version;
-  }
+  constructor(string memory _version) Versioned(_version) {}
 
   /**
    * @dev Add a new category
@@ -94,17 +92,17 @@ contract OBSSStorage is Ownable {
 
   /**
    * @dev Add a new category post
-   * @param _categoryId The category id
+   * @param categoryId The category id
    * @param _postMetadata The post metadata to add
    */
-  function addCategoryPost(uint256 _categoryId, CID memory _postMetadata)
+  function addCategoryPost(uint256 categoryId, CID memory _postMetadata)
     external
   {
     Post memory post = Post(msg.sender, _postMetadata);
-    uint256 objectId = lastCategoryPostIds[_categoryId].current();
-    categoryPosts[_categoryId].push(post);
-    emit CategoryPostAdded(_categoryId, objectId, post);
-    lastCategoryPostIds[_categoryId].increment();
+    uint256 objectId = lastCategoryPostIds[categoryId].current();
+    categoryPosts[categoryId].push(post);
+    emit CategoryPostAdded(categoryId, objectId, post);
+    lastCategoryPostIds[categoryId].increment();
   }
 
   /**
@@ -180,5 +178,51 @@ contract OBSSStorage is Ownable {
     }
     delete reactions[post.metadata.digest][msg.sender];
     emit ReactionRemoved(msg.sender, _categoryOrProfileId, _postId);
+  }
+
+  /**
+   * @dev Get the category posts
+   */
+  function getCategoryPosts(
+    uint256 categoryId,
+    uint256 skip,
+    uint256 limit
+  ) external view returns (Post[] memory) {
+    Post[] memory posts = categoryPosts[categoryId];
+    if (skip > posts.length) {
+      return new Post[](0);
+    }
+    uint256 length = skip + limit > posts.length - 1
+      ? posts.length - skip
+      : limit;
+    Post[] memory allPosts = new Post[](length);
+    for (uint256 i = 0; i < length; i++) {
+      Post memory post = posts[skip + i];
+      allPosts[i] = post;
+    }
+    return allPosts;
+  }
+
+  /**
+   * @dev Get the profile posts
+   */
+  function getProfilePosts(
+    address profile,
+    uint256 skip,
+    uint256 limit
+  ) external view returns (Post[] memory) {
+    Post[] memory posts = profilePosts[profile];
+    if (skip > posts.length) {
+      return new Post[](0);
+    }
+    uint256 length = skip + limit > posts.length - 1
+      ? posts.length - skip
+      : limit;
+    Post[] memory allPosts = new Post[](length);
+    for (uint256 i = 0; i < length; i++) {
+      Post memory post = posts[skip + i];
+      allPosts[i] = post;
+    }
+    return allPosts;
   }
 }
