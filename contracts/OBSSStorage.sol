@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.14;
+pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -30,11 +30,11 @@ contract OBSSStorage is Ownable, Versioned {
   }
 
   /* State */
-  // Categories
-  CID[] public categories;
-  Counters.Counter public lastCategoryId;
-  mapping(uint256 => Post[]) public categoryPosts;
-  mapping(uint256 => Counters.Counter) public lastCategoryPostIds;
+  // Feeds
+  CID[] public feeds;
+  Counters.Counter public lastFeedId;
+  mapping(uint256 => Post[]) public feedPosts;
+  mapping(uint256 => Counters.Counter) public lastFeedPostIds;
   // Profiles
   mapping(address => CID) public profiles;
   mapping(address => Post[]) public profilePosts;
@@ -44,10 +44,10 @@ contract OBSSStorage is Ownable, Versioned {
   mapping(bytes32 => mapping(address => Reaction)) public reactions;
 
   /* Events */
-  // Categories
-  event CategoryAdded(uint256 indexed id, CID metadata);
-  event CategoryPostAdded(
-    uint256 indexed categoryId,
+  // Feeds
+  event FeedAdded(uint256 indexed id, CID metadata);
+  event FeedPostAdded(
+    uint256 indexed feedId,
     uint256 indexed postId,
     Post post
   );
@@ -62,14 +62,14 @@ contract OBSSStorage is Ownable, Versioned {
   // Reactions
   event ReactionAdded(
     address indexed user,
-    uint256 indexed categoryOrProfileId,
+    uint256 indexed feedOrProfileId,
     uint256 indexed postId,
     uint8 reactionType,
     uint256 value
   );
   event ReactionRemoved(
     address indexed user,
-    uint256 indexed categoryOrProfileId,
+    uint256 indexed feedOrProfileId,
     uint256 postId
   );
 
@@ -80,29 +80,27 @@ contract OBSSStorage is Ownable, Versioned {
   constructor(string memory version) Versioned(version) {}
 
   /**
-   * @dev Add a new category
-   * @param categoryMetadata The category to add
+   * @dev Add a new feed
+   * @param feedMetadata The feed to add
    */
-  function addCategory(CID memory categoryMetadata) external {
-    uint256 categoryId = lastCategoryId.current();
-    categories.push(categoryMetadata);
-    emit CategoryAdded(categoryId, categoryMetadata);
-    lastCategoryId.increment();
+  function addFeed(CID memory feedMetadata) external {
+    uint256 feedId = lastFeedId.current();
+    feeds.push(feedMetadata);
+    emit FeedAdded(feedId, feedMetadata);
+    lastFeedId.increment();
   }
 
   /**
-   * @dev Add a new category post
-   * @param categoryId The category id
+   * @dev Add a new feed post
+   * @param feedId The feed id
    * @param postMetadata The post metadata to add
    */
-  function addCategoryPost(uint256 categoryId, CID memory postMetadata)
-    external
-  {
+  function addFeedPost(uint256 feedId, CID memory postMetadata) external {
     Post memory post = Post(msg.sender, postMetadata);
-    uint256 objectId = lastCategoryPostIds[categoryId].current();
-    categoryPosts[categoryId].push(post);
-    emit CategoryPostAdded(categoryId, objectId, post);
-    lastCategoryPostIds[categoryId].increment();
+    uint256 objectId = lastFeedPostIds[feedId].current();
+    feedPosts[feedId].push(post);
+    emit FeedPostAdded(feedId, objectId, post);
+    lastFeedPostIds[feedId].increment();
   }
 
   /**
@@ -137,16 +135,16 @@ contract OBSSStorage is Ownable, Versioned {
 
   /**
    * @dev Add a reaction
-   * @param categoryOrProfileId The category or profile id
+   * @param feedOrProfileId The feed or profile id
    * @param postId The post id
    * @param reactionType The reaction type
    */
   function addReaction(
-    uint256 categoryOrProfileId,
+    uint256 feedOrProfileId,
     uint256 postId,
     uint8 reactionType
   ) external payable {
-    Post memory post = categoryPosts[categoryOrProfileId][postId];
+    Post memory post = feedPosts[feedOrProfileId][postId];
     if (post.author == address(0)) {
       revert("Post not found");
     }
@@ -157,7 +155,7 @@ contract OBSSStorage is Ownable, Versioned {
     }
     emit ReactionAdded(
       msg.sender,
-      categoryOrProfileId,
+      feedOrProfileId,
       postId,
       reactionType,
       msg.value
@@ -166,29 +164,27 @@ contract OBSSStorage is Ownable, Versioned {
 
   /**
    * @dev Remove a reaction
-   * @param categoryOrProfileId The category or profile id
+   * @param feedOrProfileId The feed or profile id
    * @param postId The post id
    */
-  function removeReaction(uint256 categoryOrProfileId, uint256 postId)
-    external
-  {
-    Post memory post = categoryPosts[categoryOrProfileId][postId];
+  function removeReaction(uint256 feedOrProfileId, uint256 postId) external {
+    Post memory post = feedPosts[feedOrProfileId][postId];
     if (post.author == address(0)) {
       revert("Post not found");
     }
     delete reactions[post.metadata.digest][msg.sender];
-    emit ReactionRemoved(msg.sender, categoryOrProfileId, postId);
+    emit ReactionRemoved(msg.sender, feedOrProfileId, postId);
   }
 
   /**
-   * @dev Get the category posts
+   * @dev Get the feed posts
    */
-  function getCategoryPosts(
-    uint256 categoryId,
+  function getFeedPosts(
+    uint256 feedId,
     uint256 skip,
     uint256 limit
   ) external view returns (Post[] memory) {
-    Post[] memory posts = categoryPosts[categoryId];
+    Post[] memory posts = feedPosts[feedId];
     if (skip > posts.length) {
       return new Post[](0);
     }
