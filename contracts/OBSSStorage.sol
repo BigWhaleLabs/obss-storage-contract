@@ -120,7 +120,6 @@ contract OBSSStorage is Ownable, Versioned {
     emit CommunityAdded(communityId, communityMetadata);
     lastCommunityId.increment();
   }
-  
 
   /**
    * @dev Add a new feed
