@@ -3,13 +3,14 @@ pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@opengsn/contracts/src/ERC2771Recipient.sol";
 import "@big-whale-labs/versioned-contract/contracts/Versioned.sol";
 
 /**
  * @title OBSSStorage
  * @dev This contract is used to store the data of the OBSS contract
  */
-contract OBSSStorage is Ownable, Versioned {
+contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
   using Counters for Counters.Counter;
 
   // IPFS cid represented in a more efficient way
@@ -73,11 +74,10 @@ contract OBSSStorage is Ownable, Versioned {
     uint256 postId
   );
 
-  /**
-   * @dev Constructor
-   * @param version Version of the contract
-   */
-  constructor(string memory version) Versioned(version) {}
+  constructor(address _forwarder, string memory _version) Versioned(_version) {
+    _setTrustedForwarder(_forwarder);
+    version = _version;
+  }
 
   /**
    * @dev Add a new feed
@@ -96,7 +96,7 @@ contract OBSSStorage is Ownable, Versioned {
    * @param postMetadata The post metadata to add
    */
   function addFeedPost(uint256 feedId, CID memory postMetadata) external {
-    Post memory post = Post(msg.sender, postMetadata);
+    Post memory post = Post(_msgSender(), postMetadata);
     uint256 objectId = lastFeedPostIds[feedId].current();
     feedPosts[feedId].push(post);
     emit FeedPostAdded(feedId, objectId, post);
@@ -108,8 +108,8 @@ contract OBSSStorage is Ownable, Versioned {
    * @param profileMetadata The profile to add
    */
   function addProfile(CID memory profileMetadata) external {
-    profiles[msg.sender] = profileMetadata;
-    emit ProfileAdded(msg.sender, profileMetadata);
+    profiles[_msgSender()] = profileMetadata;
+    emit ProfileAdded(_msgSender(), profileMetadata);
   }
 
   /**
@@ -220,5 +220,23 @@ contract OBSSStorage is Ownable, Versioned {
       allPosts[i] = post;
     }
     return allPosts;
+  }
+
+  function _msgSender()
+    internal
+    view
+    override(Context, ERC2771Recipient)
+    returns (address sender)
+  {
+    sender = ERC2771Recipient._msgSender();
+  }
+
+  function _msgData()
+    internal
+    view
+    override(Context, ERC2771Recipient)
+    returns (bytes calldata ret)
+  {
+    return ERC2771Recipient._msgData();
   }
 }
