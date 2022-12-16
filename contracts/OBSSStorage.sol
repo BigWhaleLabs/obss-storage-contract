@@ -18,6 +18,11 @@ contract OBSSStorage is Ownable, Versioned {
     uint8 hashFunction;
     uint8 size;
   }
+  // Community struct
+  struct Community {
+    address owner;
+    CID metadata;
+  }
   // Post struct
   struct Post {
     address author;
@@ -30,6 +35,11 @@ contract OBSSStorage is Ownable, Versioned {
   }
 
   /* State */
+  // Community
+  CID[] public communities;
+  Counters.Counter public lastCommunityId;
+  mapping(uint256 => Post[]) public communityPosts;
+  mapping(uint256 => Counters.Counter) public lastCommunityPostId;
   // Feeds
   CID[] public feeds;
   Counters.Counter public lastFeedId;
@@ -44,6 +54,13 @@ contract OBSSStorage is Ownable, Versioned {
   mapping(bytes32 => mapping(address => Reaction)) public reactions;
 
   /* Events */
+  // Community
+  event CommunityAdded(uint256 indexed id, CID metadata);
+  event CommunityChanged(
+    address indexed owner,
+    uint256 indexed communityId,
+    CID metadata
+  );
   // Feeds
   event FeedAdded(uint256 indexed id, CID metadata);
   event FeedPostAdded(
@@ -79,6 +96,42 @@ contract OBSSStorage is Ownable, Versioned {
    */
   constructor(string memory version) Versioned(version) {}
 
+  /** 
+    @dev Get the communities
+    @return The communities
+   */
+  function getCommunities() external view returns (CID[] memory) {
+    return communities;
+  }
+  /** 
+    @dev Get the community metadata
+    @param communityId The community id
+    @return The community metadata
+   */
+  function getCommunity(uint256 communityId) external view returns (CID memory) {
+    return communities[communityId];
+  }
+  /**
+   * @dev Add a new community
+   * @param communityMetadata The community to add
+   */
+  function addCommunity(CID memory communityMetadata) external {
+    uint256 communityId = lastCommunityId.current();
+    communities.push(communityMetadata);
+    emit CommunityAdded(communityId, communityMetadata);
+    lastCommunityId.increment();
+  }
+  /**
+    * @dev Change the community metadata
+    * @param owner The community owner
+    * @param communityId The community id
+    * @param communityMetadata The community metadata to set
+    */
+  function changeCommunity(address owner, uint256 communityId, CID memory communityMetadata) external {
+    require(owner == msg.sender, "OBSSStorage: Only the owner can change the community");
+    communities[communityId] = communityMetadata;
+    emit CommunityChanged(owner, communityId, communityMetadata);
+  }
   /**
    * @dev Add a new feed
    * @param feedMetadata The feed to add
