@@ -4,6 +4,7 @@ import '@typechain/hardhat'
 import 'hardhat-gas-reporter'
 import 'solidity-coverage'
 import * as dotenv from 'dotenv'
+import { ETH_RPC as FALLBACK_ETH_RPC } from '@big-whale-labs/constants'
 import { HardhatUserConfig } from 'hardhat/config'
 import { cleanEnv, str, testOnly } from 'envalid'
 
@@ -20,7 +21,7 @@ const {
       '0000000000000000000000000000000000000000000000000000000000000000'
     ),
   }),
-  ETH_RPC: str(),
+  ETH_RPC: str({ default: FALLBACK_ETH_RPC }),
   ETHERSCAN_API_KEY: str({ devDefault: testOnly('') }),
   COINMARKETCAP_API_KEY: str({ devDefault: testOnly('') }),
 })
