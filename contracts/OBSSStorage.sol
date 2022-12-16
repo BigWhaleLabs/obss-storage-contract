@@ -103,14 +103,18 @@ contract OBSSStorage is Ownable, Versioned {
   function getCommunities() external view returns (CID[] memory) {
     return communities;
   }
+
   /** 
     @dev Get the community metadata
     @param communityId The community id
     @return The community metadata
    */
-  function getCommunity(uint256 communityId) external view returns (CID memory) {
+  function getCommunity(
+    uint256 communityId
+  ) external view returns (CID memory) {
     return communities[communityId];
   }
+
   /**
    * @dev Add a new community
    * @param communityMetadata The community to add
@@ -121,17 +125,22 @@ contract OBSSStorage is Ownable, Versioned {
     emit CommunityAdded(communityId, communityMetadata);
     lastCommunityId.increment();
   }
+
   /**
-    * @dev Change the community metadata
-    * @param owner The community owner
-    * @param communityId The community id
-    * @param communityMetadata The community metadata to set
-    */
-  function changeCommunity(address owner, uint256 communityId, CID memory communityMetadata) external {
-    require(owner == msg.sender, "OBSSStorage: Only the owner can change the community");
+   * @dev Change the community metadata
+   * @param owner The community owner
+   * @param communityId The community id
+   * @param communityMetadata The community metadata to set
+   */
+  function changeCommunity(
+    address owner,
+    uint256 communityId,
+    CID memory communityMetadata
+  ) external onlyOwner {
     communities[communityId] = communityMetadata;
     emit CommunityChanged(owner, communityId, communityMetadata);
   }
+
   /**
    * @dev Add a new feed
    * @param feedMetadata The feed to add
