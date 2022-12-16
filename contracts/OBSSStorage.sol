@@ -56,11 +56,6 @@ contract OBSSStorage is Ownable, Versioned {
   /* Events */
   // Community
   event CommunityAdded(uint256 indexed id, CID metadata);
-  event CommunityChanged(
-    address indexed owner,
-    uint256 indexed communityId,
-    CID metadata
-  );
   // Feeds
   event FeedAdded(uint256 indexed id, CID metadata);
   event FeedPostAdded(
@@ -125,21 +120,7 @@ contract OBSSStorage is Ownable, Versioned {
     emit CommunityAdded(communityId, communityMetadata);
     lastCommunityId.increment();
   }
-
-  /**
-   * @dev Change the community metadata
-   * @param owner The community owner
-   * @param communityId The community id
-   * @param communityMetadata The community metadata to set
-   */
-  function changeCommunity(
-    address owner,
-    uint256 communityId,
-    CID memory communityMetadata
-  ) external onlyOwner {
-    communities[communityId] = communityMetadata;
-    emit CommunityChanged(owner, communityId, communityMetadata);
-  }
+  
 
   /**
    * @dev Add a new feed

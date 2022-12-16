@@ -1,5 +1,6 @@
 import { ethers } from 'hardhat'
 import { expect } from 'chai'
+import serializeCommunities from './ utils'
 
 const struct = {
   digest: '0x55af6607dd06a5d5539bafd36edaef232ab59eee401d098b9268b780953adbe7',
@@ -29,13 +30,11 @@ describe('OBSSStorage contract tests', () => {
       expect(await this.obssStorage.getCommunities()).to.have.length(0)
     })
     it('should add a community', async function () {
-      const expectCommunity = [
-        '0x55af6607dd06a5d5539bafd36edaef232ab59eee401d098b9268b780953adbe7',
-        18,
-        32,
-      ]
+      const expectCommunity = [struct]
       await this.obssStorage.addCommunity(struct)
-      expect(await this.obssStorage.communities(0)).to.equal(expectCommunity)
+      const communities = await this.obssStorage.getCommunities()
+      const serializedPosts = serializeCommunities(communities)
+      expect(serializedPosts).to.deep.equal(expectCommunity)
     })
   })
 })
