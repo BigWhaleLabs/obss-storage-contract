@@ -21,7 +21,7 @@ const {
       '0000000000000000000000000000000000000000000000000000000000000000'
     ),
   }),
-  ETH_RPC:  str({ default: FALLBACK_ETH_RPC }),
+  ETH_RPC: str({ default: FALLBACK_ETH_RPC }),
   ETHERSCAN_API_KEY: str({ devDefault: testOnly('') }),
   COINMARKETCAP_API_KEY: str({ devDefault: testOnly('') }),
 })
