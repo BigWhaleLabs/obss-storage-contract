@@ -24,7 +24,6 @@ contract OBSSStorage is Ownable, Versioned {
     CID metadata;
     uint256 commentsFeedId;
   }
-
   // 0 = upvote, 1 = downvote
   struct Reaction {
     uint8 reactionType;
@@ -44,9 +43,6 @@ contract OBSSStorage is Ownable, Versioned {
   mapping(address => CID) public subscriptions;
   // Reactions
   mapping(bytes32 => mapping(address => Reaction)) public reactions;
-  // Comments
-  // mapping (bytes32 => Comment[]) public comments;
-  mapping(bytes32 => bytes32[]) public rootCommentsDigest;
   /* Events */
   // Feeds
   event FeedAdded(uint256 indexed id, CID metadata);
