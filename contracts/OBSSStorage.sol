@@ -23,6 +23,12 @@ contract OBSSStorage is Ownable, Versioned {
     address author;
     CID metadata;
   }
+  // Coment struct
+  struct Comment {
+    address author;
+    CID metadata;
+  }
+
   // 0 = upvote, 1 = downvote
   struct Reaction {
     uint8 reactionType;
@@ -42,7 +48,9 @@ contract OBSSStorage is Ownable, Versioned {
   mapping(address => CID) public subscriptions;
   // Reactions
   mapping(bytes32 => mapping(address => Reaction)) public reactions;
-
+  // Comments
+  mapping (bytes32 => Comment[]) public comments;
+  mapping(bytes32 => bytes32[]) public rootCommentsDigest;
   /* Events */
   // Feeds
   event FeedAdded(uint256 indexed id, CID metadata);
@@ -71,6 +79,11 @@ contract OBSSStorage is Ownable, Versioned {
     address indexed user,
     uint256 indexed feedOrProfileId,
     uint256 postId
+  );
+  event CommentAdded(
+    bytes32 indexed postDigest,
+    bytes32 indexed commentDigest,
+    Comment comment
   );
 
   /**
@@ -220,5 +233,27 @@ contract OBSSStorage is Ownable, Versioned {
       allPosts[i] = post;
     }
     return allPosts;
+  }
+
+  /**
+   * @dev Add top-level comment to a post
+   * @param postDigest The post digest
+   * @param commentMetadata The comment metadata
+   */
+  function addRootComment(bytes32 postDigest, CID memory commentMetadata) external {
+    Comment memory comment = Comment(msg.sender, commentMetadata);
+    rootCommentsDigest[postDigest].push(commentMetadata.digest);
+    comments[postDigest].push(comment);
+    emit CommentAdded(postDigest, commentMetadata.digest, comment);
+  }
+  /**
+   * @dev Add reply to comment
+   * @param commentDigest The digest of comment to reply to
+   * @param replyMetadata The reply metadata
+   */
+  function addReplyToComment(bytes32 commentDigest, CID memory replyMetadata) external {
+    Comment memory reply = Comment(msg.sender, replyMetadata);
+    comments[commentDigest].push(Comment(msg.sender, replyMetadata));
+    emit CommentAdded(commentDigest, replyMetadata.digest, reply);
   }
 }
