@@ -3,13 +3,14 @@ pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@opengsn/contracts/src/ERC2771Recipient.sol";
 import "@big-whale-labs/versioned-contract/contracts/Versioned.sol";
 
 /**
  * @title OBSSStorage
  * @dev This contract is used to store the data of the OBSS contract
  */
-contract OBSSStorage is Ownable, Versioned {
+contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
   using Counters for Counters.Counter;
 
   // IPFS cid represented in a more efficient way
@@ -74,11 +75,10 @@ contract OBSSStorage is Ownable, Versioned {
     uint256 postId
   );
 
-  /**
-   * @dev Constructor
-   * @param version Version of the contract
-   */
-  constructor(string memory version) Versioned(version) {}
+  constructor(address _forwarder, string memory _version) Versioned(_version) {
+    _setTrustedForwarder(_forwarder);
+    version = _version;
+  }
 
   /**
    * @dev Add a new feed
@@ -99,7 +99,7 @@ contract OBSSStorage is Ownable, Versioned {
    */
   function addFeedPost(uint256 feedId, CID memory postMetadata) external {
     uint256 commentsFeedId = addFeed(postMetadata);
-    Post memory post = Post(msg.sender, postMetadata, commentsFeedId);
+    Post memory post = Post(_msgSender(), postMetadata, commentsFeedId);
     uint256 objectId = lastFeedPostIds[feedId].current();
     feedPosts[feedId].push(post);
     emit FeedPostAdded(feedId, objectId, post);
@@ -111,8 +111,8 @@ contract OBSSStorage is Ownable, Versioned {
    * @param profileMetadata The profile to add
    */
   function addProfile(CID memory profileMetadata) external {
-    profiles[msg.sender] = profileMetadata;
-    emit ProfileAdded(msg.sender, profileMetadata);
+    profiles[_msgSender()] = profileMetadata;
+    emit ProfileAdded(_msgSender(), profileMetadata);
   }
 
   /**
@@ -121,11 +121,11 @@ contract OBSSStorage is Ownable, Versioned {
    */
   function addProfilePost(CID memory postMetadata) external {
     uint256 commentsFeedId = addFeed(postMetadata);
-    Post memory post = Post(msg.sender, postMetadata, commentsFeedId);
-    uint256 objectId = lastProfilePostIds[msg.sender].current();
-    profilePosts[msg.sender].push(post);
-    emit ProfilePostAdded(msg.sender, objectId, post);
-    lastProfilePostIds[msg.sender].increment();
+    Post memory post = Post(_msgSender(), postMetadata, commentsFeedId);
+    uint256 objectId = lastProfilePostIds[_msgSender()].current();
+    profilePosts[_msgSender()].push(post);
+    emit ProfilePostAdded(_msgSender(), objectId, post);
+    lastProfilePostIds[_msgSender()].increment();
   }
 
   /**
@@ -133,8 +133,8 @@ contract OBSSStorage is Ownable, Versioned {
    * @param subscriptionsMetadata The subscriptions to set
    */
   function changeSubscriptions(CID memory subscriptionsMetadata) external {
-    subscriptions[msg.sender] = subscriptionsMetadata;
-    emit SubsciptionsChanged(msg.sender, subscriptionsMetadata);
+    subscriptions[_msgSender()] = subscriptionsMetadata;
+    emit SubsciptionsChanged(_msgSender(), subscriptionsMetadata);
   }
 
   /**
@@ -153,12 +153,12 @@ contract OBSSStorage is Ownable, Versioned {
       revert("Post not found");
     }
     Reaction memory reaction = Reaction(reactionType, msg.value);
-    reactions[post.metadata.digest][msg.sender] = reaction;
+    reactions[post.metadata.digest][_msgSender()] = reaction;
     if (msg.value > 0) {
       payable(post.author).transfer(msg.value);
     }
     emit ReactionAdded(
-      msg.sender,
+      _msgSender(),
       feedOrProfileId,
       postId,
       reactionType,
@@ -176,8 +176,8 @@ contract OBSSStorage is Ownable, Versioned {
     if (post.author == address(0)) {
       revert("Post not found");
     }
-    delete reactions[post.metadata.digest][msg.sender];
-    emit ReactionRemoved(msg.sender, feedOrProfileId, postId);
+    delete reactions[post.metadata.digest][_msgSender()];
+    emit ReactionRemoved(_msgSender(), feedOrProfileId, postId);
   }
 
   /**
@@ -224,5 +224,23 @@ contract OBSSStorage is Ownable, Versioned {
       allPosts[i] = post;
     }
     return allPosts;
+  }
+
+  function _msgSender()
+    internal
+    view
+    override(Context, ERC2771Recipient)
+    returns (address sender)
+  {
+    sender = ERC2771Recipient._msgSender();
+  }
+
+  function _msgData()
+    internal
+    view
+    override(Context, ERC2771Recipient)
+    returns (bytes calldata ret)
+  {
+    return ERC2771Recipient._msgData();
   }
 }

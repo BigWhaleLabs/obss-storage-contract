@@ -1,6 +1,12 @@
+import { GSN_FORWARDER_CONTRACT_ADDRESS } from '@big-whale-labs/constants'
 import { ethers, run } from 'hardhat'
 import { utils } from 'ethers'
 import { version } from '../package.json'
+import prompt from 'prompt'
+
+const regexes = {
+  ethereumAddress: /^0x[a-fA-F0-9]{40}$/,
+}
 
 async function main() {
   const [deployer] = await ethers.getSigners()
@@ -11,6 +17,16 @@ async function main() {
     'Account balance:',
     utils.formatEther(await deployer.getBalance())
   )
+
+  const { forwarder } = await prompt.get({
+    properties: {
+      forwarder: {
+        required: true,
+        pattern: regexes.ethereumAddress,
+        default: GSN_FORWARDER_CONTRACT_ADDRESS,
+      },
+    },
+  })
 
   const provider = ethers.provider
   const { chainId } = await provider.getNetwork()
@@ -24,10 +40,12 @@ async function main() {
   } as { [chainId: number]: string }
   const chainName = chains[chainId]
 
+  const constructorArguments = [forwarder, version] as [string, string]
+
   const contractName = 'OBSSStorage'
   console.log(`Deploying ${contractName}...`)
   const Contract = await ethers.getContractFactory(contractName)
-  const contract = await Contract.deploy(version)
+  const contract = await Contract.deploy(...constructorArguments)
 
   console.log(
     'Deploy tx gas price:',
@@ -49,7 +67,7 @@ async function main() {
   try {
     await run('verify:verify', {
       address,
-      constructorArguments: [version],
+      constructorArguments,
     })
   } catch (err) {
     console.log(
