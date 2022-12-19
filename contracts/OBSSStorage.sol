@@ -22,6 +22,7 @@ contract OBSSStorage is Ownable, Versioned {
   struct Post {
     address author;
     CID metadata;
+    uint256 commentsFeedId;
   }
   // 0 = upvote, 1 = downvote
   struct Reaction {
@@ -83,11 +84,12 @@ contract OBSSStorage is Ownable, Versioned {
    * @dev Add a new feed
    * @param feedMetadata The feed to add
    */
-  function addFeed(CID memory feedMetadata) external {
+  function addFeed(CID memory feedMetadata) public returns (uint256) {
     uint256 feedId = lastFeedId.current();
     feeds.push(feedMetadata);
     emit FeedAdded(feedId, feedMetadata);
     lastFeedId.increment();
+    return feedId;
   }
 
   /**
@@ -96,7 +98,8 @@ contract OBSSStorage is Ownable, Versioned {
    * @param postMetadata The post metadata to add
    */
   function addFeedPost(uint256 feedId, CID memory postMetadata) external {
-    Post memory post = Post(msg.sender, postMetadata);
+    uint256 commentsFeedId = addFeed(postMetadata);
+    Post memory post = Post(msg.sender, postMetadata, commentsFeedId);
     uint256 objectId = lastFeedPostIds[feedId].current();
     feedPosts[feedId].push(post);
     emit FeedPostAdded(feedId, objectId, post);
@@ -117,7 +120,8 @@ contract OBSSStorage is Ownable, Versioned {
    * @param postMetadata The post metadata to add
    */
   function addProfilePost(CID memory postMetadata) external {
-    Post memory post = Post(msg.sender, postMetadata);
+    uint256 commentsFeedId = addFeed(postMetadata);
+    Post memory post = Post(msg.sender, postMetadata, commentsFeedId);
     uint256 objectId = lastProfilePostIds[msg.sender].current();
     profilePosts[msg.sender].push(post);
     emit ProfilePostAdded(msg.sender, objectId, post);
