@@ -22,11 +22,7 @@ contract OBSSStorage is Ownable, Versioned {
   struct Post {
     address author;
     CID metadata;
-  }
-  // Coment struct
-  struct Comment {
-    address author;
-    CID metadata;
+    uint256 commentsFeedId;
   }
 
   // 0 = upvote, 1 = downvote
@@ -49,7 +45,7 @@ contract OBSSStorage is Ownable, Versioned {
   // Reactions
   mapping(bytes32 => mapping(address => Reaction)) public reactions;
   // Comments
-  mapping (bytes32 => Comment[]) public comments;
+  // mapping (bytes32 => Comment[]) public comments;
   mapping(bytes32 => bytes32[]) public rootCommentsDigest;
   /* Events */
   // Feeds
@@ -80,11 +76,6 @@ contract OBSSStorage is Ownable, Versioned {
     uint256 indexed feedOrProfileId,
     uint256 postId
   );
-  event CommentAdded(
-    bytes32 indexed postDigest,
-    bytes32 indexed commentDigest,
-    Comment comment
-  );
 
   /**
    * @dev Constructor
@@ -96,11 +87,12 @@ contract OBSSStorage is Ownable, Versioned {
    * @dev Add a new feed
    * @param feedMetadata The feed to add
    */
-  function addFeed(CID memory feedMetadata) external {
+  function addFeed(CID memory feedMetadata) public returns (uint256) {
     uint256 feedId = lastFeedId.current();
     feeds.push(feedMetadata);
     emit FeedAdded(feedId, feedMetadata);
     lastFeedId.increment();
+    return feedId;
   }
 
   /**
@@ -109,7 +101,8 @@ contract OBSSStorage is Ownable, Versioned {
    * @param postMetadata The post metadata to add
    */
   function addFeedPost(uint256 feedId, CID memory postMetadata) external {
-    Post memory post = Post(msg.sender, postMetadata);
+    uint256 commentsFeedId = addFeed(postMetadata);
+    Post memory post = Post(msg.sender, postMetadata, commentsFeedId);
     uint256 objectId = lastFeedPostIds[feedId].current();
     feedPosts[feedId].push(post);
     emit FeedPostAdded(feedId, objectId, post);
@@ -130,7 +123,8 @@ contract OBSSStorage is Ownable, Versioned {
    * @param postMetadata The post metadata to add
    */
   function addProfilePost(CID memory postMetadata) external {
-    Post memory post = Post(msg.sender, postMetadata);
+    uint256 commentsFeedId = addFeed(postMetadata);
+    Post memory post = Post(msg.sender, postMetadata, commentsFeedId);
     uint256 objectId = lastProfilePostIds[msg.sender].current();
     profilePosts[msg.sender].push(post);
     emit ProfilePostAdded(msg.sender, objectId, post);
@@ -233,27 +227,5 @@ contract OBSSStorage is Ownable, Versioned {
       allPosts[i] = post;
     }
     return allPosts;
-  }
-
-  /**
-   * @dev Add top-level comment to a post
-   * @param postDigest The post digest
-   * @param commentMetadata The comment metadata
-   */
-  function addRootComment(bytes32 postDigest, CID memory commentMetadata) external {
-    Comment memory comment = Comment(msg.sender, commentMetadata);
-    rootCommentsDigest[postDigest].push(commentMetadata.digest);
-    comments[postDigest].push(comment);
-    emit CommentAdded(postDigest, commentMetadata.digest, comment);
-  }
-  /**
-   * @dev Add reply to comment
-   * @param commentDigest The digest of comment to reply to
-   * @param replyMetadata The reply metadata
-   */
-  function addReplyToComment(bytes32 commentDigest, CID memory replyMetadata) external {
-    Comment memory reply = Comment(msg.sender, replyMetadata);
-    comments[commentDigest].push(Comment(msg.sender, replyMetadata));
-    emit CommentAdded(commentDigest, replyMetadata.digest, reply);
   }
 }
