@@ -23,6 +23,7 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
   struct Post {
     address author;
     CID metadata;
+    uint256 commentsFeedId;
   }
   // 0 = upvote, 1 = downvote
   struct Reaction {
@@ -83,11 +84,12 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
    * @dev Add a new feed
    * @param feedMetadata The feed to add
    */
-  function addFeed(CID memory feedMetadata) external {
+  function addFeed(CID memory feedMetadata) public returns (uint256) {
     uint256 feedId = lastFeedId.current();
     feeds.push(feedMetadata);
     emit FeedAdded(feedId, feedMetadata);
     lastFeedId.increment();
+    return feedId;
   }
 
   /**
@@ -96,7 +98,8 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
    * @param postMetadata The post metadata to add
    */
   function addFeedPost(uint256 feedId, CID memory postMetadata) external {
-    Post memory post = Post(_msgSender(), postMetadata);
+    uint256 commentsFeedId = addFeed(postMetadata);
+    Post memory post = Post(_msgSender(), postMetadata, commentsFeedId);
     uint256 objectId = lastFeedPostIds[feedId].current();
     feedPosts[feedId].push(post);
     emit FeedPostAdded(feedId, objectId, post);
@@ -117,11 +120,12 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
    * @param postMetadata The post metadata to add
    */
   function addProfilePost(CID memory postMetadata) external {
-    Post memory post = Post(msg.sender, postMetadata);
-    uint256 objectId = lastProfilePostIds[msg.sender].current();
-    profilePosts[msg.sender].push(post);
-    emit ProfilePostAdded(msg.sender, objectId, post);
-    lastProfilePostIds[msg.sender].increment();
+    uint256 commentsFeedId = addFeed(postMetadata);
+    Post memory post = Post(_msgSender(), postMetadata, commentsFeedId);
+    uint256 objectId = lastProfilePostIds[_msgSender()].current();
+    profilePosts[_msgSender()].push(post);
+    emit ProfilePostAdded(_msgSender(), objectId, post);
+    lastProfilePostIds[_msgSender()].increment();
   }
 
   /**
@@ -129,8 +133,8 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
    * @param subscriptionsMetadata The subscriptions to set
    */
   function changeSubscriptions(CID memory subscriptionsMetadata) external {
-    subscriptions[msg.sender] = subscriptionsMetadata;
-    emit SubsciptionsChanged(msg.sender, subscriptionsMetadata);
+    subscriptions[_msgSender()] = subscriptionsMetadata;
+    emit SubsciptionsChanged(_msgSender(), subscriptionsMetadata);
   }
 
   /**
@@ -149,12 +153,12 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
       revert("Post not found");
     }
     Reaction memory reaction = Reaction(reactionType, msg.value);
-    reactions[post.metadata.digest][msg.sender] = reaction;
+    reactions[post.metadata.digest][_msgSender()] = reaction;
     if (msg.value > 0) {
       payable(post.author).transfer(msg.value);
     }
     emit ReactionAdded(
-      msg.sender,
+      _msgSender(),
       feedOrProfileId,
       postId,
       reactionType,
@@ -172,8 +176,8 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
     if (post.author == address(0)) {
       revert("Post not found");
     }
-    delete reactions[post.metadata.digest][msg.sender];
-    emit ReactionRemoved(msg.sender, feedOrProfileId, postId);
+    delete reactions[post.metadata.digest][_msgSender()];
+    emit ReactionRemoved(_msgSender(), feedOrProfileId, postId);
   }
 
   /**
