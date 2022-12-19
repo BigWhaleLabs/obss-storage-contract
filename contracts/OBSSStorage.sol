@@ -43,6 +43,7 @@ contract OBSSStorage is Ownable, Versioned {
   mapping(address => CID) public subscriptions;
   // Reactions
   mapping(bytes32 => mapping(address => Reaction)) public reactions;
+
   /* Events */
   // Feeds
   event FeedAdded(uint256 indexed id, CID metadata);
