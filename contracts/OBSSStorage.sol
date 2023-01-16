@@ -43,7 +43,7 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
   mapping(address => Counters.Counter) public lastProfilePostIds;
   mapping(address => CID) public subscriptions;
   // Reactions
-  mapping(bytes32 => mapping(address => Reaction)) public reactions;
+  mapping(bytes32 => mapping(uint256 => Reaction[])) public reactions;
 
   /* Events */
   // Feeds
@@ -153,7 +153,7 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
       revert("Post not found");
     }
     Reaction memory reaction = Reaction(reactionType, msg.value);
-    reactions[post.metadata.digest][_msgSender()] = reaction;
+    reactions[post.metadata.digest][postId].push(reaction);
     if (msg.value > 0) {
       payable(post.author).transfer(msg.value);
     }
@@ -176,7 +176,7 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
     if (post.author == address(0)) {
       revert("Post not found");
     }
-    delete reactions[post.metadata.digest][_msgSender()];
+    delete reactions[post.metadata.digest][postId];
     emit ReactionRemoved(_msgSender(), feedOrProfileId, postId);
   }
 
@@ -224,6 +224,38 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
       allPosts[i] = post;
     }
     return allPosts;
+  }
+
+  /**
+   * @dev Get the post rections
+   */
+  function getPostReactions(
+    uint256 feedId,
+    uint256 postId
+  ) external view returns (uint256, uint256) {
+    Post memory post = feedPosts[feedId][postId];
+    if (post.author == address(0)) {
+      revert("Post not found");
+    }
+    Reaction[] memory _reactions = reactions[post.metadata.digest][postId];
+    uint256 length = _reactions.length;
+
+    uint256 negativeReactions = 0;
+    uint256 positiveReactions = 0;
+
+    for (uint256 i = 0; i < length; ) {
+      Reaction memory currentReaction = _reactions[i];
+      if (currentReaction.reactionType == 0) {
+        positiveReactions += currentReaction.value;
+      } else {
+        negativeReactions += currentReaction.value;
+      }
+      unchecked {
+        ++i;
+      }
+    }
+
+    return (negativeReactions, positiveReactions);
   }
 
   function _msgSender()
