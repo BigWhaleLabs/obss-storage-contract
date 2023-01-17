@@ -24,6 +24,7 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
     address author;
     CID metadata;
     uint256 commentsFeedId;
+    uint256 timestamp;
   }
   // 0 = upvote, 1 = downvote
   struct Reaction {
@@ -99,7 +100,12 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
    */
   function addFeedPost(uint256 feedId, CID memory postMetadata) external {
     uint256 commentsFeedId = addFeed(postMetadata);
-    Post memory post = Post(_msgSender(), postMetadata, commentsFeedId);
+    Post memory post = Post(
+      _msgSender(),
+      postMetadata,
+      commentsFeedId,
+      block.timestamp
+    );
     uint256 objectId = lastFeedPostIds[feedId].current();
     feedPosts[feedId].push(post);
     emit FeedPostAdded(feedId, objectId, post);
@@ -121,7 +127,12 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
    */
   function addProfilePost(CID memory postMetadata) external {
     uint256 commentsFeedId = addFeed(postMetadata);
-    Post memory post = Post(_msgSender(), postMetadata, commentsFeedId);
+    Post memory post = Post(
+      _msgSender(),
+      postMetadata,
+      commentsFeedId,
+      block.timestamp
+    );
     uint256 objectId = lastProfilePostIds[_msgSender()].current();
     profilePosts[_msgSender()].push(post);
     emit ProfilePostAdded(_msgSender(), objectId, post);
