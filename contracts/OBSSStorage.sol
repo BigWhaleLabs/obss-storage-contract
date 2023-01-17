@@ -25,7 +25,7 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
     CID metadata;
     uint256 commentsFeedId;
   }
-  // 0 = upvote, 1 = downvote
+  // 1 = upvote, 2 = downvote
   struct Reaction {
     uint8 reactionType;
     uint256 value;
@@ -156,14 +156,24 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
     if (post.author == address(0)) {
       revert("Post not found");
     }
-    if (reactionsUserToId[post.metadata.digest][_msgSender()] > 0) {
-      revert("Reaction already added");
+    uint256 oldReactionId = reactionsUserToId[post.metadata.digest][
+      _msgSender()
+    ];
+    if (oldReactionId > 0) {
+      delete reactions[post.metadata.digest][oldReactionId];
+      delete reactionsUserToId[post.metadata.digest][_msgSender()];
+      emit ReactionRemoved(
+        _msgSender(),
+        feedOrProfileId,
+        postId,
+        oldReactionId
+      );
     }
     Reaction memory reaction = Reaction(reactionType, msg.value);
     uint256 reactionId = lastReactionIds[post.metadata.digest].current();
-    reactions[post.metadata.digest][reactionId] = reaction;
-    reactionsUserToId[post.metadata.digest][_msgSender()] = reactionId + 1;
     lastReactionIds[post.metadata.digest].increment();
+    reactions[post.metadata.digest][reactionId] = reaction;
+    reactionsUserToId[post.metadata.digest][_msgSender()] = reactionId;
     if (msg.value > 0) {
       payable(post.author).transfer(msg.value);
     }
@@ -259,9 +269,9 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
 
     for (uint256 i = 1; i < reactionsLength + 1; ) {
       Reaction memory currentReaction = reactions[post.metadata.digest][i];
-      if (currentReaction.reactionType == 0) {
+      if (currentReaction.reactionType == 1) {
         positiveReactions += 1;
-      } else {
+      } else if (currentReaction.reactionType == 2) {
         negativeReactions += 1;
       }
       unchecked {
