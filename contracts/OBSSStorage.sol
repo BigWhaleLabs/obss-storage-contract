@@ -26,7 +26,7 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
     uint256 commentsFeedId;
     uint256 timestamp;
   }
-  // 0 = upvote, 1 = downvote
+  // 1 = upvote, 2 = downvote
   struct Reaction {
     uint8 reactionType;
     uint256 value;
@@ -44,7 +44,9 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
   mapping(address => Counters.Counter) public lastProfilePostIds;
   mapping(address => CID) public subscriptions;
   // Reactions
-  mapping(bytes32 => mapping(address => Reaction)) public reactions;
+  mapping(bytes32 => mapping(uint256 => Reaction)) public reactions;
+  mapping(bytes32 => Counters.Counter) public lastReactionIds;
+  mapping(bytes32 => mapping(address => uint256)) public reactionsUserToId;
 
   /* Events */
   // Feeds
@@ -68,12 +70,14 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
     uint256 indexed feedOrProfileId,
     uint256 indexed postId,
     uint8 reactionType,
+    uint256 reactionId,
     uint256 value
   );
   event ReactionRemoved(
     address indexed user,
     uint256 indexed feedOrProfileId,
-    uint256 postId
+    uint256 postId,
+    uint256 reactionId
   );
 
   constructor(address _forwarder, string memory _version) Versioned(_version) {
@@ -163,8 +167,24 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
     if (post.author == address(0)) {
       revert("Post not found");
     }
+    uint256 oldReactionId = reactionsUserToId[post.metadata.digest][
+      _msgSender()
+    ];
+    if (oldReactionId > 0) {
+      delete reactions[post.metadata.digest][oldReactionId];
+      delete reactionsUserToId[post.metadata.digest][_msgSender()];
+      emit ReactionRemoved(
+        _msgSender(),
+        feedOrProfileId,
+        postId,
+        oldReactionId
+      );
+    }
     Reaction memory reaction = Reaction(reactionType, msg.value);
-    reactions[post.metadata.digest][_msgSender()] = reaction;
+    uint256 reactionId = lastReactionIds[post.metadata.digest].current();
+    lastReactionIds[post.metadata.digest].increment();
+    reactions[post.metadata.digest][reactionId] = reaction;
+    reactionsUserToId[post.metadata.digest][_msgSender()] = reactionId;
     if (msg.value > 0) {
       payable(post.author).transfer(msg.value);
     }
@@ -173,6 +193,7 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
       feedOrProfileId,
       postId,
       reactionType,
+      reactionId,
       msg.value
     );
   }
@@ -182,13 +203,18 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
    * @param feedOrProfileId The feed or profile id
    * @param postId The post id
    */
-  function removeReaction(uint256 feedOrProfileId, uint256 postId) external {
+  function removeReaction(
+    uint256 feedOrProfileId,
+    uint256 postId,
+    uint256 reactionId
+  ) external {
     Post memory post = feedPosts[feedOrProfileId][postId];
     if (post.author == address(0)) {
       revert("Post not found");
     }
-    delete reactions[post.metadata.digest][_msgSender()];
-    emit ReactionRemoved(_msgSender(), feedOrProfileId, postId);
+    delete reactions[post.metadata.digest][reactionId];
+    delete reactionsUserToId[post.metadata.digest][_msgSender()];
+    emit ReactionRemoved(_msgSender(), feedOrProfileId, postId, reactionId);
   }
 
   /**
@@ -235,6 +261,36 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
       allPosts[i] = post;
     }
     return allPosts;
+  }
+
+  /**
+   * @dev Get the post rections
+   */
+  function getPostReactions(
+    uint256 feedId,
+    uint256 postId
+  ) external view returns (uint256, uint256) {
+    Post memory post = feedPosts[feedId][postId];
+    if (post.author == address(0)) {
+      revert("Post not found");
+    }
+    uint256 reactionsLength = lastReactionIds[post.metadata.digest].current();
+    uint256 negativeReactions = 0;
+    uint256 positiveReactions = 0;
+
+    for (uint256 i = 1; i < reactionsLength + 1; ) {
+      Reaction memory currentReaction = reactions[post.metadata.digest][i];
+      if (currentReaction.reactionType == 1) {
+        positiveReactions += 1;
+      } else if (currentReaction.reactionType == 2) {
+        negativeReactions += 1;
+      }
+      unchecked {
+        ++i;
+      }
+    }
+
+    return (negativeReactions, positiveReactions);
   }
 
   function _msgSender()
