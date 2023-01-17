@@ -43,7 +43,8 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
   mapping(address => Counters.Counter) public lastProfilePostIds;
   mapping(address => CID) public subscriptions;
   // Reactions
-  mapping(bytes32 => mapping(uint256 => Reaction[])) public reactions;
+  mapping(bytes32 => Reaction[]) public reactions;
+  mapping(bytes32 => address) public reactionToUser;
 
   /* Events */
   // Feeds
@@ -152,8 +153,12 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
     if (post.author == address(0)) {
       revert("Post not found");
     }
+    if (reactionToUser[post.metadata.digest] == _msgSender()) {
+      revert("Reaction already added");
+    }
     Reaction memory reaction = Reaction(reactionType, msg.value);
-    reactions[post.metadata.digest][postId].push(reaction);
+    reactions[post.metadata.digest].push(reaction);
+    reactionToUser[post.metadata.digest] = _msgSender();
     if (msg.value > 0) {
       payable(post.author).transfer(msg.value);
     }
@@ -171,12 +176,17 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
    * @param feedOrProfileId The feed or profile id
    * @param postId The post id
    */
-  function removeReaction(uint256 feedOrProfileId, uint256 postId) external {
+  function removeReaction(
+    uint256 feedOrProfileId,
+    uint256 postId,
+    uint256 reactionId
+  ) external {
     Post memory post = feedPosts[feedOrProfileId][postId];
     if (post.author == address(0)) {
       revert("Post not found");
     }
-    delete reactions[post.metadata.digest][postId];
+    delete reactions[post.metadata.digest][reactionId];
+    delete reactionToUser[post.metadata.digest];
     emit ReactionRemoved(_msgSender(), feedOrProfileId, postId);
   }
 
@@ -237,7 +247,7 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
     if (post.author == address(0)) {
       revert("Post not found");
     }
-    Reaction[] memory _reactions = reactions[post.metadata.digest][postId];
+    Reaction[] memory _reactions = reactions[post.metadata.digest];
     uint256 length = _reactions.length;
 
     uint256 negativeReactions = 0;
