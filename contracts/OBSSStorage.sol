@@ -43,8 +43,9 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
   mapping(address => Counters.Counter) public lastProfilePostIds;
   mapping(address => CID) public subscriptions;
   // Reactions
-  mapping(bytes32 => Reaction[]) public reactions;
-  mapping(bytes32 => address) public reactionToUser;
+  mapping(bytes32 => mapping(uint256 => Reaction)) public reactions;
+  mapping(bytes32 => Counters.Counter) public lastReactionIds;
+  mapping(bytes32 => mapping(address => uint256)) public reactionsUserToId;
 
   /* Events */
   // Feeds
@@ -68,12 +69,14 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
     uint256 indexed feedOrProfileId,
     uint256 indexed postId,
     uint8 reactionType,
+    uint256 reactionId,
     uint256 value
   );
   event ReactionRemoved(
     address indexed user,
     uint256 indexed feedOrProfileId,
-    uint256 postId
+    uint256 postId,
+    uint256 reactionId
   );
 
   constructor(address _forwarder, string memory _version) Versioned(_version) {
@@ -153,12 +156,14 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
     if (post.author == address(0)) {
       revert("Post not found");
     }
-    if (reactionToUser[post.metadata.digest] == _msgSender()) {
+    if (reactionsUserToId[post.metadata.digest][_msgSender()] > 0) {
       revert("Reaction already added");
     }
     Reaction memory reaction = Reaction(reactionType, msg.value);
-    reactions[post.metadata.digest].push(reaction);
-    reactionToUser[post.metadata.digest] = _msgSender();
+    uint256 reactionId = lastReactionIds[post.metadata.digest].current();
+    reactions[post.metadata.digest][reactionId] = reaction;
+    reactionsUserToId[post.metadata.digest][_msgSender()] = reactionId + 1;
+    lastReactionIds[post.metadata.digest].increment();
     if (msg.value > 0) {
       payable(post.author).transfer(msg.value);
     }
@@ -167,6 +172,7 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
       feedOrProfileId,
       postId,
       reactionType,
+      reactionId,
       msg.value
     );
   }
@@ -186,8 +192,8 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
       revert("Post not found");
     }
     delete reactions[post.metadata.digest][reactionId];
-    delete reactionToUser[post.metadata.digest];
-    emit ReactionRemoved(_msgSender(), feedOrProfileId, postId);
+    delete reactionsUserToId[post.metadata.digest][_msgSender()];
+    emit ReactionRemoved(_msgSender(), feedOrProfileId, postId, reactionId);
   }
 
   /**
@@ -247,18 +253,16 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
     if (post.author == address(0)) {
       revert("Post not found");
     }
-    Reaction[] memory _reactions = reactions[post.metadata.digest];
-    uint256 length = _reactions.length;
-
+    uint256 reactionsLength = lastReactionIds[post.metadata.digest].current();
     uint256 negativeReactions = 0;
     uint256 positiveReactions = 0;
 
-    for (uint256 i = 0; i < length; ) {
-      Reaction memory currentReaction = _reactions[i];
+    for (uint256 i = 1; i < reactionsLength + 1; ) {
+      Reaction memory currentReaction = reactions[post.metadata.digest][i];
       if (currentReaction.reactionType == 0) {
-        positiveReactions += currentReaction.value;
+        positiveReactions += 1;
       } else {
-        negativeReactions += currentReaction.value;
+        negativeReactions += 1;
       }
       unchecked {
         ++i;
