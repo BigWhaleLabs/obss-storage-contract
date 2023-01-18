@@ -33,14 +33,16 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
   }
 
   /* State */
+  // Posts
+  mapping(uint256 => Post) public posts;
   // Feeds
   CID[] public feeds;
   Counters.Counter public lastFeedId;
-  mapping(uint256 => Post[]) public feedPosts;
+  mapping(uint256 => uint256[]) public feedPosts;
   mapping(uint256 => Counters.Counter) public lastFeedPostIds;
   // Profiles
   mapping(address => CID) public profiles;
-  mapping(address => Post[]) public profilePosts;
+  mapping(address => uint256[]) public profilePosts;
   mapping(address => Counters.Counter) public lastProfilePostIds;
   mapping(address => CID) public subscriptions;
   // Reactions
@@ -67,7 +69,6 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
   // Reactions
   event ReactionAdded(
     address indexed user,
-    uint256 indexed feedOrProfileId,
     uint256 indexed postId,
     uint8 reactionType,
     uint256 reactionId,
@@ -75,7 +76,6 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
   );
   event ReactionRemoved(
     address indexed user,
-    uint256 indexed feedOrProfileId,
     uint256 postId,
     uint256 reactionId
   );
@@ -111,7 +111,8 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
       block.timestamp
     );
     uint256 objectId = lastFeedPostIds[feedId].current();
-    feedPosts[feedId].push(post);
+    posts[commentsFeedId] = post;
+    feedPosts[feedId].push(commentsFeedId);
     emit FeedPostAdded(feedId, objectId, post);
     lastFeedPostIds[feedId].increment();
   }
@@ -138,7 +139,8 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
       block.timestamp
     );
     uint256 objectId = lastProfilePostIds[_msgSender()].current();
-    profilePosts[_msgSender()].push(post);
+    posts[commentsFeedId] = post;
+    profilePosts[_msgSender()].push(commentsFeedId);
     emit ProfilePostAdded(_msgSender(), objectId, post);
     lastProfilePostIds[_msgSender()].increment();
   }
@@ -154,16 +156,11 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
 
   /**
    * @dev Add a reaction
-   * @param feedOrProfileId The feed or profile id
    * @param postId The post id
    * @param reactionType The reaction type
    */
-  function addReaction(
-    uint256 feedOrProfileId,
-    uint256 postId,
-    uint8 reactionType
-  ) external payable {
-    Post memory post = feedPosts[feedOrProfileId][postId];
+  function addReaction(uint256 postId, uint8 reactionType) external payable {
+    Post memory post = posts[postId];
     if (post.author == address(0)) {
       revert("Post not found");
     }
@@ -173,12 +170,7 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
     if (oldReactionId > 0) {
       delete reactions[post.metadata.digest][oldReactionId];
       delete reactionsUserToId[post.metadata.digest][_msgSender()];
-      emit ReactionRemoved(
-        _msgSender(),
-        feedOrProfileId,
-        postId,
-        oldReactionId
-      );
+      emit ReactionRemoved(_msgSender(), postId, oldReactionId);
     }
     Reaction memory reaction = Reaction(reactionType, msg.value);
     uint256 reactionId = lastReactionIds[post.metadata.digest].current();
@@ -190,7 +182,6 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
     }
     emit ReactionAdded(
       _msgSender(),
-      feedOrProfileId,
       postId,
       reactionType,
       reactionId,
@@ -200,21 +191,17 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
 
   /**
    * @dev Remove a reaction
-   * @param feedOrProfileId The feed or profile id
    * @param postId The post id
+   * @param reactionId The reaction id
    */
-  function removeReaction(
-    uint256 feedOrProfileId,
-    uint256 postId,
-    uint256 reactionId
-  ) external {
-    Post memory post = feedPosts[feedOrProfileId][postId];
+  function removeReaction(uint256 postId, uint256 reactionId) external {
+    Post memory post = posts[postId];
     if (post.author == address(0)) {
       revert("Post not found");
     }
     delete reactions[post.metadata.digest][reactionId];
     delete reactionsUserToId[post.metadata.digest][_msgSender()];
-    emit ReactionRemoved(_msgSender(), feedOrProfileId, postId, reactionId);
+    emit ReactionRemoved(_msgSender(), postId, reactionId);
   }
 
   /**
@@ -225,16 +212,15 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
     uint256 skip,
     uint256 limit
   ) external view returns (Post[] memory) {
-    Post[] memory posts = feedPosts[feedId];
-    if (skip > posts.length) {
+    uint256 countPosts = lastFeedPostIds[feedId].current();
+    if (skip > countPosts) {
       return new Post[](0);
     }
-    uint256 length = skip + limit > posts.length - 1
-      ? posts.length - skip
-      : limit;
+    uint256 length = skip + limit > countPosts - 1 ? countPosts - skip : limit;
     Post[] memory allPosts = new Post[](length);
     for (uint256 i = 0; i < length; i++) {
-      Post memory post = posts[skip + i];
+      uint256 postId = feedPosts[feedId][skip + i];
+      Post memory post = posts[postId];
       allPosts[i] = post;
     }
     return allPosts;
@@ -248,16 +234,15 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
     uint256 skip,
     uint256 limit
   ) external view returns (Post[] memory) {
-    Post[] memory posts = profilePosts[profile];
-    if (skip > posts.length) {
+    uint256 countPosts = lastProfilePostIds[profile].current();
+    if (skip > countPosts) {
       return new Post[](0);
     }
-    uint256 length = skip + limit > posts.length - 1
-      ? posts.length - skip
-      : limit;
+    uint256 length = skip + limit > countPosts - 1 ? countPosts - skip : limit;
     Post[] memory allPosts = new Post[](length);
     for (uint256 i = 0; i < length; i++) {
-      Post memory post = posts[skip + i];
+      uint256 postId = profilePosts[profile][skip + i];
+      Post memory post = posts[postId];
       allPosts[i] = post;
     }
     return allPosts;
@@ -267,10 +252,9 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
    * @dev Get the post rections
    */
   function getPostReactions(
-    uint256 feedId,
     uint256 postId
   ) external view returns (uint256, uint256) {
-    Post memory post = feedPosts[feedId][postId];
+    Post memory post = posts[postId];
     if (post.author == address(0)) {
       revert("Post not found");
     }
