@@ -31,7 +31,7 @@
     "prepublishOnly": "yarn build && yarn tsc"
   },
   "devDependencies": {
-    "@big-whale-labs/constants": "^0.1.39",
+    "@big-whale-labs/constants": "^0.1.58",
     "@big-whale-labs/versioned-contract": "^1.0.2",
     "@ethersproject/providers": "^5.7.2",
     "@nomiclabs/hardhat-ethers": "^2.2.1",

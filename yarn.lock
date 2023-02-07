@@ -32,10 +32,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@big-whale-labs/constants@npm:^0.1.39":
-  version: 0.1.39
-  resolution: "@big-whale-labs/constants@npm:0.1.39"
-  checksum: 69807bda7e9ffb4561d1adb9fb62d34257b3099c1d52131adc55e4b10a859135200bc22ce8a80bce28a584ebba76e4c4f6254988415fbbddb8ad8cb20573b742
+"@big-whale-labs/constants@npm:^0.1.58":
+  version: 0.1.58
+  resolution: "@big-whale-labs/constants@npm:0.1.58"
+  checksum: 7c827fff953b09cde700b7d3207c4000bd18b4d3c7fdaa96b89e431d139ef70d8725bf4ee23d5836324b6cdc6b300d687de8174c93132854c06efac705fce53a
   languageName: node
   linkType: hard
 
@@ -43,7 +43,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@big-whale-labs/obss-storage-contract@workspace:."
   dependencies:
-    "@big-whale-labs/constants": ^0.1.39
+    "@big-whale-labs/constants": ^0.1.58
     "@big-whale-labs/versioned-contract": ^1.0.2
     "@ethersproject/providers": ^5.7.2
     "@nomiclabs/hardhat-ethers": ^2.2.1
