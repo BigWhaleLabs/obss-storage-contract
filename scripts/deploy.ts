@@ -1,4 +1,4 @@
-import { GSN_FORWARDER_CONTRACT_ADDRESS } from '@big-whale-labs/constants'
+import { GSN_MUMBAI_FORWARDER_CONTRACT_ADDRESS } from '@big-whale-labs/constants'
 import { ethers, run } from 'hardhat'
 import { utils } from 'ethers'
 import { version } from '../package.json'
@@ -23,7 +23,7 @@ async function main() {
       forwarder: {
         required: true,
         pattern: regexes.ethereumAddress,
-        default: GSN_FORWARDER_CONTRACT_ADDRESS,
+        default: GSN_MUMBAI_FORWARDER_CONTRACT_ADDRESS,
       },
     },
   })
