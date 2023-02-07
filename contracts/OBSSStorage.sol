@@ -30,6 +30,7 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
   struct Reaction {
     uint8 reactionType;
     uint256 value;
+    address reactionOwner;
   }
 
   /* State */
@@ -172,7 +173,7 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
       delete reactionsUserToId[post.metadata.digest][_msgSender()];
       emit ReactionRemoved(_msgSender(), postId, oldReactionId);
     }
-    Reaction memory reaction = Reaction(reactionType, msg.value);
+    Reaction memory reaction = Reaction(reactionType, msg.value, _msgSender());
     lastReactionIds[post.metadata.digest].increment();
     uint256 reactionId = lastReactionIds[post.metadata.digest].current();
     reactions[post.metadata.digest][reactionId] = reaction;
@@ -198,6 +199,11 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
     Post memory post = posts[postId];
     if (post.author == address(0)) {
       revert("Post not found");
+    }
+    if (
+      _msgSender() != reactions[post.metadata.digest][reactionId].reactionOwner
+    ) {
+      revert("You are not the reaction owner");
     }
     delete reactions[post.metadata.digest][reactionId];
     delete reactionsUserToId[post.metadata.digest][_msgSender()];
