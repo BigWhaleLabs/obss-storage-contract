@@ -168,6 +168,10 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
     uint256 oldReactionId = reactionsUserToId[post.metadata.digest][
       _msgSender()
     ];
+    if (
+      reactions[post.metadata.digest][oldReactionId].reactionType ==
+      reactionType
+    ) revert("Reaction already added");
     if (oldReactionId > 0) {
       delete reactions[post.metadata.digest][oldReactionId];
       delete reactionsUserToId[post.metadata.digest][_msgSender()];
