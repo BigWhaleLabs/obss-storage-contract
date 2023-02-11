@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@opengsn/contracts/src/ERC2771Recipient.sol";
 import "@big-whale-labs/versioned-contract/contracts/Versioned.sol";
+import "@big-whale-labs/ketl-allow-map-contract/contracts/KetlAllowMap.sol";
 
 /**
  * @title OBSSStorage
@@ -36,6 +37,9 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
   /* State */
   // Posts
   mapping(uint256 => Post) public posts;
+  // Ketl allow map
+  KetlAllowMap public vcAllowMap;
+  KetlAllowMap public founderAllowMap;
   // Feeds
   CID[] public feeds;
   Counters.Counter public lastFeedId;
@@ -81,7 +85,25 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
     uint256 reactionId
   );
 
-  constructor(address _forwarder, string memory _version) Versioned(_version) {
+  // Modifiers
+  modifier onlyAllowedAddress() {
+    if (
+      vcAllowMap.isAddressAllowed(_msgSender()) &&
+      founderAllowMap.isAddressAllowed(_msgSender())
+    ) {
+      revert("Address is not allowed");
+    }
+    _;
+  }
+
+  constructor(
+    address _forwarder,
+    string memory _version,
+    address _vcAllowMap,
+    address _founderAllowMap
+  ) Versioned(_version) {
+    vcAllowMap = KetlAllowMap(_vcAllowMap);
+    founderAllowMap = KetlAllowMap(_founderAllowMap);
     _setTrustedForwarder(_forwarder);
     version = _version;
   }
@@ -90,7 +112,9 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
    * @dev Add a new feed
    * @param feedMetadata The feed to add
    */
-  function addFeed(CID memory feedMetadata) public returns (uint256) {
+  function addFeed(
+    CID memory feedMetadata
+  ) public onlyAllowedAddress returns (uint256) {
     uint256 feedId = lastFeedId.current();
     feeds.push(feedMetadata);
     emit FeedAdded(feedId, feedMetadata);
@@ -103,7 +127,10 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
    * @param feedId The feed id
    * @param postMetadata The post metadata to add
    */
-  function addFeedPost(uint256 feedId, CID memory postMetadata) external {
+  function addFeedPost(
+    uint256 feedId,
+    CID memory postMetadata
+  ) external onlyAllowedAddress {
     uint256 commentsFeedId = addFeed(postMetadata);
     Post memory post = Post(
       _msgSender(),
@@ -122,7 +149,7 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
    * @dev Add a new profile
    * @param profileMetadata The profile to add
    */
-  function addProfile(CID memory profileMetadata) external {
+  function addProfile(CID memory profileMetadata) external onlyAllowedAddress {
     profiles[_msgSender()] = profileMetadata;
     emit ProfileAdded(_msgSender(), profileMetadata);
   }
@@ -131,7 +158,7 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
    * @dev Add a new profile post
    * @param postMetadata The post metadata to add
    */
-  function addProfilePost(CID memory postMetadata) external {
+  function addProfilePost(CID memory postMetadata) external onlyAllowedAddress {
     uint256 commentsFeedId = addFeed(postMetadata);
     Post memory post = Post(
       _msgSender(),
@@ -150,7 +177,9 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
    * @dev Change the subscriptions of a user
    * @param subscriptionsMetadata The subscriptions to set
    */
-  function changeSubscriptions(CID memory subscriptionsMetadata) external {
+  function changeSubscriptions(
+    CID memory subscriptionsMetadata
+  ) external onlyAllowedAddress {
     subscriptions[_msgSender()] = subscriptionsMetadata;
     emit SubsciptionsChanged(_msgSender(), subscriptionsMetadata);
   }
@@ -160,7 +189,10 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
    * @param postId The post id
    * @param reactionType The reaction type
    */
-  function addReaction(uint256 postId, uint8 reactionType) external payable {
+  function addReaction(
+    uint256 postId,
+    uint8 reactionType
+  ) external payable onlyAllowedAddress {
     Post memory post = posts[postId];
     if (post.author == address(0)) {
       revert("Post not found");
@@ -199,7 +231,10 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
    * @param postId The post id
    * @param reactionId The reaction id
    */
-  function removeReaction(uint256 postId, uint256 reactionId) external {
+  function removeReaction(
+    uint256 postId,
+    uint256 reactionId
+  ) external onlyAllowedAddress {
     Post memory post = posts[postId];
     if (post.author == address(0)) {
       revert("Post not found");
