@@ -18,12 +18,20 @@ async function main() {
     utils.formatEther(await deployer.getBalance())
   )
 
-  const { forwarder } = await prompt.get({
+  const { forwarder, vcAllowMap, founderAllowMap } = await prompt.get({
     properties: {
       forwarder: {
         required: true,
         pattern: regexes.ethereumAddress,
         default: GSN_MUMBAI_FORWARDER_CONTRACT_ADDRESS,
+      },
+      vcAllowMap: {
+        required: true,
+        pattern: regexes.ethereumAddress,
+      },
+      founderAllowMap: {
+        required: true,
+        pattern: regexes.ethereumAddress,
       },
     },
   })
@@ -40,7 +48,12 @@ async function main() {
   } as { [chainId: number]: string }
   const chainName = chains[chainId]
 
-  const constructorArguments = [forwarder, version] as [string, string]
+  const constructorArguments = [
+    forwarder,
+    version,
+    vcAllowMap,
+    founderAllowMap,
+  ] as [string, string, string, string]
 
   const contractName = 'OBSSStorage'
   console.log(`Deploying ${contractName}...`)
