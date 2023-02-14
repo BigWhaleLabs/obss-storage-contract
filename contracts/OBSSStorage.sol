@@ -86,10 +86,9 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
   );
 
   // Modifiers
-  modifier onlyAllowedAddress() {
+  modifier onlyAllowedAddresses() {
     if (
-      vcAllowMap.isAddressAllowed(_msgSender()) &&
-      founderAllowMap.isAddressAllowed(_msgSender())
+      !vcAllowMap.isAddressAllowed(_msgSender()) || !founderAllowMap.isAddressAllowed(_msgSender())
     ) {
       revert("Address is not allowed");
     }
@@ -114,7 +113,7 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
    */
   function addFeed(
     CID memory feedMetadata
-  ) public onlyAllowedAddress returns (uint256) {
+  ) public onlyAllowedAddresses returns (uint256) {
     uint256 feedId = lastFeedId.current();
     feeds.push(feedMetadata);
     emit FeedAdded(feedId, feedMetadata);
@@ -130,7 +129,7 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
   function addFeedPost(
     uint256 feedId,
     CID memory postMetadata
-  ) external onlyAllowedAddress {
+  ) external onlyAllowedAddresses {
     uint256 commentsFeedId = addFeed(postMetadata);
     Post memory post = Post(
       _msgSender(),
@@ -149,7 +148,7 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
    * @dev Add a new profile
    * @param profileMetadata The profile to add
    */
-  function addProfile(CID memory profileMetadata) external onlyAllowedAddress {
+  function addProfile(CID memory profileMetadata) external onlyAllowedAddresses {
     profiles[_msgSender()] = profileMetadata;
     emit ProfileAdded(_msgSender(), profileMetadata);
   }
@@ -158,7 +157,7 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
    * @dev Add a new profile post
    * @param postMetadata The post metadata to add
    */
-  function addProfilePost(CID memory postMetadata) external onlyAllowedAddress {
+  function addProfilePost(CID memory postMetadata) external onlyAllowedAddresses {
     uint256 commentsFeedId = addFeed(postMetadata);
     Post memory post = Post(
       _msgSender(),
@@ -179,7 +178,7 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
    */
   function changeSubscriptions(
     CID memory subscriptionsMetadata
-  ) external onlyAllowedAddress {
+  ) external onlyAllowedAddresses {
     subscriptions[_msgSender()] = subscriptionsMetadata;
     emit SubsciptionsChanged(_msgSender(), subscriptionsMetadata);
   }
@@ -192,7 +191,7 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
   function addReaction(
     uint256 postId,
     uint8 reactionType
-  ) external payable onlyAllowedAddress {
+  ) external payable onlyAllowedAddresses {
     Post memory post = posts[postId];
     if (post.author == address(0)) {
       revert("Post not found");
@@ -234,7 +233,7 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
   function removeReaction(
     uint256 postId,
     uint256 reactionId
-  ) external onlyAllowedAddress {
+  ) external onlyAllowedAddresses {
     Post memory post = posts[postId];
     if (post.author == address(0)) {
       revert("Post not found");
