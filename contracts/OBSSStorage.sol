@@ -88,7 +88,8 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
   // Modifiers
   modifier onlyAllowedAddresses() {
     if (
-      !vcAllowMap.isAddressAllowed(_msgSender()) || !founderAllowMap.isAddressAllowed(_msgSender())
+      !vcAllowMap.isAddressAllowed(_msgSender()) ||
+      !founderAllowMap.isAddressAllowed(_msgSender())
     ) {
       revert("Address is not allowed");
     }
@@ -148,7 +149,9 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
    * @dev Add a new profile
    * @param profileMetadata The profile to add
    */
-  function addProfile(CID memory profileMetadata) external onlyAllowedAddresses {
+  function addProfile(
+    CID memory profileMetadata
+  ) external onlyAllowedAddresses {
     profiles[_msgSender()] = profileMetadata;
     emit ProfileAdded(_msgSender(), profileMetadata);
   }
@@ -157,7 +160,9 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
    * @dev Add a new profile post
    * @param postMetadata The post metadata to add
    */
-  function addProfilePost(CID memory postMetadata) external onlyAllowedAddresses {
+  function addProfilePost(
+    CID memory postMetadata
+  ) external onlyAllowedAddresses {
     uint256 commentsFeedId = addFeed(postMetadata);
     Post memory post = Post(
       _msgSender(),
