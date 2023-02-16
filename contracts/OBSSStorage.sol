@@ -87,12 +87,11 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
 
   // Modifiers
   modifier onlyAllowedAddresses() {
-    if (
-      !vcAllowMap.isAddressAllowed(_msgSender()) &&
-      !founderAllowMap.isAddressAllowed(_msgSender())
-    ) {
-      revert("Address is not allowed");
-    }
+    require(
+      vcAllowMap.isAddressAllowed(_msgSender()) ||
+        founderAllowMap.isAddressAllowed(_msgSender()),
+      "Address is not allowed"
+    );
     _;
   }
 
@@ -126,6 +125,18 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
     uint[2] memory input
   ) public {
     founderAllowMap.addAddressToAllowMap(_address, a, b, c, input);
+  }
+
+  function isAddressAllowedInVCAllowMap(
+    address _address
+  ) public view returns (bool) {
+    return vcAllowMap.isAddressAllowed(_address);
+  }
+
+  function isAddressAllowedInFounderAllowMap(
+    address _address
+  ) public view returns (bool) {
+    return founderAllowMap.isAddressAllowed(_address);
   }
 
   /**
