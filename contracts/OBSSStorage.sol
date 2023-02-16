@@ -127,6 +127,18 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
     founderAllowMap.addAddressToAllowMap(_address, a, b, c, input);
   }
 
+  function isAddressAllowedInVCAllowMap(
+    address _address
+  ) public view returns (bool) {
+    return vcAllowMap.isAddressAllowed(_address);
+  }
+
+  function isAddressAllowedInFounderAllowMap(
+    address _address
+  ) public view returns (bool) {
+    return founderAllowMap.isAddressAllowed(_address);
+  }
+
   /**
    * @dev Add a new feed
    * @param feedMetadata The feed to add
