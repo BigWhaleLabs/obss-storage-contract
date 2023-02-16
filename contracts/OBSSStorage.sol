@@ -87,12 +87,11 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
 
   // Modifiers
   modifier onlyAllowedAddresses() {
-    if (
-      !vcAllowMap.isAddressAllowed(_msgSender()) &&
-      !founderAllowMap.isAddressAllowed(_msgSender())
-    ) {
-      revert("Address is not allowed");
-    }
+    require(
+      vcAllowMap.isAddressAllowed(_msgSender()) ||
+        founderAllowMap.isAddressAllowed(_msgSender()),
+      "Address is not allowed"
+    );
     _;
   }
 
