@@ -68,7 +68,7 @@ describe('OBSSStorage contract tests', () => {
       await this.contract.addFeedPost(0, MOCK_CID)
       // Add reaction
       await this.contract.addReaction(0, 1)
-      expect(await this.contract.removeReaction(0, 0))
+      expect(await this.contract.removeReaction(0, 1))
     })
   })
 })
