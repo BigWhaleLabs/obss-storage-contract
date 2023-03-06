@@ -60,7 +60,6 @@ async function main() {
   const contractName = 'OBSSStorage'
   console.log(`Deploying ${contractName}...`)
   const factory = await ethers.getContractFactory(contractName)
-  // const contract = await factory.deploy(...constructorArguments)
   const contract = await upgrades.deployProxy(factory, constructorArguments, {
     initializer: 'initialize',
   })
