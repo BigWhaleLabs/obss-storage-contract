@@ -1,5 +1,5 @@
 import { BigNumber } from 'ethers'
-import { ethers } from 'hardhat'
+import { ethers, upgrades } from 'hardhat'
 import { expect } from 'chai'
 import { getFakeAllowMapContract } from './utils'
 
@@ -22,11 +22,17 @@ describe('OBSSStorage contract tests', () => {
   describe('Constructor', function () {
     it('should deploy the contract with the correct fields', async function () {
       const version = 'v0.0.1'
-      const contract = await this.factory.deploy(
-        zeroAddress,
-        version,
-        zeroAddress,
-        zeroAddress
+      const contract = await upgrades.deployProxy(
+        this.factory,
+        [
+          zeroAddress,
+          version,
+          this.fakeAllowMapContract.address,
+          this.fakeAllowMapContract.address,
+        ],
+        {
+          initializer: 'initialize',
+        }
       )
       expect(await contract.version()).to.equal(version)
     })
@@ -34,11 +40,17 @@ describe('OBSSStorage contract tests', () => {
   describe('OBSSStorage', function () {
     beforeEach(async function () {
       const version = 'v0.0.1'
-      this.contract = await this.factory.deploy(
-        zeroAddress,
-        version,
-        this.fakeAllowMapContract.address,
-        this.fakeAllowMapContract.address
+      this.contract = await upgrades.deployProxy(
+        this.factory,
+        [
+          zeroAddress,
+          version,
+          this.fakeAllowMapContract.address,
+          this.fakeAllowMapContract.address,
+        ],
+        {
+          initializer: 'initialize',
+        }
       )
       await this.fakeAllowMapContract.mock.isAddressAllowed.returns(true)
     })
