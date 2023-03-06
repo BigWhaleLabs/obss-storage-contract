@@ -1,5 +1,5 @@
 import { GSN_MUMBAI_FORWARDER_CONTRACT_ADDRESS } from '@big-whale-labs/constants'
-import { ethers, run } from 'hardhat'
+import { ethers, run, upgrades } from 'hardhat'
 import { utils } from 'ethers'
 import { version } from '../package.json'
 import prompt from 'prompt'
@@ -28,10 +28,12 @@ async function main() {
       vcAllowMap: {
         required: true,
         pattern: regexes.ethereumAddress,
+        default: '0xe8c7754340b9f0efe49dfe0f9a47f8f137f70477',
       },
       founderAllowMap: {
         required: true,
         pattern: regexes.ethereumAddress,
+        default: '0x91002bd44b9620866693fd8e03438e69e01563ee',
       },
     },
   })
@@ -57,8 +59,11 @@ async function main() {
 
   const contractName = 'OBSSStorage'
   console.log(`Deploying ${contractName}...`)
-  const Contract = await ethers.getContractFactory(contractName)
-  const contract = await Contract.deploy(...constructorArguments)
+  const factory = await ethers.getContractFactory(contractName)
+  // const contract = await factory.deploy(...constructorArguments)
+  const contract = await upgrades.deployProxy(factory, constructorArguments, {
+    initializer: 'initialize',
+  })
 
   console.log(
     'Deploy tx gas price:',
@@ -69,18 +74,24 @@ async function main() {
     utils.formatEther(contract.deployTransaction.gasLimit)
   )
   await contract.deployed()
-  const address = contract.address
 
-  console.log('Contract deployed to:', address)
+  const implementationAddress = await upgrades.erc1967.getImplementationAddress(
+    contract.address
+  )
+  const adminAddress = await upgrades.erc1967.getAdminAddress(contract.address)
+
+  console.log('OBSSStorage Proxy address:', contract.address)
+  console.log('Implementation address:', implementationAddress)
+  console.log('Admin address:', adminAddress)
+
   console.log('Wait for 1 minute to make sure blockchain is updated')
-  await new Promise((resolve) => setTimeout(resolve, 60 * 1000))
+  await new Promise((resolve) => setTimeout(resolve, 15 * 1000))
 
   // Try to verify the contract on Etherscan
   console.log('Verifying contract on Etherscan')
   try {
     await run('verify:verify', {
-      address,
-      constructorArguments,
+      address: implementationAddress,
     })
   } catch (err) {
     console.log(
@@ -91,12 +102,12 @@ async function main() {
 
   // Print out the information
   console.log(`${contractName} deployed and verified on Etherscan!`)
-  console.log('Contract address:', address)
+  console.log('Contract address:', contract.address)
   console.log(
     'Etherscan URL:',
     `https://${
       chainName !== 'polygon' ? `${chainName}.` : ''
-    }polygonscan.com/address/${address}`
+    }polygonscan.com/address/${contract.address}`
   )
 }
 
