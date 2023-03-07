@@ -2,16 +2,16 @@
 pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@opengsn/contracts/src/ERC2771Recipient.sol";
-import "@big-whale-labs/versioned-contract/contracts/Versioned.sol";
 import "@big-whale-labs/ketl-allow-map-contract/contracts/KetlAllowMap.sol";
+import "@openzeppelin/contracts/utils/Context.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /**
  * @title OBSSStorage
  * @dev This contract is used to store the data of the OBSS contract
  */
-contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
+contract OBSSStorage is Initializable, Context, ERC2771Recipient {
   using Counters for Counters.Counter;
 
   // IPFS cid represented in a more efficient way
@@ -35,6 +35,7 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
   }
 
   /* State */
+  string public version;
   // Posts
   mapping(uint256 => Post) public posts;
   // Ketl allow map
@@ -95,12 +96,13 @@ contract OBSSStorage is Ownable, ERC2771Recipient, Versioned {
     _;
   }
 
-  constructor(
+  // Constructor
+  function initialize(
     address _forwarder,
     string memory _version,
     address _vcAllowMap,
     address _founderAllowMap
-  ) Versioned(_version) {
+  ) public initializer {
     vcAllowMap = KetlAllowMap(_vcAllowMap);
     founderAllowMap = KetlAllowMap(_founderAllowMap);
     _setTrustedForwarder(_forwarder);
