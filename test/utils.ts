@@ -4,6 +4,18 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { buildPoseidon } from 'circomlibjs'
 import { randomBytes } from 'ethers/lib/utils'
 import { waffle } from 'hardhat'
+import crypto from 'crypto'
+
+export const zeroAddress = '0x0000000000000000000000000000000000000000'
+export const MOCK_CID = {
+  digest: '0xadb5e5a92d2bf5b6cf8744624f799e8e0e50ce0f220cb9f36ac8a1d30a17254c',
+  hashFunction: BigNumber.from(0),
+  size: BigNumber.from(0),
+}
+
+function generateRandomBytes32(): string {
+  return `0x${crypto.randomBytes(32).toString('hex')}`
+}
 
 export async function getFakeAllowMapContract(signer: SignerWithAddress) {
   return await waffle.deployMockContract(signer, [
@@ -77,4 +89,42 @@ export default async function getMerkleTreeProof(
   )
   commitments.forEach((c) => tree.insert(c))
   return tree.createProof(tree.indexOf(commitment))
+}
+
+export function getFeedPostsBatch(length = 10) {
+  const posts: {
+    feedId: number
+    postMetadata: {
+      digest: string
+      hashFunction: BigNumber
+      size: BigNumber
+    }
+  }[] = []
+
+  for (let i = 0; i < length; i++) {
+    posts.push({
+      feedId: 0,
+      postMetadata: {
+        digest: generateRandomBytes32(),
+        hashFunction: BigNumber.from(0),
+        size: BigNumber.from(0),
+      },
+    })
+    posts[i].postMetadata.digest = generateRandomBytes32()
+  }
+
+  return posts
+}
+
+export function getReactionsBatch(length = 10) {
+  const reactions: {
+    postId: number
+    reactionType: number
+  }[] = []
+
+  for (let i = 0; i < length; i++) {
+    reactions.push({ postId: i, reactionType: 1 })
+  }
+
+  return reactions
 }
