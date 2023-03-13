@@ -6,8 +6,8 @@ The main storage contract. Heavily influenced by the [Big Whale Labs repos](http
 
 | Contract                    | Address                                      |
 | --------------------------- | -------------------------------------------- |
-| Proxy                       | `0xff0bd519DED90acd89B5d27Bb6Db722C0b696016` |
-| Implementation(OBSSStorage) | `0xe56EcbBB9DcCFf16EAC2057Bc5A6472a696c1008` |
+| Proxy                       | `0x333c1990fCa4d333DEe0458fd56e1F35463c32a9` |
+| Implementation(OBSSStorage) | `0x60DE8a503083F46f10Ea6d2AEd8864a97263244E` |
 | Proxy Admin                 | `0x50B76E93c14F7C2DBc50608d458Bb5B5fBf3eb8E` |
 
 ## Usage

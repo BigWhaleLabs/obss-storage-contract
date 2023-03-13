@@ -6,6 +6,7 @@ import "@opengsn/contracts/src/ERC2771Recipient.sol";
 import "@big-whale-labs/ketl-allow-map-contract/contracts/KetlAllowMap.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "hardhat/console.sol";
 
 /**
  * @title OBSSStorage
@@ -13,26 +14,6 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
  */
 contract OBSSStorage is Initializable, Context, ERC2771Recipient {
   using Counters for Counters.Counter;
-
-  // IPFS cid represented in a more efficient way
-  struct CID {
-    bytes32 digest;
-    uint8 hashFunction;
-    uint8 size;
-  }
-  // Post struct
-  struct Post {
-    address author;
-    CID metadata;
-    uint256 commentsFeedId;
-    uint256 timestamp;
-  }
-  // 1 = upvote, 2 = downvote
-  struct Reaction {
-    uint8 reactionType;
-    uint256 value;
-    address reactionOwner;
-  }
 
   /* State */
   string public version;
@@ -55,6 +36,41 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
   mapping(bytes32 => mapping(uint256 => Reaction)) public reactions;
   mapping(bytes32 => Counters.Counter) public lastReactionIds;
   mapping(bytes32 => mapping(address => uint256)) public reactionsUserToId;
+
+  // IPFS cid represented in a more efficient way
+  struct CID {
+    bytes32 digest;
+    uint8 hashFunction;
+    uint8 size;
+  }
+  // Post struct
+  struct Post {
+    address author;
+    CID metadata;
+    uint256 commentsFeedId;
+    uint256 timestamp;
+  }
+  // 1 = upvote, 2 = downvote
+  struct Reaction {
+    uint8 reactionType;
+    uint256 value;
+    address reactionOwner;
+  }
+
+  struct ReactionRequest {
+    uint256 postId;
+    uint8 reactionType;
+  }
+
+  struct ReactionRemoveRequest {
+    uint256 postId;
+    uint8 reactionId;
+  }
+
+  struct PostRequest {
+    uint256 feedId;
+    CID postMetadata;
+  }
 
   /* Events */
   // Feeds
@@ -157,25 +173,39 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
 
   /**
    * @dev Add a new feed post
-   * @param feedId The feed id
-   * @param postMetadata The post metadata to add
+   * @param postRequest Post to add
    */
-  function addFeedPost(
-    uint256 feedId,
-    CID memory postMetadata
-  ) external onlyAllowedAddresses {
-    uint256 commentsFeedId = addFeed(postMetadata);
+  function _addFeedPost(
+    PostRequest memory postRequest
+  ) private onlyAllowedAddresses {
+    uint256 commentsFeedId = addFeed(postRequest.postMetadata);
     Post memory post = Post(
       _msgSender(),
-      postMetadata,
+      postRequest.postMetadata,
       commentsFeedId,
       block.timestamp
     );
-    uint256 objectId = lastFeedPostIds[feedId].current();
+    uint256 objectId = lastFeedPostIds[postRequest.feedId].current();
     posts[commentsFeedId] = post;
-    feedPosts[feedId].push(commentsFeedId);
-    emit FeedPostAdded(feedId, objectId, post);
-    lastFeedPostIds[feedId].increment();
+    feedPosts[postRequest.feedId].push(commentsFeedId);
+    emit FeedPostAdded(postRequest.feedId, objectId, post);
+    lastFeedPostIds[postRequest.feedId].increment();
+  }
+
+  function addFeedPost(PostRequest memory postRequest) external {
+    _addFeedPost(postRequest);
+  }
+
+  function addBatchFeedPosts(PostRequest[] memory batchPosts) public {
+    uint256 length = batchPosts.length;
+    for (uint8 i = 0; i < length; ) {
+      PostRequest memory post = batchPosts[i];
+      _addFeedPost(post);
+
+      unchecked {
+        ++i;
+      }
+    }
   }
 
   /**
@@ -223,14 +253,12 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
 
   /**
    * @dev Add a reaction
-   * @param postId The post id
-   * @param reactionType The reaction type
+   * @param reactionRequest Reaction to add
    */
-  function addReaction(
-    uint256 postId,
-    uint8 reactionType
-  ) external payable onlyAllowedAddresses {
-    Post memory post = posts[postId];
+  function _addReaction(
+    ReactionRequest memory reactionRequest
+  ) private onlyAllowedAddresses {
+    Post memory post = posts[reactionRequest.postId];
     if (post.author == address(0)) {
       revert("Post not found");
     }
@@ -239,14 +267,18 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
     ];
     if (
       reactions[post.metadata.digest][oldReactionId].reactionType ==
-      reactionType
+      reactionRequest.reactionType
     ) revert("Reaction already added");
     if (oldReactionId > 0) {
       delete reactions[post.metadata.digest][oldReactionId];
       delete reactionsUserToId[post.metadata.digest][_msgSender()];
-      emit ReactionRemoved(_msgSender(), postId, oldReactionId);
+      emit ReactionRemoved(_msgSender(), reactionRequest.postId, oldReactionId);
     }
-    Reaction memory reaction = Reaction(reactionType, msg.value, _msgSender());
+    Reaction memory reaction = Reaction(
+      reactionRequest.reactionType,
+      msg.value,
+      _msgSender()
+    );
     lastReactionIds[post.metadata.digest].increment();
     uint256 reactionId = lastReactionIds[post.metadata.digest].current();
     reactions[post.metadata.digest][reactionId] = reaction;
@@ -256,34 +288,87 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
     }
     emit ReactionAdded(
       _msgSender(),
-      postId,
-      reactionType,
+      reactionRequest.postId,
+      reactionRequest.reactionType,
       reactionId,
       msg.value
     );
   }
 
+  function addReaction(
+    ReactionRequest memory reactionRequest
+  ) external payable {
+    _addReaction(reactionRequest);
+  }
+
+  function addBatchReactions(
+    ReactionRequest[] memory reactionsBatch
+  ) public payable {
+    uint256 length = reactionsBatch.length;
+    for (uint8 i = 0; i < length; ) {
+      ReactionRequest memory reaction = reactionsBatch[i];
+      _addReaction(reaction);
+
+      unchecked {
+        ++i;
+      }
+    }
+  }
+
   /**
    * @dev Remove a reaction
-   * @param postId The post id
-   * @param reactionId The reaction id
+   * @param reactionRequest Reaction to remove
    */
-  function removeReaction(
-    uint256 postId,
-    uint256 reactionId
-  ) external onlyAllowedAddresses {
-    Post memory post = posts[postId];
+  function _removeReaction(
+    ReactionRemoveRequest memory reactionRequest
+  ) private onlyAllowedAddresses {
+    Post memory post = posts[reactionRequest.postId];
     if (post.author == address(0)) {
       revert("Post not found");
     }
     if (
-      _msgSender() != reactions[post.metadata.digest][reactionId].reactionOwner
+      _msgSender() !=
+      reactions[post.metadata.digest][reactionRequest.reactionId].reactionOwner
     ) {
       revert("You are not the reaction owner");
     }
-    delete reactions[post.metadata.digest][reactionId];
+    delete reactions[post.metadata.digest][reactionRequest.reactionId];
     delete reactionsUserToId[post.metadata.digest][_msgSender()];
-    emit ReactionRemoved(_msgSender(), postId, reactionId);
+    emit ReactionRemoved(
+      _msgSender(),
+      reactionRequest.postId,
+      reactionRequest.reactionId
+    );
+  }
+
+  function removeReaction(
+    ReactionRemoveRequest memory reactionRequest
+  ) external {
+    _removeReaction(reactionRequest);
+  }
+
+  function removeBatchReactions(
+    ReactionRemoveRequest[] memory reactionsBatch
+  ) public payable {
+    uint256 length = reactionsBatch.length;
+    for (uint8 i = 0; i < length; ) {
+      ReactionRemoveRequest memory reaction = reactionsBatch[i];
+      _removeReaction(reaction);
+
+      unchecked {
+        ++i;
+      }
+    }
+  }
+
+  function batchReactionsAndPosts(
+    PostRequest[] memory batchPosts,
+    ReactionRequest[] memory batchReactionsToAdd,
+    ReactionRemoveRequest[] memory batchReactionsToRemove
+  ) external {
+    addBatchFeedPosts(batchPosts);
+    addBatchReactions(batchReactionsToAdd);
+    removeBatchReactions(batchReactionsToRemove);
   }
 
   /**

@@ -6,19 +6,28 @@ const regexes = {
 }
 
 async function main() {
-  const OBSSStorage = await ethers.getContractFactory('OBSSStorage')
+  const factory = await ethers.getContractFactory('OBSSStorage')
   const { proxyAddress } = await prompt.get({
     properties: {
       proxyAddress: {
         required: true,
         message: 'Proxy address',
         pattern: regexes.ethereumAddress,
+        default: '0x333c1990fCa4d333DEe0458fd56e1F35463c32a9',
       },
     },
   })
   console.log('Upgrading OBSSStorage...')
-  await upgrades.upgradeProxy(proxyAddress as string, OBSSStorage)
+  const contract = await upgrades.upgradeProxy(proxyAddress as string, factory)
   console.log('OBSSStorage upgraded')
+  console.log(
+    await upgrades.erc1967.getImplementationAddress(contract.address),
+    ' getImplementationAddress'
+  )
+  console.log(
+    await upgrades.erc1967.getAdminAddress(contract.address),
+    ' getAdminAddress'
+  )
 }
 
 main().catch((error) => {
