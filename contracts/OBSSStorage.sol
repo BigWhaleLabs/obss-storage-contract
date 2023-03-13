@@ -6,6 +6,7 @@ import "@opengsn/contracts/src/ERC2771Recipient.sol";
 import "@big-whale-labs/ketl-allow-map-contract/contracts/KetlAllowMap.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "hardhat/console.sol";
 
 /**
  * @title OBSSStorage
@@ -192,7 +193,7 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
     _addFeedPost(feedId, postMetadata);
   }
 
-  function addBatchFeedPost(BatchFeedPost[] memory batchPosts) external {
+  function addBatchFeedPost(BatchFeedPost[] memory batchPosts) public {
     uint256 length = batchPosts.length;
     for (uint8 i = 0; i < length; ) {
       BatchFeedPost memory post = batchPosts[i];
@@ -295,7 +296,7 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
 
   function addBatchReactions(
     BatchReaction[] memory reactionsBatch
-  ) external payable {
+  ) public payable {
     uint256 length = reactionsBatch.length;
     for (uint8 i = 0; i < length; ) {
       BatchReaction memory reaction = reactionsBatch[i];
@@ -336,7 +337,7 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
 
   function removeBatchReactions(
     BatchReaction[] memory reactionsBatch
-  ) external payable {
+  ) public payable {
     uint256 length = reactionsBatch.length;
     for (uint8 i = 0; i < length; ) {
       BatchReaction memory reaction = reactionsBatch[i];
@@ -346,6 +347,16 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
         ++i;
       }
     }
+  }
+
+  function batchReactionsAndPosts(
+    BatchFeedPost[] memory batchPosts,
+    BatchReaction[] memory batchReactionsToAdd,
+    BatchReaction[] memory batchReactionsToRemove
+  ) external {
+    addBatchFeedPost(batchPosts);
+    addBatchReactions(batchReactionsToAdd);
+    removeBatchReactions(batchReactionsToRemove);
   }
 
   /**

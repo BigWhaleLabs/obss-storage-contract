@@ -104,5 +104,15 @@ describe('OBSSStorage contract tests', () => {
       const reactions = getReactionsBatch()
       expect(await this.contract.removeBatchReactions(reactions))
     })
+    it('successful call `batchReactionsAndPosts`', async function () {
+      // Add batch posts
+      const posts = getFeedPostsBatch()
+      await this.contract.addBatchFeedPost(posts)
+
+      const reactions = getReactionsBatch()
+      expect(
+        await this.contract.batchReactionsAndPosts(posts, reactions, reactions)
+      )
+    })
   })
 })
