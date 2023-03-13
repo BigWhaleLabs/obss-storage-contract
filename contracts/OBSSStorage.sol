@@ -35,12 +35,12 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
     address reactionOwner;
   }
 
-  struct BatchReaction {
+  struct ReactionRequest {
     uint256 postId;
     uint8 reactionType;
   }
 
-  struct BatchFeedPost {
+  struct PostRequest {
     uint256 feedId;
     CID postMetadata;
   }
@@ -193,10 +193,10 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
     _addFeedPost(feedId, postMetadata);
   }
 
-  function addBatchFeedPost(BatchFeedPost[] memory batchPosts) public {
+  function addBatchFeedPost(PostRequest[] memory batchPosts) public {
     uint256 length = batchPosts.length;
     for (uint8 i = 0; i < length; ) {
-      BatchFeedPost memory post = batchPosts[i];
+      PostRequest memory post = batchPosts[i];
       _addFeedPost(post.feedId, post.postMetadata);
 
       unchecked {
@@ -295,11 +295,11 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
   }
 
   function addBatchReactions(
-    BatchReaction[] memory reactionsBatch
+    ReactionRequest[] memory reactionsBatch
   ) public payable {
     uint256 length = reactionsBatch.length;
     for (uint8 i = 0; i < length; ) {
-      BatchReaction memory reaction = reactionsBatch[i];
+      ReactionRequest memory reaction = reactionsBatch[i];
       _addReaction(reaction.postId, reaction.reactionType);
 
       unchecked {
@@ -336,11 +336,11 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
   }
 
   function removeBatchReactions(
-    BatchReaction[] memory reactionsBatch
+    ReactionRequest[] memory reactionsBatch
   ) public payable {
     uint256 length = reactionsBatch.length;
     for (uint8 i = 0; i < length; ) {
-      BatchReaction memory reaction = reactionsBatch[i];
+      ReactionRequest memory reaction = reactionsBatch[i];
       _removeReaction(reaction.postId, reaction.reactionType);
 
       unchecked {
@@ -350,9 +350,9 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
   }
 
   function batchReactionsAndPosts(
-    BatchFeedPost[] memory batchPosts,
-    BatchReaction[] memory batchReactionsToAdd,
-    BatchReaction[] memory batchReactionsToRemove
+    PostRequest[] memory batchPosts,
+    ReactionRequest[] memory batchReactionsToAdd,
+    ReactionRequest[] memory batchReactionsToRemove
   ) external {
     addBatchFeedPost(batchPosts);
     addBatchReactions(batchReactionsToAdd);
