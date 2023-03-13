@@ -3,6 +3,7 @@ import {
   getFakeAllowMapContract,
   getFeedPostsBatch,
   getReactionsBatch,
+  getRemoveReactionsBatch,
   zeroAddress,
 } from './utils'
 import { ethers, upgrades } from 'hardhat'
@@ -57,7 +58,9 @@ describe('OBSSStorage contract tests', () => {
       expect(await this.contract.addFeed(MOCK_CID))
     })
     it('should add feed post', async function () {
-      expect(await this.contract.addFeedPost(0, MOCK_CID))
+      expect(
+        await this.contract.addFeedPost({ feedId: 0, postMetadata: MOCK_CID })
+      )
     })
     it('should add batch feed post', async function () {
       const posts = getFeedPostsBatch()
@@ -74,8 +77,8 @@ describe('OBSSStorage contract tests', () => {
     })
     it('should add reaction', async function () {
       // Add post
-      await this.contract.addFeedPost(0, MOCK_CID)
-      expect(await this.contract.addReaction(0, 1))
+      await this.contract.addFeedPost({ feedId: 0, postMetadata: MOCK_CID })
+      expect(await this.contract.addReaction({ postId: 0, reactionType: 1 }))
     })
     it('should add batch reactions', async function () {
       // Add batch posts
@@ -87,10 +90,10 @@ describe('OBSSStorage contract tests', () => {
     })
     it('should remove reaction', async function () {
       // Add post
-      await this.contract.addFeedPost(0, MOCK_CID)
+      await this.contract.addFeedPost({ feedId: 0, postMetadata: MOCK_CID })
       // Add reaction
-      await this.contract.addReaction(0, 1)
-      expect(await this.contract.removeReaction(0, 1))
+      await this.contract.addReaction({ postId: 0, reactionType: 1 })
+      expect(await this.contract.removeReaction({ postId: 0, reactionId: 1 }))
     })
     it('should remove batch reactions', async function () {
       // Add batch posts
@@ -98,10 +101,10 @@ describe('OBSSStorage contract tests', () => {
       await this.contract.addBatchFeedPost(posts)
 
       for (let i = 0; i < 10; i++) {
-        await this.contract.addReaction(i, 1)
+        await this.contract.addReaction({ postId: i, reactionType: 1 })
       }
 
-      const reactions = getReactionsBatch()
+      const reactions = getRemoveReactionsBatch()
       expect(await this.contract.removeBatchReactions(reactions))
     })
     it('successful call `batchReactionsAndPosts`', async function () {
@@ -110,8 +113,13 @@ describe('OBSSStorage contract tests', () => {
       await this.contract.addBatchFeedPost(posts)
 
       const reactions = getReactionsBatch()
+      const removeReactions = getRemoveReactionsBatch()
       expect(
-        await this.contract.batchReactionsAndPosts(posts, reactions, reactions)
+        await this.contract.batchReactionsAndPosts(
+          posts,
+          reactions,
+          removeReactions
+        )
       )
     })
   })

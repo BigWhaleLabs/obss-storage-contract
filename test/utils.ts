@@ -128,3 +128,16 @@ export function getReactionsBatch(length = 10) {
 
   return reactions
 }
+
+export function getRemoveReactionsBatch(length = 10) {
+  const reactions: {
+    postId: number
+    reactionId: number
+  }[] = []
+
+  for (let i = 0; i < length; i++) {
+    reactions.push({ postId: i, reactionId: 1 })
+  }
+
+  return reactions
+}

@@ -40,6 +40,11 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
     uint8 reactionType;
   }
 
+  struct ReactionRemoveRequest {
+    uint256 postId;
+    uint8 reactionId;
+  }
+
   struct PostRequest {
     uint256 feedId;
     CID postMetadata;
@@ -168,36 +173,34 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
 
   /**
    * @dev Add a new feed post
-   * @param feedId The feed id
-   * @param postMetadata The post metadata to add
+   * @param postRequest Post to add
    */
   function _addFeedPost(
-    uint256 feedId,
-    CID memory postMetadata
+    PostRequest memory postRequest
   ) private onlyAllowedAddresses {
-    uint256 commentsFeedId = addFeed(postMetadata);
+    uint256 commentsFeedId = addFeed(postRequest.postMetadata);
     Post memory post = Post(
       _msgSender(),
-      postMetadata,
+      postRequest.postMetadata,
       commentsFeedId,
       block.timestamp
     );
-    uint256 objectId = lastFeedPostIds[feedId].current();
+    uint256 objectId = lastFeedPostIds[postRequest.feedId].current();
     posts[commentsFeedId] = post;
-    feedPosts[feedId].push(commentsFeedId);
-    emit FeedPostAdded(feedId, objectId, post);
-    lastFeedPostIds[feedId].increment();
+    feedPosts[postRequest.feedId].push(commentsFeedId);
+    emit FeedPostAdded(postRequest.feedId, objectId, post);
+    lastFeedPostIds[postRequest.feedId].increment();
   }
 
-  function addFeedPost(uint256 feedId, CID memory postMetadata) external {
-    _addFeedPost(feedId, postMetadata);
+  function addFeedPost(PostRequest memory postRequest) external {
+    _addFeedPost(postRequest);
   }
 
   function addBatchFeedPost(PostRequest[] memory batchPosts) public {
     uint256 length = batchPosts.length;
     for (uint8 i = 0; i < length; ) {
       PostRequest memory post = batchPosts[i];
-      _addFeedPost(post.feedId, post.postMetadata);
+      _addFeedPost(post);
 
       unchecked {
         ++i;
@@ -250,14 +253,12 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
 
   /**
    * @dev Add a reaction
-   * @param postId The post id
-   * @param reactionType The reaction type
+   * @param reactionRequest Reaction to add
    */
   function _addReaction(
-    uint256 postId,
-    uint8 reactionType
+    ReactionRequest memory reactionRequest
   ) private onlyAllowedAddresses {
-    Post memory post = posts[postId];
+    Post memory post = posts[reactionRequest.postId];
     if (post.author == address(0)) {
       revert("Post not found");
     }
@@ -266,14 +267,18 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
     ];
     if (
       reactions[post.metadata.digest][oldReactionId].reactionType ==
-      reactionType
+      reactionRequest.reactionType
     ) revert("Reaction already added");
     if (oldReactionId > 0) {
       delete reactions[post.metadata.digest][oldReactionId];
       delete reactionsUserToId[post.metadata.digest][_msgSender()];
-      emit ReactionRemoved(_msgSender(), postId, oldReactionId);
+      emit ReactionRemoved(_msgSender(), reactionRequest.postId, oldReactionId);
     }
-    Reaction memory reaction = Reaction(reactionType, msg.value, _msgSender());
+    Reaction memory reaction = Reaction(
+      reactionRequest.reactionType,
+      msg.value,
+      _msgSender()
+    );
     lastReactionIds[post.metadata.digest].increment();
     uint256 reactionId = lastReactionIds[post.metadata.digest].current();
     reactions[post.metadata.digest][reactionId] = reaction;
@@ -283,15 +288,17 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
     }
     emit ReactionAdded(
       _msgSender(),
-      postId,
-      reactionType,
+      reactionRequest.postId,
+      reactionRequest.reactionType,
       reactionId,
       msg.value
     );
   }
 
-  function addReaction(uint256 postId, uint8 reactionType) external payable {
-    _addReaction(postId, reactionType);
+  function addReaction(
+    ReactionRequest memory reactionRequest
+  ) external payable {
+    _addReaction(reactionRequest);
   }
 
   function addBatchReactions(
@@ -300,7 +307,7 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
     uint256 length = reactionsBatch.length;
     for (uint8 i = 0; i < length; ) {
       ReactionRequest memory reaction = reactionsBatch[i];
-      _addReaction(reaction.postId, reaction.reactionType);
+      _addReaction(reaction);
 
       unchecked {
         ++i;
@@ -310,38 +317,43 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
 
   /**
    * @dev Remove a reaction
-   * @param postId The post id
-   * @param reactionId The reaction id
+   * @param reactionRequest Reaction to remove
    */
   function _removeReaction(
-    uint256 postId,
-    uint256 reactionId
+    ReactionRemoveRequest memory reactionRequest
   ) private onlyAllowedAddresses {
-    Post memory post = posts[postId];
+    Post memory post = posts[reactionRequest.postId];
     if (post.author == address(0)) {
       revert("Post not found");
     }
     if (
-      _msgSender() != reactions[post.metadata.digest][reactionId].reactionOwner
+      _msgSender() !=
+      reactions[post.metadata.digest][reactionRequest.reactionId].reactionOwner
     ) {
       revert("You are not the reaction owner");
     }
-    delete reactions[post.metadata.digest][reactionId];
+    delete reactions[post.metadata.digest][reactionRequest.reactionId];
     delete reactionsUserToId[post.metadata.digest][_msgSender()];
-    emit ReactionRemoved(_msgSender(), postId, reactionId);
+    emit ReactionRemoved(
+      _msgSender(),
+      reactionRequest.postId,
+      reactionRequest.reactionId
+    );
   }
 
-  function removeReaction(uint256 postId, uint256 reactionId) external {
-    _removeReaction(postId, reactionId);
+  function removeReaction(
+    ReactionRemoveRequest memory reactionRequest
+  ) external {
+    _removeReaction(reactionRequest);
   }
 
   function removeBatchReactions(
-    ReactionRequest[] memory reactionsBatch
+    ReactionRemoveRequest[] memory reactionsBatch
   ) public payable {
     uint256 length = reactionsBatch.length;
     for (uint8 i = 0; i < length; ) {
-      ReactionRequest memory reaction = reactionsBatch[i];
-      _removeReaction(reaction.postId, reaction.reactionType);
+      ReactionRemoveRequest memory reaction = reactionsBatch[i];
+      _removeReaction(reaction);
 
       unchecked {
         ++i;
@@ -352,7 +364,7 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
   function batchReactionsAndPosts(
     PostRequest[] memory batchPosts,
     ReactionRequest[] memory batchReactionsToAdd,
-    ReactionRequest[] memory batchReactionsToRemove
+    ReactionRemoveRequest[] memory batchReactionsToRemove
   ) external {
     addBatchFeedPost(batchPosts);
     addBatchReactions(batchReactionsToAdd);
