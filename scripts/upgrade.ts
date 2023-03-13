@@ -13,6 +13,7 @@ async function main() {
         required: true,
         message: 'Proxy address',
         pattern: regexes.ethereumAddress,
+        default: '0x333c1990fCa4d333DEe0458fd56e1F35463c32a9',
       },
     },
   })

@@ -15,6 +15,28 @@ import "hardhat/console.sol";
 contract OBSSStorage is Initializable, Context, ERC2771Recipient {
   using Counters for Counters.Counter;
 
+  /* State */
+  string public version;
+  // Posts
+  mapping(uint256 => Post) public posts;
+  // Ketl allow map
+  KetlAllowMap public vcAllowMap;
+  KetlAllowMap public founderAllowMap;
+  // Feeds
+  CID[] public feeds;
+  Counters.Counter public lastFeedId;
+  mapping(uint256 => uint256[]) public feedPosts;
+  mapping(uint256 => Counters.Counter) public lastFeedPostIds;
+  // Profiles
+  mapping(address => CID) public profiles;
+  mapping(address => uint256[]) public profilePosts;
+  mapping(address => Counters.Counter) public lastProfilePostIds;
+  mapping(address => CID) public subscriptions;
+  // Reactions
+  mapping(bytes32 => mapping(uint256 => Reaction)) public reactions;
+  mapping(bytes32 => Counters.Counter) public lastReactionIds;
+  mapping(bytes32 => mapping(address => uint256)) public reactionsUserToId;
+
   // IPFS cid represented in a more efficient way
   struct CID {
     bytes32 digest;
@@ -49,28 +71,6 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
     uint256 feedId;
     CID postMetadata;
   }
-
-  /* State */
-  string public version;
-  // Posts
-  mapping(uint256 => Post) public posts;
-  // Ketl allow map
-  KetlAllowMap public vcAllowMap;
-  KetlAllowMap public founderAllowMap;
-  // Feeds
-  CID[] public feeds;
-  Counters.Counter public lastFeedId;
-  mapping(uint256 => uint256[]) public feedPosts;
-  mapping(uint256 => Counters.Counter) public lastFeedPostIds;
-  // Profiles
-  mapping(address => CID) public profiles;
-  mapping(address => uint256[]) public profilePosts;
-  mapping(address => Counters.Counter) public lastProfilePostIds;
-  mapping(address => CID) public subscriptions;
-  // Reactions
-  mapping(bytes32 => mapping(uint256 => Reaction)) public reactions;
-  mapping(bytes32 => Counters.Counter) public lastReactionIds;
-  mapping(bytes32 => mapping(address => uint256)) public reactionsUserToId;
 
   /* Events */
   // Feeds
