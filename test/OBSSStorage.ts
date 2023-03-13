@@ -64,7 +64,7 @@ describe('OBSSStorage contract tests', () => {
     })
     it('should add batch feed post', async function () {
       const posts = getFeedPostsBatch()
-      expect(await this.contract.addBatchFeedPost(posts))
+      expect(await this.contract.addBatchFeedPosts(posts))
     })
     it('should add profile', async function () {
       expect(await this.contract.addProfile(MOCK_CID))
@@ -83,7 +83,7 @@ describe('OBSSStorage contract tests', () => {
     it('should add batch reactions', async function () {
       // Add batch posts
       const posts = getFeedPostsBatch()
-      await this.contract.addBatchFeedPost(posts)
+      await this.contract.addBatchFeedPosts(posts)
 
       const reactions = getReactionsBatch()
       expect(await this.contract.addBatchReactions(reactions))
@@ -98,7 +98,7 @@ describe('OBSSStorage contract tests', () => {
     it('should remove batch reactions', async function () {
       // Add batch posts
       const posts = getFeedPostsBatch()
-      await this.contract.addBatchFeedPost(posts)
+      await this.contract.addBatchFeedPosts(posts)
 
       for (let i = 0; i < 10; i++) {
         await this.contract.addReaction({ postId: i, reactionType: 1 })
@@ -110,7 +110,7 @@ describe('OBSSStorage contract tests', () => {
     it('successful call `batchReactionsAndPosts`', async function () {
       // Add batch posts
       const posts = getFeedPostsBatch()
-      await this.contract.addBatchFeedPost(posts)
+      await this.contract.addBatchFeedPosts(posts)
 
       const reactions = getReactionsBatch()
       const removeReactions = getRemoveReactionsBatch()

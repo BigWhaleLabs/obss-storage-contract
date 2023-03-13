@@ -196,7 +196,7 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
     _addFeedPost(postRequest);
   }
 
-  function addBatchFeedPost(PostRequest[] memory batchPosts) public {
+  function addBatchFeedPosts(PostRequest[] memory batchPosts) public {
     uint256 length = batchPosts.length;
     for (uint8 i = 0; i < length; ) {
       PostRequest memory post = batchPosts[i];
@@ -366,7 +366,7 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
     ReactionRequest[] memory batchReactionsToAdd,
     ReactionRemoveRequest[] memory batchReactionsToRemove
   ) external {
-    addBatchFeedPost(batchPosts);
+    addBatchFeedPosts(batchPosts);
     addBatchReactions(batchReactionsToAdd);
     removeBatchReactions(batchReactionsToRemove);
   }
