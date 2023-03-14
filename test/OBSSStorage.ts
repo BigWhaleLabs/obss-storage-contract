@@ -2,6 +2,8 @@ import {
   MOCK_CID,
   getFakeAllowMapContract,
   getFeedPostsBatch,
+  getLegacyFeedPostsBatch,
+  getLegacyReactionsBatch,
   getReactionsBatch,
   getRemoveReactionsBatch,
   zeroAddress,
@@ -120,6 +122,29 @@ describe('OBSSStorage contract tests', () => {
           reactions,
           removeReactions
         )
+      )
+    })
+    it('successfully add legacy posts and reactions', async function () {
+      // Add batch posts
+      const posts = getFeedPostsBatch()
+      await this.contract.addBatchFeedPosts(posts)
+
+      const reactions = getReactionsBatch()
+      const removeReactions = getRemoveReactionsBatch()
+      expect(
+        await this.contract.batchReactionsAndPosts(
+          posts,
+          reactions,
+          removeReactions
+        )
+      )
+    })
+    it('successfully load the legay data', async function () {
+      const legacyPosts = getLegacyFeedPostsBatch()
+      const legacyReactions = getLegacyReactionsBatch()
+
+      expect(
+        await this.contract.migrateLegacyData(legacyPosts, legacyReactions)
       )
     })
   })

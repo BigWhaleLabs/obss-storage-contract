@@ -4,15 +4,20 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@opengsn/contracts/src/ERC2771Recipient.sol";
 import "@big-whale-labs/ketl-allow-map-contract/contracts/KetlAllowMap.sol";
-import "@openzeppelin/contracts/utils/Context.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "hardhat/console.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /**
  * @title OBSSStorage
  * @dev This contract is used to store the data of the OBSS contract
  */
-contract OBSSStorage is Initializable, Context, ERC2771Recipient {
+contract OBSSStorage is
+  Initializable,
+  ContextUpgradeable,
+  OwnableUpgradeable,
+  ERC2771Recipient
+{
   using Counters for Counters.Counter;
 
   /* State */
@@ -72,6 +77,18 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
     CID postMetadata;
   }
 
+  struct LegacyPost {
+    address author;
+    uint256 feedId;
+    CID postMetadata;
+  }
+  struct LegacyReaction {
+    uint256 postId;
+    uint256 value;
+    address owner;
+    uint8 reactionType;
+  }
+
   /* Events */
   // Feeds
   event FeedAdded(uint256 indexed id, CID metadata);
@@ -123,6 +140,8 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
     founderAllowMap = KetlAllowMap(_founderAllowMap);
     _setTrustedForwarder(_forwarder);
     version = _version;
+    // Set owner
+    __Ownable_init();
   }
 
   function addAddressToVCAllowMap(
@@ -371,6 +390,70 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
     removeBatchReactions(batchReactionsToRemove);
   }
 
+  function migrateLegacyData(
+    LegacyPost[] memory legacyPosts,
+    LegacyReaction[] memory legacyReactions
+  ) external onlyOwner {
+    _addFeedLegacyPostsBatch(legacyPosts);
+    _addFeedLegacyReactionsBatch(legacyReactions);
+  }
+
+  function _addFeedLegacyPostsBatch(LegacyPost[] memory legacyPosts) private {
+    uint256 length = legacyPosts.length;
+    for (uint8 i = 0; i < length; ) {
+      LegacyPost memory legacyPost = legacyPosts[i];
+      uint256 commentsFeedId = addFeed(legacyPost.postMetadata);
+      Post memory post = Post(
+        legacyPost.author,
+        legacyPost.postMetadata,
+        commentsFeedId,
+        block.timestamp
+      );
+      uint256 objectId = lastFeedPostIds[legacyPost.feedId].current();
+      posts[commentsFeedId] = post;
+      feedPosts[legacyPost.feedId].push(commentsFeedId);
+      emit FeedPostAdded(legacyPost.feedId, objectId, post);
+      lastFeedPostIds[legacyPost.feedId].increment();
+      unchecked {
+        ++i;
+      }
+    }
+  }
+
+  function _addFeedLegacyReactionsBatch(
+    LegacyReaction[] memory legacyReactions
+  ) private {
+    uint256 length = legacyReactions.length;
+    for (uint8 i = 0; i < length; ) {
+      LegacyReaction memory legacyReaction = legacyReactions[i];
+      Post memory post = posts[legacyReaction.postId];
+      Reaction memory reaction = Reaction(
+        legacyReaction.reactionType,
+        legacyReaction.value,
+        legacyReaction.owner
+      );
+      lastReactionIds[post.metadata.digest].increment();
+      uint256 reactionId = lastReactionIds[post.metadata.digest].current();
+      reactions[post.metadata.digest][reactionId] = reaction;
+      reactionsUserToId[post.metadata.digest][
+        legacyReaction.owner
+      ] = reactionId;
+      if (msg.value > 0) {
+        payable(post.author).transfer(msg.value);
+      }
+      emit ReactionAdded(
+        legacyReaction.owner,
+        legacyReaction.postId,
+        legacyReaction.reactionType,
+        reactionId,
+        msg.value
+      );
+      unchecked {
+        ++i;
+      }
+    }
+  }
+
   /**
    * @dev Get the feed posts
    */
@@ -447,7 +530,7 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
   function _msgSender()
     internal
     view
-    override(Context, ERC2771Recipient)
+    override(ContextUpgradeable, ERC2771Recipient)
     returns (address sender)
   {
     sender = ERC2771Recipient._msgSender();
@@ -456,7 +539,7 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
   function _msgData()
     internal
     view
-    override(Context, ERC2771Recipient)
+    override(ContextUpgradeable, ERC2771Recipient)
     returns (bytes calldata ret)
   {
     return ERC2771Recipient._msgData();

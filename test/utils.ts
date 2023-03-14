@@ -116,6 +116,33 @@ export function getFeedPostsBatch(length = 10) {
   return posts
 }
 
+export function getLegacyFeedPostsBatch(length = 10) {
+  const posts: {
+    author: string
+    feedId: number
+    postMetadata: {
+      digest: string
+      hashFunction: BigNumber
+      size: BigNumber
+    }
+  }[] = []
+
+  for (let i = 0; i < length; i++) {
+    posts.push({
+      feedId: 0,
+      author: `0x000000000000000000000000000000000000000${i}`,
+      postMetadata: {
+        digest: generateRandomBytes32(),
+        hashFunction: BigNumber.from(0),
+        size: BigNumber.from(0),
+      },
+    })
+    posts[i].postMetadata.digest = generateRandomBytes32()
+  }
+
+  return posts
+}
+
 export function getReactionsBatch(length = 10) {
   const reactions: {
     postId: number
@@ -124,6 +151,26 @@ export function getReactionsBatch(length = 10) {
 
   for (let i = 0; i < length; i++) {
     reactions.push({ postId: i, reactionType: 1 })
+  }
+
+  return reactions
+}
+
+export function getLegacyReactionsBatch(length = 10) {
+  const reactions: {
+    postId: number
+    value: number
+    owner: string
+    reactionType: number
+  }[] = []
+
+  for (let i = 0; i < length; i++) {
+    reactions.push({
+      postId: i,
+      reactionType: 1,
+      value: 0,
+      owner: `0x000000000000000000000000000000000000000${i}`,
+    })
   }
 
   return reactions
