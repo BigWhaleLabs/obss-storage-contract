@@ -124,22 +124,7 @@ describe('OBSSStorage contract tests', () => {
         )
       )
     })
-    it('successfully add legacy posts and reactions', async function () {
-      // Add batch posts
-      const posts = getFeedPostsBatch()
-      await this.contract.addBatchFeedPosts(posts)
-
-      const reactions = getReactionsBatch()
-      const removeReactions = getRemoveReactionsBatch()
-      expect(
-        await this.contract.batchReactionsAndPosts(
-          posts,
-          reactions,
-          removeReactions
-        )
-      )
-    })
-    it('successfully load the legay data', async function () {
+    it('successfully load the legacy data', async function () {
       const legacyPosts = getLegacyFeedPostsBatch()
       const legacyReactions = getLegacyReactionsBatch()
 

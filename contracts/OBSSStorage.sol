@@ -80,7 +80,8 @@ contract OBSSStorage is
   struct LegacyPost {
     address author;
     uint256 feedId;
-    CID postMetadata;
+    CID metadata;
+    uint256 timestamp;
   }
   struct LegacyReaction {
     uint256 postId;
@@ -402,12 +403,12 @@ contract OBSSStorage is
     uint256 length = legacyPosts.length;
     for (uint8 i = 0; i < length; ) {
       LegacyPost memory legacyPost = legacyPosts[i];
-      uint256 commentsFeedId = addFeed(legacyPost.postMetadata);
+      uint256 commentsFeedId = addFeed(legacyPost.metadata);
       Post memory post = Post(
         legacyPost.author,
-        legacyPost.postMetadata,
+        legacyPost.metadata,
         commentsFeedId,
-        block.timestamp
+        legacyPost.timestamp
       );
       uint256 objectId = lastFeedPostIds[legacyPost.feedId].current();
       posts[commentsFeedId] = post;

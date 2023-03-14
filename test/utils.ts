@@ -120,24 +120,26 @@ export function getLegacyFeedPostsBatch(length = 10) {
   const posts: {
     author: string
     feedId: number
-    postMetadata: {
+    metadata: {
       digest: string
       hashFunction: BigNumber
       size: BigNumber
     }
+    timestamp: number
   }[] = []
 
   for (let i = 0; i < length; i++) {
     posts.push({
       feedId: 0,
       author: `0x000000000000000000000000000000000000000${i}`,
-      postMetadata: {
+      metadata: {
         digest: generateRandomBytes32(),
         hashFunction: BigNumber.from(0),
         size: BigNumber.from(0),
       },
+      timestamp: 1000000 * i,
     })
-    posts[i].postMetadata.digest = generateRandomBytes32()
+    posts[i].metadata.digest = generateRandomBytes32()
   }
 
   return posts
