@@ -85,10 +85,10 @@ contract OBSSStorage is
     uint256 timestamp;
   }
   struct LegacyReaction {
-    uint256 postId;
     uint256 value;
     address owner;
     uint8 reactionType;
+    CID metadata;
   }
 
   /* Events */
@@ -434,28 +434,21 @@ contract OBSSStorage is
     uint256 length = legacyReactions.length;
     for (uint8 i = 0; i < length; ) {
       LegacyReaction memory legacyReaction = legacyReactions[i];
-      Post memory post = posts[legacyReaction.postId];
       Reaction memory reaction = Reaction(
         legacyReaction.reactionType,
         legacyReaction.value,
         legacyReaction.owner
       );
-      lastReactionIds[post.metadata.digest].increment();
-      uint256 reactionId = lastReactionIds[post.metadata.digest].current();
-      reactions[post.metadata.digest][reactionId] = reaction;
-      reactionsUserToId[post.metadata.digest][
+      lastReactionIds[legacyReaction.metadata.digest].increment();
+      uint256 reactionId = lastReactionIds[legacyReaction.metadata.digest]
+        .current();
+      reactions[legacyReaction.metadata.digest][reactionId] = reaction;
+      reactionsUserToId[legacyReaction.metadata.digest][
         legacyReaction.owner
       ] = reactionId;
       if (msg.value > 0) {
-        payable(post.author).transfer(msg.value);
+        payable(legacyReaction.owner).transfer(msg.value);
       }
-      emit ReactionAdded(
-        legacyReaction.owner,
-        legacyReaction.postId,
-        legacyReaction.reactionType,
-        reactionId,
-        msg.value
-      );
       unchecked {
         ++i;
       }

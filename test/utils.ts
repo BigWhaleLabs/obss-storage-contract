@@ -160,18 +160,26 @@ export function getReactionsBatch(length = 10) {
 
 export function getLegacyReactionsBatch(length = 10) {
   const reactions: {
-    postId: number
     value: number
     owner: string
     reactionType: number
+    metadata: {
+      digest: string
+      hashFunction: BigNumber
+      size: BigNumber
+    }
   }[] = []
 
   for (let i = 0; i < length; i++) {
     reactions.push({
-      postId: i,
       reactionType: 1,
       value: 0,
       owner: `0x000000000000000000000000000000000000000${i}`,
+      metadata: {
+        digest: generateRandomBytes32(),
+        hashFunction: BigNumber.from(0),
+        size: BigNumber.from(0),
+      },
     })
   }
 
