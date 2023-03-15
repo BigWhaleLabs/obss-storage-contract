@@ -132,5 +132,16 @@ describe('OBSSStorage contract tests', () => {
         await this.contract.migrateLegacyData(legacyPosts, legacyReactions)
       )
     })
+    it('should lock data loading after calling `lockDataLoading`', async function () {
+      const legacyPosts = getLegacyFeedPostsBatch()
+      const legacyReactions = getLegacyReactionsBatch()
+
+      await this.contract.migrateLegacyData(legacyPosts, legacyReactions)
+      // Lock data loading
+      await this.contract.lockDataLoading()
+      await expect(
+        this.contract.migrateLegacyData(legacyPosts, legacyReactions)
+      ).to.be.revertedWith('All legacy data already loaded')
+    })
   })
 })
