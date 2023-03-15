@@ -41,7 +41,7 @@ contract OBSSStorage is
   mapping(bytes32 => mapping(uint256 => Reaction)) public reactions;
   mapping(bytes32 => Counters.Counter) public lastReactionIds;
   mapping(bytes32 => mapping(address => uint256)) public reactionsUserToId;
-  bool public isDataLoadingLocked;
+  bool public isDataMigrationLocked;
 
   // IPFS cid represented in a more efficient way
   struct CID {
@@ -132,7 +132,7 @@ contract OBSSStorage is
   }
 
   modifier ifLoadingAllowed() {
-    require(!isDataLoadingLocked, "All legacy data already loaded");
+    require(!isDataMigrationLocked, "All legacy data already loaded");
     _;
   }
 
@@ -149,7 +149,7 @@ contract OBSSStorage is
     version = _version;
     // Set owner
     __Ownable_init();
-    isDataLoadingLocked = false;
+    isDataMigrationLocked = false;
   }
 
   function addAddressToVCAllowMap(
@@ -455,8 +455,8 @@ contract OBSSStorage is
     }
   }
 
-  function lockDataLoading() external onlyOwner {
-    isDataLoadingLocked = true;
+  function lockDataMigration() external onlyOwner {
+    isDataMigrationLocked = true;
   }
 
   /**

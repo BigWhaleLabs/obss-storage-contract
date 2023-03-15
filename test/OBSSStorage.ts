@@ -138,7 +138,7 @@ describe('OBSSStorage contract tests', () => {
 
       await this.contract.migrateLegacyData(legacyPosts, legacyReactions)
       // Lock data loading
-      await this.contract.lockDataLoading()
+      await this.contract.lockDataMigration()
       await expect(
         this.contract.migrateLegacyData(legacyPosts, legacyReactions)
       ).to.be.revertedWith('All legacy data already loaded')
