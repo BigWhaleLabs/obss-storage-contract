@@ -21,11 +21,10 @@ function getBatchOfData(data: LegacyData, start: number, end: number) {
 }
 
 function prepareAllBatches(data: LegacyData) {
-  const batchStep = 10
+  const batchStep = 5
   const batches: LegacyData[] = []
   for (let i = 0; i < data.length; i += batchStep) {
     const batch = getBatchOfData(data, i, i + batchStep)
-    console.log(batch)
     batches.push(batch)
   }
   return batches
@@ -102,7 +101,10 @@ async function main() {
   )
   const adminAddress = await upgrades.erc1967.getAdminAddress(contract.address)
 
-  const deployedContract = factory.attach(contract.address).connect(provider)
+  const deployedContract = factory
+    .attach(contract.address)
+    .connect(provider)
+    .connect(deployer)
 
   console.log('OBSSStorage Proxy address:', contract.address)
   console.log('Implementation address:', implementationAddress)
@@ -115,18 +117,30 @@ async function main() {
   const legacyReactions = JSON.parse(
     readFileSync(resolve(cwd(), 'data', 'legacy-reactions.json'), 'utf-8')
   )
-  const legacyPostsBatches = prepareAllBatches(legacyPosts)
-  const legacyReactionsBatches = prepareAllBatches(legacyReactions)
+  const legacyPostsBatches = prepareAllBatches(legacyPosts).slice(0, 5)
+  const legacyReactionsBatches = prepareAllBatches(legacyReactions).slice(0, 5)
 
-  for (let i = 0; i < legacyPosts.length; i++) {
+  for (let i = 0; i < 3; i++) {
     console.log(`Loading data batch ${i}`)
     const tx = await deployedContract.migrateLegacyData(
       legacyPostsBatches[i] as OBSSStorage.LegacyPostStruct[],
+      [] as OBSSStorage.LegacyReactionStruct[]
+    )
+    const receipt = await tx.wait()
+    console.log(
+      `Batch ${i} loaded `,
+      `https://mumbai.polygonscan.com/tx/${receipt.transactionHash}`
+    )
+  }
+  for (let i = 0; i < 3; i++) {
+    console.log(`Loading data batch ${i}`)
+    const tx = await deployedContract.migrateLegacyData(
+      [] as OBSSStorage.LegacyPostStruct[],
       legacyReactionsBatches[i] as OBSSStorage.LegacyReactionStruct[]
     )
     const receipt = await tx.wait()
     console.log(
-      `Batch ${i} minted `,
+      `Batch ${i} loaded `,
       `https://mumbai.polygonscan.com/tx/${receipt.transactionHash}`
     )
   }

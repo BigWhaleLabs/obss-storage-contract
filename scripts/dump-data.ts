@@ -22,7 +22,6 @@ async function main() {
 
     const feedPosts = await contract.getFeedPosts(i, 0, postsInFeed.toNumber())
     console.log(`Feed ID: ${i}`)
-    // console.log(feedPosts)
     feedPosts.forEach(async (post: OBSSStorage.PostStructOutput, j) => {
       legacyPosts.push({
         author: post.author,
