@@ -6,6 +6,8 @@ typechain
 .DS_Store
 dist
 .openzeppelin
+legacy-posts.json
+legacy-reactions.json
 
 # Hardhat files
 cache
