@@ -195,7 +195,7 @@ async function downloadData(
   console.log(`Total feeds count: ${totalFeeds.toNumber()}`)
   const legacyPosts: OBSSStorage.LegacyPostStruct[] = []
   const legacyReactions: OBSSStorage.LegacyReactionStruct[] = []
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < totalFeeds.toNumber(); i++) {
     const postsInFeed = await legacyContract.lastFeedPostIds(i)
     if (postsInFeed.toNumber() === 0) continue
 
@@ -208,14 +208,9 @@ async function downloadData(
     feedPosts.forEach(async (post: OBSSStorage.PostStructOutput, j) => {
       legacyPosts.push({
         post: {
-          author: post.author,
-          metadata: {
-            digest: post.metadata.digest,
-            hashFunction: post.metadata.hashFunction,
-            size: post.metadata.size,
-          },
-          commentsFeedId: 0,
+          ...post,
           timestamp: post.timestamp.toNumber(),
+          commentsFeedId: 0,
         },
         feedId: j,
       })
@@ -228,10 +223,7 @@ async function downloadData(
           post.metadata.digest,
           reactionId
         )
-        if (
-          reaction.reactionOwner !==
-          '0x0000000000000000000000000000000000000000'
-        ) {
+        if (Number(reaction.reactionOwner) !== 0) {
           legacyReactions.push({
             reaction: {
               value: 0,
@@ -250,8 +242,8 @@ async function downloadData(
             },
           })
         }
-      } catch (_) {
-        console.log('err')
+      } catch (e) {
+        console.error(e)
       }
     })
   }
