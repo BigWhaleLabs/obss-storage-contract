@@ -113,15 +113,6 @@ async function main() {
   console.log('Migrating data...')
 
   const { legacyPosts, legacyReactions } = await downloadData(provider)
-
-  // for (const { post, feedId } of legacyPosts) {
-  //   console.log('legacyPosts', Number(feedId), Number(post.commentsFeedId))
-  // }
-
-  // for (const { reaction } of legacyReactions) {
-  //   console.log('legacyReactions', reaction.reactionType, reaction.postId)
-  // }
-
   const legacyPostsBatches = prepareAllBatches(legacyPosts)
   const legacyReactionsBatches = prepareAllBatches(legacyReactions)
 
