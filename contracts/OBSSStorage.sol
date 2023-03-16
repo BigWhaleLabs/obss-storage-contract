@@ -127,7 +127,7 @@ contract OBSSStorage is
     _;
   }
 
-  modifier ifLoadingAllowed() {
+  modifier onlyIfLoadingAllowed() {
     require(!isDataMigrationLocked, "All legacy data already loaded");
     _;
   }
@@ -397,7 +397,7 @@ contract OBSSStorage is
   function migrateLegacyData(
     LegacyPost[] memory legacyPosts,
     LegacyReaction[] memory legacyReactions
-  ) external onlyOwner ifLoadingAllowed {
+  ) external onlyOwner onlyIfLoadingAllowed {
     _addFeedLegacyPostsBatch(legacyPosts);
     _addFeedLegacyReactionsBatch(legacyReactions);
   }
