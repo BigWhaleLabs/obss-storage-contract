@@ -117,7 +117,7 @@ async function main() {
   const legacyReactionsBatches = prepareAllBatches(legacyReactions)
 
   for (let i = 0; i < legacyPostsBatches.length; i++) {
-    console.log(`Loading data batch ${i}/ ${legacyPostsBatches.length}`)
+    console.log(`Loading data batch ${i} / ${legacyPostsBatches.length}`)
     const tx = await deployedContract.migrateLegacyData(
       legacyPostsBatches[i] as OBSSStorage.LegacyPostStruct[],
       [] as OBSSStorage.LegacyReactionStruct[]
