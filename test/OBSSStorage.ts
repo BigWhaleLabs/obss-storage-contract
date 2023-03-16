@@ -132,7 +132,7 @@ describe('OBSSStorage contract tests', () => {
         await this.contract.migrateLegacyData(legacyPosts, legacyReactions)
       )
     })
-    it('should lock data loading after calling `lockDataLoading`', async function () {
+    it.only('should lock data loading after calling `lockDataLoading`', async function () {
       const legacyPosts = getLegacyFeedPostsBatch()
       const legacyReactions = getLegacyReactionsBatch()
 

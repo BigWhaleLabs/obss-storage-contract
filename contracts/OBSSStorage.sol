@@ -79,16 +79,12 @@ contract OBSSStorage is
   }
 
   struct LegacyPost {
-    address author;
+    Post post;
     uint256 feedId;
-    CID metadata;
-    uint256 timestamp;
   }
   struct LegacyReaction {
-    uint256 value;
-    address owner;
-    uint8 reactionType;
-    CID metadata;
+    Reaction reaction;
+    Post post;
   }
 
   /* Events */
@@ -410,12 +406,12 @@ contract OBSSStorage is
     uint256 length = legacyPosts.length;
     for (uint8 i = 0; i < length; ) {
       LegacyPost memory legacyPost = legacyPosts[i];
-      uint256 commentsFeedId = addFeed(legacyPost.metadata);
+      uint256 commentsFeedId = addFeed(legacyPost.post.metadata);
       Post memory post = Post(
-        legacyPost.author,
-        legacyPost.metadata,
+        legacyPost.post.author,
+        legacyPost.post.metadata,
         commentsFeedId,
-        legacyPost.timestamp
+        legacyPost.post.timestamp
       );
       uint256 objectId = lastFeedPostIds[legacyPost.feedId].current();
       posts[commentsFeedId] = post;
@@ -435,19 +431,19 @@ contract OBSSStorage is
     for (uint8 i = 0; i < length; ) {
       LegacyReaction memory legacyReaction = legacyReactions[i];
       Reaction memory reaction = Reaction(
-        legacyReaction.reactionType,
-        legacyReaction.value,
-        legacyReaction.owner
+        legacyReaction.reaction.reactionType,
+        legacyReaction.reaction.value,
+        legacyReaction.reaction.reactionOwner
       );
-      lastReactionIds[legacyReaction.metadata.digest].increment();
-      uint256 reactionId = lastReactionIds[legacyReaction.metadata.digest]
+      lastReactionIds[legacyReaction.post.metadata.digest].increment();
+      uint256 reactionId = lastReactionIds[legacyReaction.post.metadata.digest]
         .current();
-      reactions[legacyReaction.metadata.digest][reactionId] = reaction;
-      reactionsUserToId[legacyReaction.metadata.digest][
-        legacyReaction.owner
+      reactions[legacyReaction.post.metadata.digest][reactionId] = reaction;
+      reactionsUserToId[legacyReaction.post.metadata.digest][
+        legacyReaction.reaction.reactionOwner
       ] = reactionId;
       if (msg.value > 0) {
-        payable(legacyReaction.owner).transfer(msg.value);
+        payable(legacyReaction.reaction.reactionOwner).transfer(msg.value);
       }
       unchecked {
         ++i;

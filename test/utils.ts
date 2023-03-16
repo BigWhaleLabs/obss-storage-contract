@@ -1,5 +1,6 @@
 import { BigNumber } from 'ethers'
 import { IncrementalMerkleTree } from '@zk-kit/incremental-merkle-tree'
+import { OBSSStorage } from 'typechain'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { buildPoseidon } from 'circomlibjs'
 import { randomBytes } from 'ethers/lib/utils'
@@ -117,29 +118,23 @@ export function getFeedPostsBatch(length = 10) {
 }
 
 export function getLegacyFeedPostsBatch(length = 10) {
-  const posts: {
-    author: string
-    feedId: number
-    metadata: {
-      digest: string
-      hashFunction: BigNumber
-      size: BigNumber
-    }
-    timestamp: number
-  }[] = []
+  const posts: OBSSStorage.LegacyPostStruct[] = []
 
   for (let i = 0; i < length; i++) {
     posts.push({
-      feedId: 0,
-      author: `0x000000000000000000000000000000000000000${i}`,
-      metadata: {
-        digest: generateRandomBytes32(),
-        hashFunction: BigNumber.from(0),
-        size: BigNumber.from(0),
+      post: {
+        author: `0x000000000000000000000000000000000000000${i}`,
+        metadata: {
+          digest: generateRandomBytes32(),
+          hashFunction: BigNumber.from(0),
+          size: BigNumber.from(0),
+        },
+        commentsFeedId: 0,
+        timestamp: 1000000 * i,
       },
-      timestamp: 1000000 * i,
+      feedId: 0,
     })
-    posts[i].metadata.digest = generateRandomBytes32()
+    posts[i].post.metadata.digest = generateRandomBytes32()
   }
 
   return posts
@@ -159,26 +154,24 @@ export function getReactionsBatch(length = 10) {
 }
 
 export function getLegacyReactionsBatch(length = 10) {
-  const reactions: {
-    value: number
-    owner: string
-    reactionType: number
-    metadata: {
-      digest: string
-      hashFunction: BigNumber
-      size: BigNumber
-    }
-  }[] = []
+  const reactions: OBSSStorage.LegacyReactionStruct[] = []
 
   for (let i = 0; i < length; i++) {
     reactions.push({
-      reactionType: 1,
-      value: 0,
-      owner: `0x000000000000000000000000000000000000000${i}`,
-      metadata: {
-        digest: generateRandomBytes32(),
-        hashFunction: BigNumber.from(0),
-        size: BigNumber.from(0),
+      reaction: {
+        reactionType: 1,
+        value: 0,
+        reactionOwner: `0x000000000000000000000000000000000000000${i}`,
+      },
+      post: {
+        metadata: {
+          digest: generateRandomBytes32(),
+          hashFunction: BigNumber.from(0),
+          size: BigNumber.from(0),
+        },
+        author: `0x000000000000000000000000000000000000000${i}`,
+        commentsFeedId: 0,
+        timestamp: 1000000 * i,
       },
     })
   }
