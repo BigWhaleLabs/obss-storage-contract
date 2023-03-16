@@ -445,6 +445,13 @@ contract OBSSStorage is
       if (msg.value > 0) {
         payable(legacyReaction.reaction.reactionOwner).transfer(msg.value);
       }
+      emit ReactionAdded(
+        legacyReaction.reaction.reactionOwner,
+        0,
+        legacyReaction.reaction.reactionType,
+        reactionId,
+        0
+      );
       unchecked {
         ++i;
       }
