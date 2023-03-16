@@ -25,7 +25,6 @@
     "coverage": "yarn hardhat compile --force && node --max_old_space_size=6144 node_modules/.bin/hardhat coverage --testfiles 'test/**/*.ts' --show-stack-traces",
     "deploy": "yarn hardhat run --network deploy scripts/deploy.ts",
     "upgrade": "yarn hardhat run --network deploy scripts/upgrade.ts",
-    "dump-data": "yarn hardhat run --network deploy scripts/dump-data.ts",
     "eth-lint": "yarn solhint 'contracts/**/*.sol'",
     "lint": "prettier --check . && eslint --max-warnings 0 --ext ts scripts test && yarn eth-lint",
     "prettify": "prettier --write .",

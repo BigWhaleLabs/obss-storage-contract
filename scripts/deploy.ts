@@ -1,10 +1,8 @@
 import { GSN_MUMBAI_FORWARDER_CONTRACT_ADDRESS } from '@big-whale-labs/constants'
-import { OBSSStorage } from 'typechain'
-import { cwd } from 'process'
+import { JsonRpcProvider } from '@ethersproject/providers'
+import { OBSSStorage, OBSSStorage__factory } from 'typechain'
+import { Signer, utils } from 'ethers'
 import { ethers, run, upgrades } from 'hardhat'
-import { readFileSync } from 'fs'
-import { resolve } from 'path'
-import { utils } from 'ethers'
 import { version } from '../package.json'
 import prompt from 'prompt'
 
@@ -111,16 +109,15 @@ async function main() {
   console.log('Admin address:', adminAddress)
 
   console.log('Migrating data...')
-  const legacyPosts = JSON.parse(
-    readFileSync(resolve(cwd(), 'data', 'legacy-posts.json'), 'utf-8')
+  const { legacyPosts, legacyReactions } = await downloadData(
+    factory,
+    provider,
+    deployer
   )
-  const legacyReactions = JSON.parse(
-    readFileSync(resolve(cwd(), 'data', 'legacy-reactions.json'), 'utf-8')
-  )
-  const legacyPostsBatches = prepareAllBatches(legacyPosts).slice(0, 5)
-  const legacyReactionsBatches = prepareAllBatches(legacyReactions).slice(0, 5)
+  const legacyPostsBatches = prepareAllBatches(legacyPosts)
+  const legacyReactionsBatches = prepareAllBatches(legacyReactions)
 
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < legacyPostsBatches.length; i++) {
     console.log(`Loading data batch ${i}`)
     const tx = await deployedContract.migrateLegacyData(
       legacyPostsBatches[i] as OBSSStorage.LegacyPostStruct[],
@@ -132,7 +129,7 @@ async function main() {
       `https://mumbai.polygonscan.com/tx/${receipt.transactionHash}`
     )
   }
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < legacyReactionsBatches.length; i++) {
     console.log(`Loading data batch ${i}`)
     const tx = await deployedContract.migrateLegacyData(
       [] as OBSSStorage.LegacyPostStruct[],
@@ -179,6 +176,90 @@ async function main() {
       chainName !== 'polygon' ? `${chainName}.` : ''
     }polygonscan.com/address/${contract.address}`
   )
+}
+
+const legacyContractAddress = '0x9e7A15E77e5E4f536b8215aaF778e786005D0f8d'
+
+async function downloadData(
+  factory: OBSSStorage__factory,
+  provider: JsonRpcProvider,
+  signer: Signer
+) {
+  const legacyContract = factory
+    .attach(legacyContractAddress)
+    .connect(provider)
+    .connect(signer)
+
+  console.log(legacyContract.address)
+  const totalFeeds = await legacyContract.lastFeedId()
+  console.log(`Total feeds count: ${totalFeeds.toNumber()}`)
+  const legacyPosts: OBSSStorage.LegacyPostStruct[] = []
+  const legacyReactions: OBSSStorage.LegacyReactionStruct[] = []
+  for (let i = 0; i < 10; i++) {
+    const postsInFeed = await legacyContract.lastFeedPostIds(i)
+    if (postsInFeed.toNumber() === 0) continue
+
+    const feedPosts = await legacyContract.getFeedPosts(
+      i,
+      0,
+      postsInFeed.toNumber()
+    )
+    console.log(`Feed ID: ${i}`)
+    feedPosts.forEach(async (post: OBSSStorage.PostStructOutput, j) => {
+      legacyPosts.push({
+        post: {
+          author: post.author,
+          metadata: {
+            digest: post.metadata.digest,
+            hashFunction: post.metadata.hashFunction,
+            size: post.metadata.size,
+          },
+          commentsFeedId: 0,
+          timestamp: post.timestamp.toNumber(),
+        },
+        feedId: j,
+      })
+      // Collect reactions
+      try {
+        const reactionId = await legacyContract.lastReactionIds(
+          post.metadata.digest
+        )
+        const reaction = await legacyContract.reactions(
+          post.metadata.digest,
+          reactionId
+        )
+        if (
+          reaction.reactionOwner !==
+          '0x0000000000000000000000000000000000000000'
+        ) {
+          legacyReactions.push({
+            reaction: {
+              value: 0,
+              reactionOwner: reaction.reactionOwner,
+              reactionType: reaction.reactionType,
+            },
+            post: {
+              metadata: {
+                digest: post.metadata.digest,
+                hashFunction: post.metadata.hashFunction,
+                size: post.metadata.size,
+              },
+              author: '0x0000000000000000000000000000000000000000',
+              commentsFeedId: 0,
+              timestamp: 0,
+            },
+          })
+        }
+      } catch (_) {
+        console.log('err')
+      }
+    })
+  }
+
+  return {
+    legacyPosts,
+    legacyReactions,
+  }
 }
 
 main().catch((error) => {
