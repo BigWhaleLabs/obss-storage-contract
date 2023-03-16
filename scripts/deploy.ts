@@ -2,6 +2,7 @@ import { BigNumber, Signer, utils } from 'ethers'
 import { GSN_MUMBAI_FORWARDER_CONTRACT_ADDRESS } from '@big-whale-labs/constants'
 import { OBSSStorage__factory as LegacyOBSSStorage__factory } from '@big-whale-labs/obss-storage-contract'
 import { OBSSStorage } from 'typechain'
+import { Provider } from '@ethersproject/providers'
 import { ethers, run, upgrades } from 'hardhat'
 import { version } from '../package.json'
 import prompt from 'prompt'
@@ -59,6 +60,7 @@ async function main() {
   })
 
   const provider = ethers.provider
+
   const { chainId } = await provider.getNetwork()
   const chains = {
     1: 'mainnet',
@@ -109,12 +111,22 @@ async function main() {
   console.log('Admin address:', adminAddress)
 
   console.log('Migrating data...')
-  const { legacyPosts, legacyReactions } = await downloadData(deployer)
+
+  const { legacyPosts, legacyReactions } = await downloadData(provider)
+
+  // for (const { post, feedId } of legacyPosts) {
+  //   console.log('legacyPosts', Number(feedId), Number(post.commentsFeedId))
+  // }
+
+  // for (const { reaction } of legacyReactions) {
+  //   console.log('legacyReactions', reaction.reactionType, reaction.postId)
+  // }
+
   const legacyPostsBatches = prepareAllBatches(legacyPosts)
   const legacyReactionsBatches = prepareAllBatches(legacyReactions)
 
   for (let i = 0; i < legacyPostsBatches.length; i++) {
-    console.log(`Loading data batch ${i}`)
+    console.log(`Loading data batch ${i}/ ${legacyPostsBatches.length}`)
     const tx = await deployedContract.migrateLegacyData(
       legacyPostsBatches[i] as OBSSStorage.LegacyPostStruct[],
       [] as OBSSStorage.LegacyReactionStruct[]
@@ -126,7 +138,7 @@ async function main() {
     )
   }
   for (let i = 0; i < legacyReactionsBatches.length; i++) {
-    console.log(`Loading data batch ${i}`)
+    console.log(`Loading data batch ${i} / ${legacyReactionsBatches.length}`)
     const tx = await deployedContract.migrateLegacyData(
       [] as OBSSStorage.LegacyPostStruct[],
       legacyReactionsBatches[i] as OBSSStorage.LegacyReactionStruct[]
@@ -176,10 +188,10 @@ async function main() {
 
 const legacyContractAddress = '0x9e7A15E77e5E4f536b8215aaF778e786005D0f8d'
 
-async function downloadData(signer: Signer) {
+async function downloadData(provider: Provider) {
   const legacyContract = LegacyOBSSStorage__factory.connect(
     legacyContractAddress,
-    signer
+    provider
   )
 
   console.log(legacyContract.address)
@@ -187,7 +199,16 @@ async function downloadData(signer: Signer) {
   console.log(`Total feeds count: ${totalFeeds.toNumber()}`)
   const legacyPosts: OBSSStorage.LegacyPostStruct[] = []
   const legacyReactions: OBSSStorage.LegacyReactionStruct[] = []
-  for (let i = 0; i < 10; i++) {
+  const userToReaction = new Map<
+    string,
+    {
+      postId: BigNumber
+      reactionType: number
+      value: BigNumber
+      reactionOwner: string
+    }
+  >()
+  for (let i = 0; i < totalFeeds.toNumber(); i++) {
     const postsInFeed = await legacyContract.lastFeedPostIds(i)
     if (postsInFeed.toNumber() === 0) continue
 
@@ -196,6 +217,32 @@ async function downloadData(signer: Signer) {
       0,
       postsInFeed.toNumber()
     )
+
+    const [first] = feedPosts
+
+    if (first) {
+      const maxId = Math.max(
+        ...legacyPosts.map(({ post }) => Number(post.commentsFeedId)),
+        0
+      )
+      for (
+        let prevFeed = maxId;
+        prevFeed < first.commentsFeedId.toNumber();
+        prevFeed += 1
+      ) {
+        const metadata = await legacyContract.feeds(prevFeed)
+        legacyPosts.push({
+          post: {
+            author: '0x0000000000000000000000000000000000000000',
+            metadata,
+            commentsFeedId: BigNumber.from(prevFeed),
+            timestamp: first.timestamp.toNumber(),
+          },
+          feedId: 0,
+        })
+      }
+    }
+
     feedPosts.forEach(async (post: OBSSStorage.PostStructOutput) => {
       legacyPosts.push({
         post: {
@@ -215,15 +262,6 @@ async function downloadData(signer: Signer) {
         const lastReactionId = await legacyContract.lastReactionIds(
           post.metadata.digest
         )
-        const userToReaction = new Map<
-          string,
-          {
-            postId: BigNumber
-            reactionType: number
-            value: BigNumber
-            reactionOwner: string
-          }
-        >()
         for (
           let reactionId = 0;
           reactionId < lastReactionId.toNumber();
@@ -235,8 +273,11 @@ async function downloadData(signer: Signer) {
           )
 
           if (
+            userToReaction.has(
+              `${post.commentsFeedId}-${reaction.reactionOwner}`
+            ) ||
             reaction.reactionOwner ===
-            '0x0000000000000000000000000000000000000000'
+              '0x0000000000000000000000000000000000000000'
           )
             continue
 
@@ -252,25 +293,38 @@ async function downloadData(signer: Signer) {
                 currentReactionId.toNumber()
               )
 
-          userToReaction.set(reaction.reactionOwner, {
-            postId: post.commentsFeedId,
-            ...currentReaction,
-          })
+          const { reactionType, value, reactionOwner } = currentReaction
+
+          userToReaction.set(
+            `${post.commentsFeedId}-${reaction.reactionOwner}`,
+            {
+              postId: post.commentsFeedId,
+              reactionType,
+              value,
+              reactionOwner,
+            }
+          )
         }
-
-        const reactions = Array.from(userToReaction.values()).map(
-          (reaction) => ({ reaction })
-        )
-
-        legacyReactions.push(...reactions)
       } catch (error) {
         console.log(error)
       }
     })
   }
 
+  const reactions = Array.from(userToReaction.values()).map((reaction) => ({
+    reaction,
+  }))
+
+  legacyReactions.push(...reactions)
+
+  const sorted = legacyPosts.sort(
+    (a, b) =>
+      (a.post.commentsFeedId as BigNumber).toNumber() -
+      (b.post.commentsFeedId as BigNumber).toNumber()
+  )
+
   return {
-    legacyPosts,
+    legacyPosts: sorted,
     legacyReactions,
   }
 }
