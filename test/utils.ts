@@ -129,7 +129,7 @@ export function getLegacyFeedPostsBatch(length = 10) {
           hashFunction: BigNumber.from(0),
           size: BigNumber.from(0),
         },
-        commentsFeedId: 0,
+        commentsFeedId: i + 1,
         timestamp: 1000000 * i,
       },
       feedId: 0,
@@ -159,19 +159,10 @@ export function getLegacyReactionsBatch(length = 10) {
   for (let i = 0; i < length; i++) {
     reactions.push({
       reaction: {
+        postId: i + 1,
         reactionType: 1,
         value: 0,
         reactionOwner: `0x000000000000000000000000000000000000000${i}`,
-      },
-      post: {
-        metadata: {
-          digest: generateRandomBytes32(),
-          hashFunction: BigNumber.from(0),
-          size: BigNumber.from(0),
-        },
-        author: `0x000000000000000000000000000000000000000${i}`,
-        commentsFeedId: 0,
-        timestamp: 1000000 * i,
       },
     })
   }
