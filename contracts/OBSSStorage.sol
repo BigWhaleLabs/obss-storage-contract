@@ -38,9 +38,9 @@ contract OBSSStorage is
   mapping(address => Counters.Counter) public lastProfilePostIds;
   mapping(address => CID) public subscriptions;
   // Reactions
-  mapping(bytes32 => mapping(uint256 => Reaction)) public reactions;
-  mapping(bytes32 => Counters.Counter) public lastReactionIds;
-  mapping(bytes32 => mapping(address => uint256)) public reactionsUserToId;
+  mapping(uint256 => mapping(uint256 => Reaction)) public reactions;
+  mapping(uint256 => Counters.Counter) public lastReactionIds;
+  mapping(uint256 => mapping(address => uint256)) public reactionsUserToId;
   bool public isDataMigrationLocked;
 
   // IPFS cid represented in a more efficient way
@@ -58,6 +58,7 @@ contract OBSSStorage is
   }
   // 1 = upvote, 2 = downvote
   struct Reaction {
+    uint256 postId;
     uint8 reactionType;
     uint256 value;
     address reactionOwner;
@@ -84,7 +85,6 @@ contract OBSSStorage is
   }
   struct LegacyReaction {
     Reaction reaction;
-    Post post;
   }
 
   /* Events */
@@ -285,27 +285,28 @@ contract OBSSStorage is
     if (post.author == address(0)) {
       revert("Post not found");
     }
-    uint256 oldReactionId = reactionsUserToId[post.metadata.digest][
+    uint256 oldReactionId = reactionsUserToId[reactionRequest.postId][
       _msgSender()
     ];
     if (
-      reactions[post.metadata.digest][oldReactionId].reactionType ==
+      reactions[reactionRequest.postId][oldReactionId].reactionType ==
       reactionRequest.reactionType
     ) revert("Reaction already added");
     if (oldReactionId > 0) {
-      delete reactions[post.metadata.digest][oldReactionId];
-      delete reactionsUserToId[post.metadata.digest][_msgSender()];
+      delete reactions[reactionRequest.postId][oldReactionId];
+      delete reactionsUserToId[reactionRequest.postId][_msgSender()];
       emit ReactionRemoved(_msgSender(), reactionRequest.postId, oldReactionId);
     }
     Reaction memory reaction = Reaction(
+      reactionRequest.postId,
       reactionRequest.reactionType,
       msg.value,
       _msgSender()
     );
-    lastReactionIds[post.metadata.digest].increment();
-    uint256 reactionId = lastReactionIds[post.metadata.digest].current();
-    reactions[post.metadata.digest][reactionId] = reaction;
-    reactionsUserToId[post.metadata.digest][_msgSender()] = reactionId;
+    lastReactionIds[reactionRequest.postId].increment();
+    uint256 reactionId = lastReactionIds[reactionRequest.postId].current();
+    reactions[reactionRequest.postId][reactionId] = reaction;
+    reactionsUserToId[reactionRequest.postId][_msgSender()] = reactionId;
     if (msg.value > 0) {
       payable(post.author).transfer(msg.value);
     }
@@ -351,12 +352,13 @@ contract OBSSStorage is
     }
     if (
       _msgSender() !=
-      reactions[post.metadata.digest][reactionRequest.reactionId].reactionOwner
+      reactions[reactionRequest.postId][reactionRequest.reactionId]
+        .reactionOwner
     ) {
       revert("You are not the reaction owner");
     }
-    delete reactions[post.metadata.digest][reactionRequest.reactionId];
-    delete reactionsUserToId[post.metadata.digest][_msgSender()];
+    delete reactions[reactionRequest.postId][reactionRequest.reactionId];
+    delete reactionsUserToId[reactionRequest.postId][_msgSender()];
     emit ReactionRemoved(
       _msgSender(),
       reactionRequest.postId,
@@ -431,15 +433,16 @@ contract OBSSStorage is
     for (uint8 i = 0; i < length; ) {
       LegacyReaction memory legacyReaction = legacyReactions[i];
       Reaction memory reaction = Reaction(
+        legacyReaction.reaction.postId,
         legacyReaction.reaction.reactionType,
         legacyReaction.reaction.value,
         legacyReaction.reaction.reactionOwner
       );
-      lastReactionIds[legacyReaction.post.metadata.digest].increment();
-      uint256 reactionId = lastReactionIds[legacyReaction.post.metadata.digest]
+      lastReactionIds[legacyReaction.reaction.postId].increment();
+      uint256 reactionId = lastReactionIds[legacyReaction.reaction.postId]
         .current();
-      reactions[legacyReaction.post.metadata.digest][reactionId] = reaction;
-      reactionsUserToId[legacyReaction.post.metadata.digest][
+      reactions[legacyReaction.reaction.postId][reactionId] = reaction;
+      reactionsUserToId[legacyReaction.reaction.postId][
         legacyReaction.reaction.reactionOwner
       ] = reactionId;
       if (msg.value > 0) {
@@ -447,7 +450,7 @@ contract OBSSStorage is
       }
       emit ReactionAdded(
         legacyReaction.reaction.reactionOwner,
-        0,
+        legacyReaction.reaction.postId,
         legacyReaction.reaction.reactionType,
         reactionId,
         0
@@ -516,12 +519,12 @@ contract OBSSStorage is
     if (post.author == address(0)) {
       revert("Post not found");
     }
-    uint256 reactionsLength = lastReactionIds[post.metadata.digest].current();
+    uint256 reactionsLength = lastReactionIds[postId].current();
     uint256 negativeReactions = 0;
     uint256 positiveReactions = 0;
 
     for (uint256 i = 1; i < reactionsLength + 1; ) {
-      Reaction memory currentReaction = reactions[post.metadata.digest][i];
+      Reaction memory currentReaction = reactions[postId][i];
       if (currentReaction.reactionType == 1) {
         positiveReactions += 1;
       } else if (currentReaction.reactionType == 2) {

@@ -1,7 +1,8 @@
+import { BigNumber, utils } from 'ethers'
 import { GSN_MUMBAI_FORWARDER_CONTRACT_ADDRESS } from '@big-whale-labs/constants'
-import { JsonRpcProvider } from '@ethersproject/providers'
-import { OBSSStorage, OBSSStorage__factory } from 'typechain'
-import { Signer, utils } from 'ethers'
+import { OBSSStorage__factory as LegacyOBSSStorage__factory } from '@big-whale-labs/obss-storage-contract'
+import { OBSSStorage } from 'typechain'
+import { Provider } from '@ethersproject/providers'
 import { ethers, run, upgrades } from 'hardhat'
 import { version } from '../package.json'
 import prompt from 'prompt'
@@ -59,6 +60,7 @@ async function main() {
   })
 
   const provider = ethers.provider
+
   const { chainId } = await provider.getNetwork()
   const chains = {
     1: 'mainnet',
@@ -109,16 +111,13 @@ async function main() {
   console.log('Admin address:', adminAddress)
 
   console.log('Migrating data...')
-  const { legacyPosts, legacyReactions } = await downloadData(
-    factory,
-    provider,
-    deployer
-  )
+
+  const { legacyPosts, legacyReactions } = await downloadData(provider)
   const legacyPostsBatches = prepareAllBatches(legacyPosts)
   const legacyReactionsBatches = prepareAllBatches(legacyReactions)
 
   for (let i = 0; i < legacyPostsBatches.length; i++) {
-    console.log(`Loading data batch ${i}`)
+    console.log(`Loading data batch ${i} / ${legacyPostsBatches.length}`)
     const tx = await deployedContract.migrateLegacyData(
       legacyPostsBatches[i] as OBSSStorage.LegacyPostStruct[],
       [] as OBSSStorage.LegacyReactionStruct[]
@@ -130,7 +129,7 @@ async function main() {
     )
   }
   for (let i = 0; i < legacyReactionsBatches.length; i++) {
-    console.log(`Loading data batch ${i}`)
+    console.log(`Loading data batch ${i} / ${legacyReactionsBatches.length}`)
     const tx = await deployedContract.migrateLegacyData(
       [] as OBSSStorage.LegacyPostStruct[],
       legacyReactionsBatches[i] as OBSSStorage.LegacyReactionStruct[]
@@ -180,21 +179,26 @@ async function main() {
 
 const legacyContractAddress = '0x9e7A15E77e5E4f536b8215aaF778e786005D0f8d'
 
-async function downloadData(
-  factory: OBSSStorage__factory,
-  provider: JsonRpcProvider,
-  signer: Signer
-) {
-  const legacyContract = factory
-    .attach(legacyContractAddress)
-    .connect(provider)
-    .connect(signer)
+async function downloadData(provider: Provider) {
+  const legacyContract = LegacyOBSSStorage__factory.connect(
+    legacyContractAddress,
+    provider
+  )
 
   console.log(legacyContract.address)
   const totalFeeds = await legacyContract.lastFeedId()
   console.log(`Total feeds count: ${totalFeeds.toNumber()}`)
   const legacyPosts: OBSSStorage.LegacyPostStruct[] = []
   const legacyReactions: OBSSStorage.LegacyReactionStruct[] = []
+  const userToReaction = new Map<
+    string,
+    {
+      postId: BigNumber
+      reactionType: number
+      value: BigNumber
+      reactionOwner: string
+    }
+  >()
   for (let i = 0; i < totalFeeds.toNumber(); i++) {
     const postsInFeed = await legacyContract.lastFeedPostIds(i)
     if (postsInFeed.toNumber() === 0) continue
@@ -204,52 +208,114 @@ async function downloadData(
       0,
       postsInFeed.toNumber()
     )
-    console.log(`Feed ID: ${i}`)
-    feedPosts.forEach(async (post: OBSSStorage.PostStructOutput, j) => {
+
+    const [first] = feedPosts
+
+    if (first) {
+      const maxId = Math.max(
+        ...legacyPosts.map(({ post }) => Number(post.commentsFeedId)),
+        0
+      )
+      for (
+        let prevFeed = maxId;
+        prevFeed < first.commentsFeedId.toNumber();
+        prevFeed += 1
+      ) {
+        const metadata = await legacyContract.feeds(prevFeed)
+        legacyPosts.push({
+          post: {
+            author: '0x0000000000000000000000000000000000000000',
+            metadata,
+            commentsFeedId: BigNumber.from(prevFeed),
+            timestamp: first.timestamp.toNumber(),
+          },
+          feedId: 0,
+        })
+      }
+    }
+
+    feedPosts.forEach(async (post: OBSSStorage.PostStructOutput) => {
       legacyPosts.push({
         post: {
-          ...post,
+          author: post.author,
+          metadata: {
+            digest: post.metadata.digest,
+            hashFunction: post.metadata.hashFunction,
+            size: post.metadata.size,
+          },
+          commentsFeedId: post.commentsFeedId,
           timestamp: post.timestamp.toNumber(),
-          commentsFeedId: 0,
         },
-        feedId: j,
+        feedId: i,
       })
       // Collect reactions
       try {
-        const reactionId = await legacyContract.lastReactionIds(
+        const lastReactionId = await legacyContract.lastReactionIds(
           post.metadata.digest
         )
-        const reaction = await legacyContract.reactions(
-          post.metadata.digest,
-          reactionId
-        )
-        if (Number(reaction.reactionOwner) !== 0) {
-          legacyReactions.push({
-            reaction: {
-              value: 0,
-              reactionOwner: reaction.reactionOwner,
-              reactionType: reaction.reactionType,
-            },
-            post: {
-              metadata: {
-                digest: post.metadata.digest,
-                hashFunction: post.metadata.hashFunction,
-                size: post.metadata.size,
-              },
-              author: '0x0000000000000000000000000000000000000000',
-              commentsFeedId: 0,
-              timestamp: 0,
-            },
-          })
+        for (
+          let reactionId = 0;
+          reactionId < lastReactionId.toNumber();
+          reactionId++
+        ) {
+          const reaction = await legacyContract.reactions(
+            post.metadata.digest,
+            reactionId
+          )
+
+          if (
+            userToReaction.has(
+              `${post.commentsFeedId}-${reaction.reactionOwner}`
+            ) ||
+            reaction.reactionOwner ===
+              '0x0000000000000000000000000000000000000000'
+          )
+            continue
+
+          const currentReactionId = await legacyContract.reactionsUserToId(
+            post.metadata.digest,
+            reaction.reactionOwner
+          )
+
+          const currentReaction = currentReactionId.eq(reactionId)
+            ? reaction
+            : await legacyContract.reactions(
+                post.metadata.digest,
+                currentReactionId.toNumber()
+              )
+
+          const { reactionType, value, reactionOwner } = currentReaction
+
+          userToReaction.set(
+            `${post.commentsFeedId}-${reaction.reactionOwner}`,
+            {
+              postId: post.commentsFeedId,
+              reactionType,
+              value,
+              reactionOwner,
+            }
+          )
         }
-      } catch (e) {
-        console.error(e)
+      } catch (error) {
+        console.log(error)
       }
     })
   }
 
+  const reactions = Array.from(userToReaction.values()).map((reaction) => ({
+    reaction,
+  }))
+
+  legacyReactions.push(...reactions)
+
+  const sorted = legacyPosts.sort(
+    (a, b) =>
+      (a.post.commentsFeedId as BigNumber).toNumber() -
+      (b.post.commentsFeedId as BigNumber).toNumber()
+  )
+
   return {
-    legacyPosts,
+    legacyPosts: sorted,
     legacyReactions,
   }
 }
