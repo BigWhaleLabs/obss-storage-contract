@@ -4,15 +4,20 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@opengsn/contracts/src/ERC2771Recipient.sol";
 import "@big-whale-labs/ketl-allow-map-contract/contracts/KetlAllowMap.sol";
-import "@openzeppelin/contracts/utils/Context.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "hardhat/console.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /**
  * @title OBSSStorage
  * @dev This contract is used to store the data of the OBSS contract
  */
-contract OBSSStorage is Initializable, Context, ERC2771Recipient {
+contract OBSSStorage is
+  Initializable,
+  ContextUpgradeable,
+  OwnableUpgradeable,
+  ERC2771Recipient
+{
   using Counters for Counters.Counter;
 
   /* State */
@@ -33,9 +38,10 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
   mapping(address => Counters.Counter) public lastProfilePostIds;
   mapping(address => CID) public subscriptions;
   // Reactions
-  mapping(bytes32 => mapping(uint256 => Reaction)) public reactions;
-  mapping(bytes32 => Counters.Counter) public lastReactionIds;
-  mapping(bytes32 => mapping(address => uint256)) public reactionsUserToId;
+  mapping(uint256 => mapping(uint256 => Reaction)) public reactions;
+  mapping(uint256 => Counters.Counter) public lastReactionIds;
+  mapping(uint256 => mapping(address => uint256)) public reactionsUserToId;
+  bool public isDataMigrationLocked;
 
   // IPFS cid represented in a more efficient way
   struct CID {
@@ -52,6 +58,7 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
   }
   // 1 = upvote, 2 = downvote
   struct Reaction {
+    uint256 postId;
     uint8 reactionType;
     uint256 value;
     address reactionOwner;
@@ -70,6 +77,14 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
   struct PostRequest {
     uint256 feedId;
     CID postMetadata;
+  }
+
+  struct LegacyPost {
+    Post post;
+    uint256 feedId;
+  }
+  struct LegacyReaction {
+    Reaction reaction;
   }
 
   /* Events */
@@ -112,6 +127,11 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
     _;
   }
 
+  modifier onlyIfLoadingAllowed() {
+    require(!isDataMigrationLocked, "All legacy data already loaded");
+    _;
+  }
+
   // Constructor
   function initialize(
     address _forwarder,
@@ -123,6 +143,9 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
     founderAllowMap = KetlAllowMap(_founderAllowMap);
     _setTrustedForwarder(_forwarder);
     version = _version;
+    // Set owner
+    __Ownable_init();
+    isDataMigrationLocked = false;
   }
 
   function addAddressToVCAllowMap(
@@ -262,27 +285,28 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
     if (post.author == address(0)) {
       revert("Post not found");
     }
-    uint256 oldReactionId = reactionsUserToId[post.metadata.digest][
+    uint256 oldReactionId = reactionsUserToId[reactionRequest.postId][
       _msgSender()
     ];
     if (
-      reactions[post.metadata.digest][oldReactionId].reactionType ==
+      reactions[reactionRequest.postId][oldReactionId].reactionType ==
       reactionRequest.reactionType
     ) revert("Reaction already added");
     if (oldReactionId > 0) {
-      delete reactions[post.metadata.digest][oldReactionId];
-      delete reactionsUserToId[post.metadata.digest][_msgSender()];
+      delete reactions[reactionRequest.postId][oldReactionId];
+      delete reactionsUserToId[reactionRequest.postId][_msgSender()];
       emit ReactionRemoved(_msgSender(), reactionRequest.postId, oldReactionId);
     }
     Reaction memory reaction = Reaction(
+      reactionRequest.postId,
       reactionRequest.reactionType,
       msg.value,
       _msgSender()
     );
-    lastReactionIds[post.metadata.digest].increment();
-    uint256 reactionId = lastReactionIds[post.metadata.digest].current();
-    reactions[post.metadata.digest][reactionId] = reaction;
-    reactionsUserToId[post.metadata.digest][_msgSender()] = reactionId;
+    lastReactionIds[reactionRequest.postId].increment();
+    uint256 reactionId = lastReactionIds[reactionRequest.postId].current();
+    reactions[reactionRequest.postId][reactionId] = reaction;
+    reactionsUserToId[reactionRequest.postId][_msgSender()] = reactionId;
     if (msg.value > 0) {
       payable(post.author).transfer(msg.value);
     }
@@ -328,12 +352,13 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
     }
     if (
       _msgSender() !=
-      reactions[post.metadata.digest][reactionRequest.reactionId].reactionOwner
+      reactions[reactionRequest.postId][reactionRequest.reactionId]
+        .reactionOwner
     ) {
       revert("You are not the reaction owner");
     }
-    delete reactions[post.metadata.digest][reactionRequest.reactionId];
-    delete reactionsUserToId[post.metadata.digest][_msgSender()];
+    delete reactions[reactionRequest.postId][reactionRequest.reactionId];
+    delete reactionsUserToId[reactionRequest.postId][_msgSender()];
     emit ReactionRemoved(
       _msgSender(),
       reactionRequest.postId,
@@ -369,6 +394,75 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
     addBatchFeedPosts(batchPosts);
     addBatchReactions(batchReactionsToAdd);
     removeBatchReactions(batchReactionsToRemove);
+  }
+
+  function migrateLegacyData(
+    LegacyPost[] memory legacyPosts,
+    LegacyReaction[] memory legacyReactions
+  ) external onlyOwner onlyIfLoadingAllowed {
+    _addFeedLegacyPostsBatch(legacyPosts);
+    _addFeedLegacyReactionsBatch(legacyReactions);
+  }
+
+  function _addFeedLegacyPostsBatch(LegacyPost[] memory legacyPosts) private {
+    uint256 length = legacyPosts.length;
+    for (uint8 i = 0; i < length; ) {
+      LegacyPost memory legacyPost = legacyPosts[i];
+      uint256 commentsFeedId = addFeed(legacyPost.post.metadata);
+      Post memory post = Post(
+        legacyPost.post.author,
+        legacyPost.post.metadata,
+        commentsFeedId,
+        legacyPost.post.timestamp
+      );
+      uint256 objectId = lastFeedPostIds[legacyPost.feedId].current();
+      posts[commentsFeedId] = post;
+      feedPosts[legacyPost.feedId].push(commentsFeedId);
+      emit FeedPostAdded(legacyPost.feedId, objectId, post);
+      lastFeedPostIds[legacyPost.feedId].increment();
+      unchecked {
+        ++i;
+      }
+    }
+  }
+
+  function _addFeedLegacyReactionsBatch(
+    LegacyReaction[] memory legacyReactions
+  ) private {
+    uint256 length = legacyReactions.length;
+    for (uint8 i = 0; i < length; ) {
+      LegacyReaction memory legacyReaction = legacyReactions[i];
+      Reaction memory reaction = Reaction(
+        legacyReaction.reaction.postId,
+        legacyReaction.reaction.reactionType,
+        legacyReaction.reaction.value,
+        legacyReaction.reaction.reactionOwner
+      );
+      lastReactionIds[legacyReaction.reaction.postId].increment();
+      uint256 reactionId = lastReactionIds[legacyReaction.reaction.postId]
+        .current();
+      reactions[legacyReaction.reaction.postId][reactionId] = reaction;
+      reactionsUserToId[legacyReaction.reaction.postId][
+        legacyReaction.reaction.reactionOwner
+      ] = reactionId;
+      if (msg.value > 0) {
+        payable(legacyReaction.reaction.reactionOwner).transfer(msg.value);
+      }
+      emit ReactionAdded(
+        legacyReaction.reaction.reactionOwner,
+        legacyReaction.reaction.postId,
+        legacyReaction.reaction.reactionType,
+        reactionId,
+        0
+      );
+      unchecked {
+        ++i;
+      }
+    }
+  }
+
+  function lockDataMigration() external onlyOwner {
+    isDataMigrationLocked = true;
   }
 
   /**
@@ -425,12 +519,12 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
     if (post.author == address(0)) {
       revert("Post not found");
     }
-    uint256 reactionsLength = lastReactionIds[post.metadata.digest].current();
+    uint256 reactionsLength = lastReactionIds[postId].current();
     uint256 negativeReactions = 0;
     uint256 positiveReactions = 0;
 
     for (uint256 i = 1; i < reactionsLength + 1; ) {
-      Reaction memory currentReaction = reactions[post.metadata.digest][i];
+      Reaction memory currentReaction = reactions[postId][i];
       if (currentReaction.reactionType == 1) {
         positiveReactions += 1;
       } else if (currentReaction.reactionType == 2) {
@@ -447,7 +541,7 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
   function _msgSender()
     internal
     view
-    override(Context, ERC2771Recipient)
+    override(ContextUpgradeable, ERC2771Recipient)
     returns (address sender)
   {
     sender = ERC2771Recipient._msgSender();
@@ -456,7 +550,7 @@ contract OBSSStorage is Initializable, Context, ERC2771Recipient {
   function _msgData()
     internal
     view
-    override(Context, ERC2771Recipient)
+    override(ContextUpgradeable, ERC2771Recipient)
     returns (bytes calldata ret)
   {
     return ERC2771Recipient._msgData();

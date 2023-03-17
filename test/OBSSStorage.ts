@@ -2,6 +2,8 @@ import {
   MOCK_CID,
   getFakeAllowMapContract,
   getFeedPostsBatch,
+  getLegacyFeedPostsBatch,
+  getLegacyReactionsBatch,
   getReactionsBatch,
   getRemoveReactionsBatch,
   zeroAddress,
@@ -121,6 +123,25 @@ describe('OBSSStorage contract tests', () => {
           removeReactions
         )
       )
+    })
+    it('successfully load the legacy data', async function () {
+      const legacyPosts = getLegacyFeedPostsBatch()
+      const legacyReactions = getLegacyReactionsBatch()
+
+      expect(
+        await this.contract.migrateLegacyData(legacyPosts, legacyReactions)
+      )
+    })
+    it('should lock data loading after calling `lockDataLoading`', async function () {
+      const legacyPosts = getLegacyFeedPostsBatch()
+      const legacyReactions = getLegacyReactionsBatch()
+
+      await this.contract.migrateLegacyData(legacyPosts, legacyReactions)
+      // Lock data loading
+      await this.contract.lockDataMigration()
+      await expect(
+        this.contract.migrateLegacyData(legacyPosts, legacyReactions)
+      ).to.be.revertedWith('All legacy data already loaded')
     })
   })
 })

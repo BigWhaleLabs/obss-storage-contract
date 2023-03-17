@@ -1,5 +1,6 @@
 import { BigNumber } from 'ethers'
 import { IncrementalMerkleTree } from '@zk-kit/incremental-merkle-tree'
+import { OBSSStorage } from 'typechain'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { buildPoseidon } from 'circomlibjs'
 import { randomBytes } from 'ethers/lib/utils'
@@ -116,6 +117,29 @@ export function getFeedPostsBatch(length = 10) {
   return posts
 }
 
+export function getLegacyFeedPostsBatch(length = 10) {
+  const posts: OBSSStorage.LegacyPostStruct[] = []
+
+  for (let i = 0; i < length; i++) {
+    posts.push({
+      post: {
+        author: `0x000000000000000000000000000000000000000${i}`,
+        metadata: {
+          digest: generateRandomBytes32(),
+          hashFunction: BigNumber.from(0),
+          size: BigNumber.from(0),
+        },
+        commentsFeedId: i + 1,
+        timestamp: 1000000 * i,
+      },
+      feedId: 0,
+    })
+    posts[i].post.metadata.digest = generateRandomBytes32()
+  }
+
+  return posts
+}
+
 export function getReactionsBatch(length = 10) {
   const reactions: {
     postId: number
@@ -124,6 +148,23 @@ export function getReactionsBatch(length = 10) {
 
   for (let i = 0; i < length; i++) {
     reactions.push({ postId: i, reactionType: 1 })
+  }
+
+  return reactions
+}
+
+export function getLegacyReactionsBatch(length = 10) {
+  const reactions: OBSSStorage.LegacyReactionStruct[] = []
+
+  for (let i = 0; i < length; i++) {
+    reactions.push({
+      reaction: {
+        postId: i + 1,
+        reactionType: 1,
+        value: 0,
+        reactionOwner: `0x000000000000000000000000000000000000000${i}`,
+      },
+    })
   }
 
   return reactions
