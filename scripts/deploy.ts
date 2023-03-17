@@ -1,4 +1,4 @@
-import { BigNumber, Signer, utils } from 'ethers'
+import { BigNumber, utils } from 'ethers'
 import { GSN_MUMBAI_FORWARDER_CONTRACT_ADDRESS } from '@big-whale-labs/constants'
 import { OBSSStorage__factory as LegacyOBSSStorage__factory } from '@big-whale-labs/obss-storage-contract'
 import { OBSSStorage } from 'typechain'
