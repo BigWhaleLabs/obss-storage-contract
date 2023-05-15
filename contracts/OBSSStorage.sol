@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@opengsn/contracts/src/ERC2771Recipient.sol";
@@ -7,6 +7,7 @@ import "@big-whale-labs/ketl-allow-map-contract/contracts/KetlAllowMap.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "./KetlKarma.sol";
 
 /**
  * @title OBSSStorage
@@ -42,6 +43,8 @@ contract OBSSStorage is
   mapping(uint256 => Counters.Counter) public lastReactionIds;
   mapping(uint256 => mapping(address => uint256)) public reactionsUserToId;
   bool public isDataMigrationLocked;
+  // Karma
+  KetlKarma public karma;
 
   // IPFS cid represented in a more efficient way
   struct CID {
@@ -146,6 +149,8 @@ contract OBSSStorage is
     // Set owner
     __Ownable_init();
     isDataMigrationLocked = false;
+    // Set karma
+    karma = new KetlKarma(address(this));
   }
 
   function addAddressToVCAllowMap(
@@ -309,6 +314,9 @@ contract OBSSStorage is
     reactionsUserToId[reactionRequest.postId][_msgSender()] = reactionId;
     if (msg.value > 0) {
       payable(post.author).transfer(msg.value);
+    }
+    if (reactionRequest.reactionType == 1) {
+      karma.mint(post.author, 1);
     }
     emit ReactionAdded(
       _msgSender(),
