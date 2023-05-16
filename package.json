@@ -79,6 +79,7 @@
   "dependencies": {
     "@big-whale-labs/constants": "^0.1.85",
     "@big-whale-labs/ketl-allow-map-contract": "^0.0.3",
+    "@big-whale-labs/ketl-attestation-token": "^0.0.6",
     "@big-whale-labs/obss-storage-contract": "^0.1.4",
     "@openzeppelin/contracts-upgradeable": "^4.8.3",
     "@openzeppelin/hardhat-upgrades": "^1.26.0",

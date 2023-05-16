@@ -39,22 +39,17 @@ async function main() {
     utils.formatEther(await deployer.getBalance())
   )
 
-  const { forwarder, vcAllowMap, founderAllowMap } = await prompt.get({
+  const { forwarder, ketlAttestation } = await prompt.get({
     properties: {
       forwarder: {
         required: true,
         pattern: regexes.ethereumAddress,
         default: GSN_MUMBAI_FORWARDER_CONTRACT_ADDRESS,
       },
-      vcAllowMap: {
+      ketlAttestation: {
         required: true,
         pattern: regexes.ethereumAddress,
-        default: '0xe8c7754340b9f0efe49dfe0f9a47f8f137f70477',
-      },
-      founderAllowMap: {
-        required: true,
-        pattern: regexes.ethereumAddress,
-        default: '0x91002bd44b9620866693fd8e03438e69e01563ee',
+        default: '0xA2Dc60503Cb061c5Ac09Ba4ED01C0b1a47e50420',
       },
     },
   })
@@ -72,15 +67,14 @@ async function main() {
   } as { [chainId: number]: string }
   const chainName = chains[chainId]
 
-  const constructorArguments = [
-    forwarder,
-    version,
-    vcAllowMap,
-    founderAllowMap,
-  ] as [string, string, string, string]
+  const constructorArguments = [forwarder, version, ketlAttestation] as [
+    string,
+    string,
+    string
+  ]
 
   const contractName = 'OBSSStorage'
-  console.log(`Deploying ${contractName}...`)
+  console.log(`Deploying ${contractName}... (chainName: ${chainName})`)
   const factory = await ethers.getContractFactory(contractName)
   const contract = await upgrades.deployProxy(factory, constructorArguments, {
     initializer: 'initialize',

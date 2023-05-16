@@ -1,6 +1,6 @@
 import {
   MOCK_CID,
-  getFakeAllowMapContract,
+  getFakeKetlAttestationContract,
   getFeedPostsBatch,
   getLegacyFeedPostsBatch,
   getLegacyReactionsBatch,
@@ -17,7 +17,9 @@ describe('OBSSStorage contract tests', () => {
     this.owner = this.accounts[0]
     this.user = this.accounts[1]
     this.factory = await ethers.getContractFactory('OBSSStorage')
-    this.fakeAllowMapContract = await getFakeAllowMapContract(this.owner)
+    this.fakeKetlAttestationContract = await getFakeKetlAttestationContract(
+      this.owner
+    )
   })
 
   describe('Constructor', function () {
@@ -25,12 +27,7 @@ describe('OBSSStorage contract tests', () => {
       const version = 'v0.0.1'
       const contract = await upgrades.deployProxy(
         this.factory,
-        [
-          zeroAddress,
-          version,
-          this.fakeAllowMapContract.address,
-          this.fakeAllowMapContract.address,
-        ],
+        [zeroAddress, version, this.fakeKetlAttestationContract.address],
         {
           initializer: 'initialize',
         }
@@ -43,17 +40,13 @@ describe('OBSSStorage contract tests', () => {
       const version = 'v0.0.1'
       this.contract = await upgrades.deployProxy(
         this.factory,
-        [
-          zeroAddress,
-          version,
-          this.fakeAllowMapContract.address,
-          this.fakeAllowMapContract.address,
-        ],
+        [zeroAddress, version, this.fakeKetlAttestationContract.address],
         {
           initializer: 'initialize',
         }
       )
-      await this.fakeAllowMapContract.mock.isAddressAllowed.returns(true)
+      await this.fakeKetlAttestationContract.mock.lastId.returns(1)
+      await this.fakeKetlAttestationContract.mock.balanceOf.returns(1)
     })
 
     it('should add feed', async function () {

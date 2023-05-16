@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@opengsn/contracts/src/ERC2771Recipient.sol";
-import "@big-whale-labs/ketl-allow-map-contract/contracts/KetlAllowMap.sol";
+import "@big-whale-labs/ketl-attestation-token/contracts/KetlAttestation.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -25,9 +25,8 @@ contract OBSSStorage is
   string public version;
   // Posts
   mapping(uint256 => Post) public posts;
-  // Ketl allow map
-  KetlAllowMap public vcAllowMap;
-  KetlAllowMap public founderAllowMap;
+  // Ketl attestation
+  KetlAttestation public ketlAttestation;
   // Feeds
   CID[] public feeds;
   Counters.Counter public lastFeedId;
@@ -122,12 +121,18 @@ contract OBSSStorage is
 
   // Modifiers
   modifier onlyAllowedAddresses() {
-    require(
-      vcAllowMap.isAddressAllowed(_msgSender()) ||
-        founderAllowMap.isAddressAllowed(_msgSender()),
-      "Address is not allowed"
-    );
+    require(checkIfUserIsAllowed(_msgSender()), "Address is not allowed");
     _;
+  }
+
+  function checkIfUserIsAllowed(address _address) public view returns (bool) {
+    uint256 _lastId = ketlAttestation.lastId();
+    for (uint256 id = 0; id < _lastId; id++) {
+      if (ketlAttestation.balanceOf(_address, id) > 0) {
+        return true;
+      }
+    }
+    return false;
   }
 
   modifier onlyIfLoadingAllowed() {
@@ -139,11 +144,9 @@ contract OBSSStorage is
   function initialize(
     address _forwarder,
     string memory _version,
-    address _vcAllowMap,
-    address _founderAllowMap
+    address _ketlAttestation
   ) public initializer {
-    vcAllowMap = KetlAllowMap(_vcAllowMap);
-    founderAllowMap = KetlAllowMap(_founderAllowMap);
+    ketlAttestation = KetlAttestation(_ketlAttestation);
     _setTrustedForwarder(_forwarder);
     version = _version;
     // Set owner
@@ -151,38 +154,6 @@ contract OBSSStorage is
     isDataMigrationLocked = false;
     // Set karma
     karma = new KetlKarma(address(this));
-  }
-
-  function addAddressToVCAllowMap(
-    address _address,
-    uint[2] memory a,
-    uint[2][2] memory b,
-    uint[2] memory c,
-    uint[2] memory input
-  ) public {
-    vcAllowMap.addAddressToAllowMap(_address, a, b, c, input);
-  }
-
-  function addAddressToFounderAllowMap(
-    address _address,
-    uint[2] memory a,
-    uint[2][2] memory b,
-    uint[2] memory c,
-    uint[2] memory input
-  ) public {
-    founderAllowMap.addAddressToAllowMap(_address, a, b, c, input);
-  }
-
-  function isAddressAllowedInVCAllowMap(
-    address _address
-  ) public view returns (bool) {
-    return vcAllowMap.isAddressAllowed(_address);
-  }
-
-  function isAddressAllowedInFounderAllowMap(
-    address _address
-  ) public view returns (bool) {
-    return founderAllowMap.isAddressAllowed(_address);
   }
 
   /**

@@ -18,24 +18,24 @@ function generateRandomBytes32(): string {
   return `0x${crypto.randomBytes(32).toString('hex')}`
 }
 
-export async function getFakeAllowMapContract(signer: SignerWithAddress) {
+export async function getFakeKetlAttestationContract(
+  signer: SignerWithAddress
+) {
   return await waffle.deployMockContract(signer, [
     {
+      inputs: [],
+      name: 'lastId',
+      outputs: [{ internalType: 'uint256', name: '_value', type: 'uint256' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
       inputs: [
-        {
-          internalType: 'address',
-          name: '_address',
-          type: 'address',
-        },
+        { internalType: 'address', name: 'account', type: 'address' },
+        { internalType: 'uint256', name: 'id', type: 'uint256' },
       ],
-      name: 'isAddressAllowed',
-      outputs: [
-        {
-          internalType: 'bool',
-          name: '',
-          type: 'bool',
-        },
-      ],
+      name: 'balanceOf',
+      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
       stateMutability: 'view',
       type: 'function',
     },
