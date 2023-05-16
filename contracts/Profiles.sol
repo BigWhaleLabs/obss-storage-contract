@@ -59,46 +59,58 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@opengsn/contracts/src/ERC2771Recipient.sol";
-import "./Karma.sol";
-import "./Profiles.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "./superclasses/KetlGuarded.sol";
+import "./models/Post.sol";
 
-/**
- * @title OBSSStorage
- * @dev This contract is used to store the data of the OBSS contract
- */
-contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
+contract Profiles is KetlGuarded {
+  using Counters for Counters.Counter;
+
   // State
-  string public version;
-  Karma public karma;
-  Profiles public profiles;
+  mapping(address => CID) public profiles;
+  mapping(address => Post[]) public profilePosts;
+  mapping(address => Counters.Counter) public lastProfilePostIds;
+  mapping(address => mapping(uint => Post[])) public profileComments;
+  mapping(address => mapping(uint => Counters.Counter))
+    public lastProfileCommentIds;
 
-  // Constructor
+  // Events
+  event ProfileSet(address indexed profile, CID metadata);
+  event ProfilePostAdded(
+    address indexed profile,
+    uint256 indexed postId,
+    Post post
+  );
+  event ProfileCommentAdded(
+    address indexed profile,
+    uint256 indexed postId,
+    uint256 indexed commentId,
+    Post comment
+  );
+
   function initialize(
-    address _forwarder,
-    string memory _version,
-    address _karma,
-    address _profiles
-  ) public initializer {
-    // Call parent initializers
-    __Ownable_init();
-    // Set forwarder for OpenGSN
-    _setTrustedForwarder(_forwarder);
-    // Set version
-    version = _version;
-    // Set sub-contracts
-    karma = Karma(_karma);
-    profiles = Profiles(_profiles);
+    address _allowedCaller,
+    address _token
+  ) public override initializer {
+    KetlGuarded.initialize(_token, _allowedCaller);
   }
 
-  // Profiles
-
-  function setProfile(CID memory profileMetadata) external {
-    profiles.setProfile(_msgSender(), profileMetadata);
+  function setProfile(
+    address sender,
+    CID memory profileMetadata
+  ) external onlyAllowedCaller onlyKetlTokenOwners(sender) {
+    profiles[sender] = profileMetadata;
+    emit ProfileSet(sender, profileMetadata);
   }
 
-  function addProfilePost(CID memory postMetadata) external {
-    profiles.addProfilePost(_msgSender(), postMetadata);
+  function addProfilePost(
+    address sender,
+    CID memory postMetadata
+  ) external onlyAllowedCaller onlyKetlTokenOwners(sender) {
+    Post memory post = Post(sender, postMetadata, block.timestamp);
+    profilePosts[sender].push(post);
+    emit ProfilePostAdded(sender, lastProfilePostIds[sender].current(), post);
+    lastProfilePostIds[sender].increment();
   }
 
   function getProfilePosts(
@@ -106,34 +118,37 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
     uint256 skip,
     uint256 limit
   ) external view returns (Post[] memory) {
-    return profiles.getProfilePosts(profile, skip, limit);
+    uint256 countPosts = lastProfilePostIds[profile].current();
+    if (skip > countPosts) {
+      return new Post[](0);
+    }
+    uint256 length = skip + limit > countPosts - 1 ? countPosts - skip : limit;
+    Post[] memory allPosts = new Post[](length);
+    for (uint256 i = 0; i < length; i++) {
+      Post memory post = profilePosts[profile][skip + i];
+      allPosts[i] = post;
+    }
+    return allPosts;
   }
 
   function addProfileComment(
+    address sender,
     address profile,
     uint256 postId,
     CID memory commentMetadata
-  ) external {
-    profiles.addProfileComment(_msgSender(), profile, postId, commentMetadata);
-  }
-
-  // OpenGSN boilerplate
-
-  function _msgSender()
-    internal
-    view
-    override(ContextUpgradeable, ERC2771Recipient)
-    returns (address sender)
-  {
-    sender = ERC2771Recipient._msgSender();
-  }
-
-  function _msgData()
-    internal
-    view
-    override(ContextUpgradeable, ERC2771Recipient)
-    returns (bytes calldata ret)
-  {
-    return ERC2771Recipient._msgData();
+  ) external onlyAllowedCaller onlyKetlTokenOwners(sender) {
+    require(
+      postId < lastProfilePostIds[profile].current(),
+      "Profile post does not exist"
+    );
+    Post memory post = Post(sender, commentMetadata, block.timestamp);
+    profileComments[profile][postId].push(post);
+    emit ProfileCommentAdded(
+      profile,
+      postId,
+      lastProfileCommentIds[profile][postId].current(),
+      post
+    );
+    lastProfileCommentIds[profile][postId].increment();
   }
 }

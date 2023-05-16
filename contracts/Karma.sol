@@ -59,81 +59,30 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@opengsn/contracts/src/ERC2771Recipient.sol";
-import "./Karma.sol";
-import "./Profiles.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import "./superclasses/KetlGuarded.sol";
 
-/**
- * @title OBSSStorage
- * @dev This contract is used to store the data of the OBSS contract
- */
-contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
-  // State
-  string public version;
-  Karma public karma;
-  Profiles public profiles;
-
-  // Constructor
+contract Karma is ERC20Upgradeable, KetlGuarded {
   function initialize(
-    address _forwarder,
-    string memory _version,
-    address _karma,
-    address _profiles
+    string memory name,
+    string memory symbol,
+    address _allowedCaller
   ) public initializer {
-    // Call parent initializers
-    __Ownable_init();
-    // Set forwarder for OpenGSN
-    _setTrustedForwarder(_forwarder);
-    // Set version
-    version = _version;
-    // Set sub-contracts
-    karma = Karma(_karma);
-    profiles = Profiles(_profiles);
+    __ERC20_init(name, symbol);
+    KetlGuarded.initialize(address(this), _allowedCaller);
   }
 
-  // Profiles
-
-  function setProfile(CID memory profileMetadata) external {
-    profiles.setProfile(_msgSender(), profileMetadata);
+  function mint(address to, uint256 amount) public onlyAllowedCaller {
+    _mint(to, amount);
   }
 
-  function addProfilePost(CID memory postMetadata) external {
-    profiles.addProfilePost(_msgSender(), postMetadata);
-  }
+  function _beforeTokenTransfer(
+    address from,
+    address to,
+    uint256 amount
+  ) internal virtual override {
+    super._beforeTokenTransfer(from, to, amount);
 
-  function getProfilePosts(
-    address profile,
-    uint256 skip,
-    uint256 limit
-  ) external view returns (Post[] memory) {
-    return profiles.getProfilePosts(profile, skip, limit);
-  }
-
-  function addProfileComment(
-    address profile,
-    uint256 postId,
-    CID memory commentMetadata
-  ) external {
-    profiles.addProfileComment(_msgSender(), profile, postId, commentMetadata);
-  }
-
-  // OpenGSN boilerplate
-
-  function _msgSender()
-    internal
-    view
-    override(ContextUpgradeable, ERC2771Recipient)
-    returns (address sender)
-  {
-    sender = ERC2771Recipient._msgSender();
-  }
-
-  function _msgData()
-    internal
-    view
-    override(ContextUpgradeable, ERC2771Recipient)
-    returns (bytes calldata ret)
-  {
-    return ERC2771Recipient._msgData();
+    require(from == address(0), "Karma: transfer not allowed");
   }
 }

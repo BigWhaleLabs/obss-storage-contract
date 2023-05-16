@@ -59,81 +59,40 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@opengsn/contracts/src/ERC2771Recipient.sol";
-import "./Karma.sol";
-import "./Profiles.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "../../node_modules/@big-whale-labs/ketl-allow-map-contract/contracts/KetlAllowMap.sol";
 
-/**
- * @title OBSSStorage
- * @dev This contract is used to store the data of the OBSS contract
- */
-contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
-  // State
-  string public version;
-  Karma public karma;
-  Profiles public profiles;
+contract KetlGuarded is Initializable, OwnableUpgradeable {
+  KetlAllowMap public token;
+  address public allowedCaller;
 
-  // Constructor
   function initialize(
-    address _forwarder,
-    string memory _version,
-    address _karma,
-    address _profiles
-  ) public initializer {
-    // Call parent initializers
+    address _token,
+    address _allowedCaller
+  ) public onlyInitializing {
     __Ownable_init();
-    // Set forwarder for OpenGSN
-    _setTrustedForwarder(_forwarder);
-    // Set version
-    version = _version;
-    // Set sub-contracts
-    karma = Karma(_karma);
-    profiles = Profiles(_profiles);
+    token = KetlAllowMap(_token);
+    allowedCaller = _allowedCaller;
   }
 
-  // Profiles
-
-  function setProfile(CID memory profileMetadata) external {
-    profiles.setProfile(_msgSender(), profileMetadata);
+  function setAllowedCaller(address _allowedCaller) public onlyOwner {
+    allowedCaller = _allowedCaller;
   }
 
-  function addProfilePost(CID memory postMetadata) external {
-    profiles.addProfilePost(_msgSender(), postMetadata);
+  modifier onlyAllowedCaller() {
+    require(
+      msg.sender == allowedCaller,
+      "AllowedCallerChecker: Only allowed caller can call this function"
+    );
+    _;
   }
 
-  function getProfilePosts(
-    address profile,
-    uint256 skip,
-    uint256 limit
-  ) external view returns (Post[] memory) {
-    return profiles.getProfilePosts(profile, skip, limit);
-  }
-
-  function addProfileComment(
-    address profile,
-    uint256 postId,
-    CID memory commentMetadata
-  ) external {
-    profiles.addProfileComment(_msgSender(), profile, postId, commentMetadata);
-  }
-
-  // OpenGSN boilerplate
-
-  function _msgSender()
-    internal
-    view
-    override(ContextUpgradeable, ERC2771Recipient)
-    returns (address sender)
-  {
-    sender = ERC2771Recipient._msgSender();
-  }
-
-  function _msgData()
-    internal
-    view
-    override(ContextUpgradeable, ERC2771Recipient)
-    returns (bytes calldata ret)
-  {
-    return ERC2771Recipient._msgData();
+  modifier onlyKetlTokenOwners(address sender) {
+    require(
+      token.isAddressAllowed(sender),
+      "KetlTokenChecker: sender not allowed"
+    );
+    _;
   }
 }
