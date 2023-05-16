@@ -67,17 +67,26 @@ import "./KetlGuarded.sol";
 contract Posts is KetlGuarded {
   using Counters for Counters.Counter;
 
+  // Structs
+  struct PostAndParticipants {
+    Post post;
+    address[] participants;
+  }
+
   // State
   mapping(uint => Post[]) public posts;
   mapping(uint => Counters.Counter) public lastPostIds;
+  mapping(uint => mapping(uint => address[])) public participants;
+  mapping(uint => mapping(uint => mapping(address => bool)))
+    public participantsMap;
 
   mapping(uint => mapping(uint => Post[])) public comments;
   mapping(uint => mapping(uint => Counters.Counter)) public lastCommentIds;
 
-  mapping(uint => mapping(uint => Reaction[])) public reactions;
-  mapping(uint => mapping(uint => Counters.Counter)) public lastReactionIds;
-  mapping(uint => mapping(uint => mapping(address => Reaction)))
-    public usersToReactions;
+  // mapping(uint => mapping(uint => Reaction[])) public reactions;
+  // mapping(uint => mapping(uint => Counters.Counter)) public lastReactionIds;
+  // mapping(uint => mapping(uint => mapping(address => Reaction)))
+  //   public usersToReactions;
 
   // Events
   event PostAdded(uint indexed feedId, uint indexed postId, Post post);
@@ -87,139 +96,221 @@ contract Posts is KetlGuarded {
     uint indexed commentId,
     Post comment
   );
-  event ReactionAdded(
-    address indexed sender,
-    uint indexed feedId,
-    uint indexed postId,
-    uint8 reactionType,
-    uint reactionId,
-    uint value
-  );
-  event ReactionRemoved(
-    address indexed sender,
-    uint feedId,
-    uint postId,
-    uint reactionId
-  );
+
+  // event ReactionAdded(
+  //   address indexed sender,
+  //   uint indexed feedId,
+  //   uint indexed postId,
+  //   uint8 reactionType,
+  //   uint reactionId,
+  //   uint value
+  // );
+  // event ReactionRemoved(
+  //   address indexed sender,
+  //   uint feedId,
+  //   uint postId,
+  //   uint reactionId
+  // );
+
+  // Posts
 
   function addPost(
     address sender,
-    uint id,
+    uint feedId,
     CID memory postMetadata
   ) internal onlyAllowedCaller onlyKetlTokenOwners(sender) {
-    Post memory post = Post(sender, postMetadata, block.timestamp);
-    posts[id].push(post);
-    emit PostAdded(id, lastPostIds[id].current(), post);
-    lastPostIds[id].increment();
+    // Get current post id
+    uint currentPostId = lastPostIds[feedId].current();
+    // Create the post
+    Post memory post = Post(
+      sender,
+      postMetadata,
+      block.timestamp,
+      currentPostId,
+      currentPostId,
+      0
+    );
+    // Add the post
+    posts[feedId].push(post);
+    // Add the participants
+    participants[feedId][currentPostId].push(sender);
+    participantsMap[feedId][currentPostId][sender] = true;
+    // Emit the event
+    emit PostAdded(feedId, lastPostIds[feedId].current(), post);
+    // Increment current post id
+    lastPostIds[feedId].increment();
   }
 
-  function getPosts(
-    uint id,
+  function getPostsAndParticipants(
+    uint feedId,
     uint skip,
     uint limit
-  ) external view returns (Post[] memory) {
-    uint countPosts = lastPostIds[id].current();
+  ) external view returns (PostAndParticipants[] memory) {
+    // Get the number of posts
+    uint countPosts = lastPostIds[feedId].current();
+    // Check if there are posts to return after skip
     if (skip > countPosts) {
-      return new Post[](0);
+      return new PostAndParticipants[](0);
     }
+    // Get the number of posts to return
     uint length = skip + limit > countPosts - 1 ? countPosts - skip : limit;
-    Post[] memory allPosts = new Post[](length);
+    // Create the array of posts
+    PostAndParticipants[] memory allPosts = new PostAndParticipants[](length);
+    // Fill the array of posts
     for (uint i = 0; i < length; i++) {
-      Post memory post = posts[id][skip + i];
-      allPosts[i] = post;
+      Post memory post = posts[feedId][skip + i];
+      allPosts[i] = PostAndParticipants(post, participants[feedId][skip + i]);
     }
+    // Return the array of posts
     return allPosts;
   }
 
+  // Comments
+
   function addComment(
     address sender,
-    uint id,
+    uint feedId,
     uint postId,
+    uint replyTo,
     CID memory commentMetadata
   ) internal onlyAllowedCaller onlyKetlTokenOwners(sender) {
-    Post memory comment = Post(sender, commentMetadata, block.timestamp);
-    comments[id][postId].push(comment);
-    emit CommentAdded(
-      id,
+    // Fetch parent post
+    Post memory parentPost = posts[feedId][postId];
+    // Check if parent post exists
+    require(parentPost.author != address(0), "Post not found");
+    // Fetch parent comment and check if it exists
+    if (replyTo > 0) {
+      Post memory parentComment = comments[feedId][postId][replyTo];
+      require(parentComment.author != address(0), "Comment not found");
+    }
+    // Increment comment id (so that we start with 1)
+    lastCommentIds[feedId][postId].increment();
+    // Create comment
+    Post memory comment = Post(
+      sender,
+      commentMetadata,
+      block.timestamp,
       postId,
-      lastCommentIds[id][postId].current(),
+      replyTo,
+      0
+    );
+    // Add comment
+    comments[feedId][postId].push(comment);
+    // Add the participant
+    if (!participantsMap[feedId][postId][sender]) {
+      participants[feedId][postId].push(sender);
+      participantsMap[feedId][postId][sender] = true;
+    }
+    // Increment comments count
+    parentPost.numberOfComments++;
+    // Emit the event
+    emit CommentAdded(
+      feedId,
+      postId,
+      lastCommentIds[feedId][postId].current(),
       comment
     );
-    lastCommentIds[id][postId].increment();
   }
 
-  function addReaction(
-    address sender,
+  function getComments(
     uint feedId,
     uint postId,
-    uint8 reactionType
-  ) external payable onlyAllowedCaller onlyKetlTokenOwners(sender) {
-    Post memory post = posts[feedId][postId];
-    require(post.author != address(0), "Post not found");
-    Reaction memory oldReaction = usersToReactions[feedId][postId][sender];
-    require(oldReaction.sender == address(0), "Reaction already exists");
-
-    Reaction memory reaction = Reaction(
-      sender,
-      feedId,
-      postId,
-      reactionType,
-      msg.value
-    );
-    reactions[feedId][postId].push(reaction);
-    usersToReactions[feedId][postId][sender] = reaction;
-    lastReactionIds[feedId][postId].increment();
-
-    if (msg.value > 0) {
-      payable(post.author).transfer(msg.value);
+    uint skip,
+    uint limit
+  ) external view returns (Post[] memory) {
+    // Get the number of comments
+    uint countComments = lastCommentIds[feedId][postId].current();
+    // Check if there are comments to return after skip
+    if (skip > countComments) {
+      return new Post[](0);
     }
-
-    emit ReactionAdded(
-      sender,
-      feedId,
-      postId,
-      reactionType,
-      lastReactionIds[feedId][postId].current(),
-      msg.value
-    );
-  }
-
-  function removeReaction(
-    address sender,
-    uint feedId,
-    uint postId,
-    uint reactionId
-  ) external onlyAllowedCaller onlyKetlTokenOwners(sender) {
-    Post memory post = posts[feedId][postId];
-    require(post.author != address(0), "Post not found");
-    require(
-      reactions[feedId][postId][reactionId].sender == sender,
-      "You are not the owner of this reaction"
-    );
-    delete reactions[feedId][postId][reactionId];
-    delete usersToReactions[feedId][postId][sender];
-    emit ReactionRemoved(sender, feedId, postId, reactionId);
-  }
-
-  function getPostReactions(
-    uint feedId,
-    uint postId
-  ) external view returns (uint, uint) {
-    Post memory post = posts[feedId][postId];
-    require(post.author != address(0), "Post not found");
-    uint reactionsLength = lastReactionIds[feedId][postId].current();
-    uint negativeReactions = 0;
-    uint positiveReactions = 0;
-
-    for (uint i = 0; i < reactionsLength; i++) {
-      Reaction memory currentReaction = reactions[feedId][postId][i];
-      if (currentReaction.reactionType == 1) {
-        positiveReactions += 1;
-      } else if (currentReaction.reactionType == 2) {
-        negativeReactions += 1;
-      }
+    // Get the number of comments to return
+    uint length = skip + limit > countComments - 1
+      ? countComments - skip
+      : limit;
+    // Create the array of comments
+    Post[] memory allComments = new Post[](length);
+    // Fill the array of comments
+    for (uint i = 0; i < length; i++) {
+      allComments[i] = comments[feedId][postId][skip + i];
     }
-
-    return (negativeReactions, positiveReactions);
+    // Return the array of comments
+    return allComments;
   }
+
+  // Reactions
+
+  // function addReaction(
+  //   address sender,
+  //   uint feedId,
+  //   uint postId,
+  //   uint8 reactionType
+  // ) external payable onlyAllowedCaller onlyKetlTokenOwners(sender) {
+  //   Post memory post = posts[feedId][postId];
+  //   require(post.author != address(0), "Post not found");
+  //   Reaction memory oldReaction = usersToReactions[feedId][postId][sender];
+  //   require(oldReaction.sender == address(0), "Reaction already exists");
+
+  //   Reaction memory reaction = Reaction(
+  //     sender,
+  //     feedId,
+  //     postId,
+  //     reactionType,
+  //     msg.value
+  //   );
+  //   reactions[feedId][postId].push(reaction);
+  //   usersToReactions[feedId][postId][sender] = reaction;
+  //   lastReactionIds[feedId][postId].increment();
+
+  //   if (msg.value > 0) {
+  //     payable(post.author).transfer(msg.value);
+  //   }
+
+  //   emit ReactionAdded(
+  //     sender,
+  //     feedId,
+  //     postId,
+  //     reactionType,
+  //     lastReactionIds[feedId][postId].current(),
+  //     msg.value
+  //   );
+  // }
+
+  // function removeReaction(
+  //   address sender,
+  //   uint feedId,
+  //   uint postId,
+  //   uint reactionId
+  // ) external onlyAllowedCaller onlyKetlTokenOwners(sender) {
+  //   Post memory post = posts[feedId][postId];
+  //   require(post.author != address(0), "Post not found");
+  //   require(
+  //     reactions[feedId][postId][reactionId].sender == sender,
+  //     "You are not the owner of this reaction"
+  //   );
+  //   delete reactions[feedId][postId][reactionId];
+  //   delete usersToReactions[feedId][postId][sender];
+  //   emit ReactionRemoved(sender, feedId, postId, reactionId);
+  // }
+
+  // function getPostReactions(
+  //   uint feedId,
+  //   uint postId
+  // ) external view returns (uint, uint) {
+  //   Post memory post = posts[feedId][postId];
+  //   require(post.author != address(0), "Post not found");
+  //   uint reactionsLength = lastReactionIds[feedId][postId].current();
+  //   uint negativeReactions = 0;
+  //   uint positiveReactions = 0;
+
+  //   for (uint i = 0; i < reactionsLength; i++) {
+  //     Reaction memory currentReaction = reactions[feedId][postId][i];
+  //     if (currentReaction.reactionType == 1) {
+  //       positiveReactions += 1;
+  //     } else if (currentReaction.reactionType == 2) {
+  //       negativeReactions += 1;
+  //     }
+  //   }
+  //   return (negativeReactions, positiveReactions);
+  // }
 }

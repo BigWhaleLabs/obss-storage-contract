@@ -96,6 +96,7 @@ contract Feeds is Posts {
     CID memory commentMetadata
   ) public {
     require(feedId < lastFeedId.current(), "Feed does not exist");
+    require(postId < lastPostIds[feedId].current(), "Post does not exist");
     super.addComment(sender, feedId, postId, commentMetadata);
   }
 }
