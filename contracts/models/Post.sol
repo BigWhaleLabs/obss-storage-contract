@@ -6,5 +6,5 @@ import "./CID.sol";
 struct Post {
   address author;
   CID metadata;
-  uint256 timestamp;
+  uint timestamp;
 }

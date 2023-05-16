@@ -72,14 +72,14 @@ contract Karma is ERC20Upgradeable, KetlGuarded {
     KetlGuarded.initialize(address(this), _allowedCaller);
   }
 
-  function mint(address to, uint256 amount) public onlyAllowedCaller {
+  function mint(address to, uint amount) public onlyAllowedCaller {
     _mint(to, amount);
   }
 
   function _beforeTokenTransfer(
     address from,
     address to,
-    uint256 amount
+    uint amount
   ) internal virtual override {
     super._beforeTokenTransfer(from, to, amount);
 

@@ -107,15 +107,16 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
 
   function getProfilePosts(
     address profile,
-    uint256 skip,
-    uint256 limit
+    uint skip,
+    uint limit
   ) external view returns (Post[] memory) {
-    return profiles.getProfilePosts(profile, skip, limit);
+    uint id = uint(keccak256(abi.encodePacked(profile)));
+    return profiles.getPosts(id, skip, limit);
   }
 
   function addProfileComment(
     address profile,
-    uint256 postId,
+    uint postId,
     CID memory commentMetadata
   ) external {
     profiles.addProfileComment(_msgSender(), profile, postId, commentMetadata);
@@ -129,15 +130,15 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
 
   function getFeedPosts(
     uint feedId,
-    uint256 skip,
-    uint256 limit
+    uint skip,
+    uint limit
   ) external view returns (Post[] memory) {
-    return feeds.getFeedPosts(feedId, skip, limit);
+    return feeds.getPosts(feedId, skip, limit);
   }
 
   function addFeedComment(
     uint feedId,
-    uint256 postId,
+    uint postId,
     CID memory commentMetadata
   ) external {
     feeds.addFeedComment(_msgSender(), feedId, postId, commentMetadata);
