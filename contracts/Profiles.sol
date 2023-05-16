@@ -59,12 +59,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/utils/Counters.sol";
 import "./superclasses/Posts.sol";
 
 contract Profiles is Posts {
-  using Counters for Counters.Counter;
-
   // State
   mapping(address => CID) public profiles;
 
@@ -77,20 +74,5 @@ contract Profiles is Posts {
   ) external onlyAllowedCaller onlyKetlTokenOwners(sender) {
     profiles[sender] = profileMetadata;
     emit ProfileSet(sender, profileMetadata);
-  }
-
-  function addProfilePost(address sender, CID memory postMetadata) public {
-    uint id = uint(keccak256(abi.encodePacked(sender)));
-    super.addPost(sender, id, postMetadata);
-  }
-
-  function addProfileComment(
-    address sender,
-    address profile,
-    uint postId,
-    CID memory commentMetadata
-  ) public {
-    uint id = uint(keccak256(abi.encodePacked(profile)));
-    super.addComment(sender, id, postId, commentMetadata);
   }
 }

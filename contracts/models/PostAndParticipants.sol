@@ -59,29 +59,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "./superclasses/Posts.sol";
+import "./Post.sol";
 
-contract Feeds is Posts {
-  using Counters for Counters.Counter;
-
-  // State
-  CID[] public feeds;
-  Counters.Counter public lastFeedId;
-
-  // Events
-  event FeedAdded(uint indexed id, CID metadata);
-
-  // Modifiers
-  modifier onlyAllowedFeedId(uint feedId) override {
-    require(feedId < lastFeedId.current(), "Feed does not exist");
-    _;
-  }
-
-  function addFeed(CID memory feedMetadata) public onlyOwner returns (uint) {
-    uint feedId = lastFeedId.current();
-    feeds.push(feedMetadata);
-    emit FeedAdded(feedId, feedMetadata);
-    lastFeedId.increment();
-    return feedId;
-  }
+struct PostAndParticipants {
+  Post post;
+  address[] participants;
 }

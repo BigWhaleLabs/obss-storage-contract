@@ -64,6 +64,7 @@ struct Reaction {
   address sender;
   uint feedId;
   uint postId;
+  uint commentId;
   uint8 reactionType;
   uint value;
 }

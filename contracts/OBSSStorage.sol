@@ -102,46 +102,74 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
   }
 
   function addProfilePost(CID memory postMetadata) external {
-    profiles.addProfilePost(_msgSender(), postMetadata);
-  }
-
-  function getProfilePosts(
-    address profile,
-    uint skip,
-    uint limit
-  ) external view returns (Post[] memory) {
-    uint id = uint(keccak256(abi.encodePacked(profile)));
-    return profiles.getPosts(id, skip, limit);
+    uint feedId = uint(keccak256(abi.encodePacked(_msgSender())));
+    profiles.addPost(_msgSender(), feedId, postMetadata);
   }
 
   function addProfileComment(
-    address profile,
+    uint feedId,
     uint postId,
+    uint replyTo,
     CID memory commentMetadata
   ) external {
-    profiles.addProfileComment(_msgSender(), profile, postId, commentMetadata);
+    profiles.addComment(_msgSender(), feedId, postId, replyTo, commentMetadata);
+  }
+
+  function addProfileReaction(
+    uint feedId,
+    uint postId,
+    uint commentId,
+    uint8 reactionType
+  ) external payable {
+    profiles.addReaction(_msgSender(), feedId, postId, commentId, reactionType);
+  }
+
+  function removeProfileReaction(
+    uint feedId,
+    uint postId,
+    uint commentId,
+    uint reactionId
+  ) external {
+    profiles.removeReaction(
+      _msgSender(),
+      feedId,
+      postId,
+      commentId,
+      reactionId
+    );
   }
 
   // Feeds
 
   function addFeedPost(uint feedId, CID memory postMetadata) external {
-    feeds.addFeedPost(_msgSender(), feedId, postMetadata);
-  }
-
-  function getFeedPosts(
-    uint feedId,
-    uint skip,
-    uint limit
-  ) external view returns (Post[] memory) {
-    return feeds.getPosts(feedId, skip, limit);
+    feeds.addPost(_msgSender(), feedId, postMetadata);
   }
 
   function addFeedComment(
     uint feedId,
     uint postId,
+    uint replyTo,
     CID memory commentMetadata
   ) external {
-    feeds.addFeedComment(_msgSender(), feedId, postId, commentMetadata);
+    feeds.addComment(_msgSender(), feedId, postId, replyTo, commentMetadata);
+  }
+
+  function addFeedReaction(
+    uint feedId,
+    uint postId,
+    uint commentId,
+    uint8 reactionType
+  ) external payable {
+    feeds.addReaction(_msgSender(), feedId, postId, commentId, reactionType);
+  }
+
+  function removeFeedReaction(
+    uint feedId,
+    uint postId,
+    uint commentId,
+    uint reactionId
+  ) external {
+    feeds.removeReaction(_msgSender(), feedId, postId, commentId, reactionId);
   }
 
   // OpenGSN boilerplate
