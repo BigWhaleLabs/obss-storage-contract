@@ -62,6 +62,7 @@ pragma solidity ^0.8.20;
 import "@opengsn/contracts/src/ERC2771Recipient.sol";
 import "./Karma.sol";
 import "./Profiles.sol";
+import "./Feeds.sol";
 
 /**
  * @title OBSSStorage
@@ -72,13 +73,15 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
   string public version;
   Karma public karma;
   Profiles public profiles;
+  Feeds public feeds;
 
   // Constructor
   function initialize(
     address _forwarder,
     string memory _version,
     address _karma,
-    address _profiles
+    address _profiles,
+    address _feeds
   ) public initializer {
     // Call parent initializers
     __Ownable_init();
@@ -89,6 +92,7 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
     // Set sub-contracts
     karma = Karma(_karma);
     profiles = Profiles(_profiles);
+    feeds = Feeds(_feeds);
   }
 
   // Profiles
@@ -115,6 +119,28 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
     CID memory commentMetadata
   ) external {
     profiles.addProfileComment(_msgSender(), profile, postId, commentMetadata);
+  }
+
+  // Feeds
+
+  function addFeedPost(uint feedId, CID memory postMetadata) external {
+    feeds.addFeedPost(_msgSender(), feedId, postMetadata);
+  }
+
+  function getFeedPosts(
+    uint feedId,
+    uint256 skip,
+    uint256 limit
+  ) external view returns (Post[] memory) {
+    return feeds.getFeedPosts(feedId, skip, limit);
+  }
+
+  function addFeedComment(
+    uint feedId,
+    uint256 postId,
+    CID memory commentMetadata
+  ) external {
+    feeds.addFeedComment(_msgSender(), feedId, postId, commentMetadata);
   }
 
   // OpenGSN boilerplate

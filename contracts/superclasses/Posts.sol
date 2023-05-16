@@ -60,37 +60,70 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "./superclasses/Posts.sol";
+import "../models/Post.sol";
+import "./KetlGuarded.sol";
 
-contract Profiles is Posts {
+contract Posts is KetlGuarded {
   using Counters for Counters.Counter;
 
   // State
-  mapping(address => CID) public profiles;
+  mapping(uint => Post[]) public posts;
+  mapping(uint => Counters.Counter) public lastPostIds;
+  mapping(uint => mapping(uint => Post[])) public comments;
+  mapping(uint => mapping(uint => Counters.Counter)) public lastCommentIds;
 
   // Events
-  event ProfileSet(address indexed profile, CID metadata);
+  event PostAdded(uint indexed feedId, uint indexed postId, Post post);
+  event CommentAdded(
+    uint indexed feedId,
+    uint indexed postId,
+    uint indexed commentId,
+    Post comment
+  );
 
-  function setProfile(
+  function addPost(
     address sender,
-    CID memory profileMetadata
-  ) external onlyAllowedCaller onlyKetlTokenOwners(sender) {
-    profiles[sender] = profileMetadata;
-    emit ProfileSet(sender, profileMetadata);
+    uint id,
+    CID memory postMetadata
+  ) internal onlyAllowedCaller onlyKetlTokenOwners(sender) {
+    Post memory post = Post(sender, postMetadata, block.timestamp);
+    posts[id].push(post);
+    emit PostAdded(id, lastPostIds[id].current(), post);
+    lastPostIds[id].increment();
   }
 
-  function addProfilePost(address sender, CID memory postMetadata) public {
-    uint id = uint(keccak256(abi.encodePacked(sender)));
-    super.addPost(sender, id, postMetadata);
+  function getPosts(
+    uint id,
+    uint skip,
+    uint limit
+  ) external view returns (Post[] memory) {
+    uint countPosts = lastPostIds[id].current();
+    if (skip > countPosts) {
+      return new Post[](0);
+    }
+    uint length = skip + limit > countPosts - 1 ? countPosts - skip : limit;
+    Post[] memory allPosts = new Post[](length);
+    for (uint i = 0; i < length; i++) {
+      Post memory post = posts[id][skip + i];
+      allPosts[i] = post;
+    }
+    return allPosts;
   }
 
-  function addProfileComment(
+  function addComment(
     address sender,
-    address profile,
+    uint id,
     uint postId,
     CID memory commentMetadata
-  ) public {
-    uint id = uint(keccak256(abi.encodePacked(profile)));
-    super.addComment(sender, id, postId, commentMetadata);
+  ) internal onlyAllowedCaller onlyKetlTokenOwners(sender) {
+    Post memory comment = Post(sender, commentMetadata, block.timestamp);
+    comments[id][postId].push(comment);
+    emit CommentAdded(
+      id,
+      postId,
+      lastCommentIds[id][postId].current(),
+      comment
+    );
+    lastCommentIds[id][postId].increment();
   }
 }
