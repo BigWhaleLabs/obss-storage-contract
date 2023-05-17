@@ -61,18 +61,18 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "../../node_modules/@big-whale-labs/ketl-allow-map-contract/contracts/KetlAllowMap.sol";
+import "../../node_modules/@big-whale-labs/ketl-attestation-token/contracts/KetlAttestation.sol";
 
 contract KetlGuarded is Initializable, OwnableUpgradeable {
-  KetlAllowMap public token;
+  KetlAttestation public attestationToken;
   address public allowedCaller;
 
   function initialize(
-    address _token,
+    address _attestationToken,
     address _allowedCaller
   ) public onlyInitializing {
     __Ownable_init();
-    token = KetlAllowMap(_token);
+    attestationToken = KetlAttestation(_attestationToken);
     allowedCaller = _allowedCaller;
   }
 
@@ -89,10 +89,12 @@ contract KetlGuarded is Initializable, OwnableUpgradeable {
   }
 
   modifier onlyKetlTokenOwners(address sender) {
-    require(
-      token.isAddressAllowed(sender),
-      "KetlTokenChecker: sender not allowed"
-    );
-    _;
+    for (uint32 i = 0; i < attestationToken.currentTokenId(); i++) {
+      if (attestationToken.balanceOf(sender, i) > 0) {
+        _;
+        return;
+      }
+    }
+    revert("KetlGuarded: sender not allowed");
   }
 }
