@@ -48,8 +48,11 @@ async function deployContact({
   )
 
   console.log(`${contractName} Proxy address: `, contract.address)
-  console.log('Implementation address: ', contractImplementationAddress)
-  console.log('Admin address: ', contractAdminAddress)
+  console.log(
+    `${contractName} Implementation address: `,
+    contractImplementationAddress
+  )
+  console.log(`${contractName} Admin address: `, contractAdminAddress)
 
   console.log('Wait for 1 minute to make sure blockchain is updated')
   await new Promise((resolve) => setTimeout(resolve, 15 * 1000))
