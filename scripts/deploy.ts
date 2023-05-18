@@ -65,7 +65,7 @@ async function deployContact({
   console.log(`${contractName} deployed and verified!`)
   console.log(`${contractName} contract address: `, contract.address)
   console.log(
-    'Scanner URL:',
+    `${contractName} scanner URL:`,
     `https://${
       chainName === 'polygon' ? '' : `${chainName}.`
     }polygonscan.com/address/${contract.address}`
