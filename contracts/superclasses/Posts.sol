@@ -62,6 +62,9 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "../models/PostAndParticipants.sol";
 import "../models/Reaction.sol";
+import "../models/PostRequest.sol";
+import "../models/CommentRequest.sol";
+import "../models/ReactionRequests.sol";
 import "./KetlGuarded.sol";
 
 contract Posts is KetlGuarded {
@@ -118,20 +121,20 @@ contract Posts is KetlGuarded {
 
   function addPost(
     address sender,
-    uint feedId,
-    CID memory postMetadata
+    PostRequest memory postRequest
   )
     external
     onlyAllowedCaller
     onlyKetlTokenOwners(sender)
-    onlyAllowedFeedId(feedId)
+    onlyAllowedFeedId(postRequest.feedId)
   {
+    uint feedId = postRequest.feedId;
     // Get current post id
     uint currentPostId = lastPostIds[feedId].current();
     // Create the post
     Post memory post = Post(
       sender,
-      postMetadata,
+      postRequest.postMetadata,
       block.timestamp,
       currentPostId,
       currentPostId,
@@ -176,16 +179,16 @@ contract Posts is KetlGuarded {
 
   function addComment(
     address sender,
-    uint feedId,
-    uint postId,
-    uint replyTo,
-    CID memory commentMetadata
+    CommentRequest memory commentRequest
   )
     external
     onlyAllowedCaller
     onlyKetlTokenOwners(sender)
-    onlyAllowedFeedId(feedId)
+    onlyAllowedFeedId(commentRequest.feedId)
   {
+    uint feedId = commentRequest.feedId;
+    uint postId = commentRequest.postId;
+    uint replyTo = commentRequest.replyTo;
     // Fetch parent post
     Post memory parentPost = posts[feedId][postId];
     // Check if parent post exists
@@ -200,7 +203,7 @@ contract Posts is KetlGuarded {
     // Create comment
     Post memory comment = Post(
       sender,
-      commentMetadata,
+      commentRequest.commentMetadata,
       block.timestamp,
       postId,
       replyTo,
@@ -254,17 +257,18 @@ contract Posts is KetlGuarded {
 
   function addReaction(
     address sender,
-    uint feedId,
-    uint postId,
-    uint commentId,
-    uint8 reactionType
+    AddReactionRequest memory reactionRequest
   )
     external
     payable
     onlyAllowedCaller
     onlyKetlTokenOwners(sender)
-    onlyAllowedFeedId(feedId)
+    onlyAllowedFeedId(reactionRequest.feedId)
   {
+    uint feedId = reactionRequest.feedId;
+    uint postId = reactionRequest.postId;
+    uint commentId = reactionRequest.commentId;
+    uint8 reactionType = reactionRequest.reactionType;
     // Fetch post or comment
     Post memory post = commentId == 0
       ? posts[feedId][postId]
@@ -310,16 +314,17 @@ contract Posts is KetlGuarded {
 
   function removeReaction(
     address sender,
-    uint feedId,
-    uint postId,
-    uint commentId,
-    uint reactionId
+    RemoveReactionRequest memory reactionRequest
   )
     external
     onlyAllowedCaller
     onlyKetlTokenOwners(sender)
-    onlyAllowedFeedId(feedId)
+    onlyAllowedFeedId(reactionRequest.feedId)
   {
+    uint feedId = reactionRequest.feedId;
+    uint postId = reactionRequest.postId;
+    uint commentId = reactionRequest.commentId;
+    uint reactionId = reactionRequest.reactionId;
     // Fetch post or comment
     Post memory post = commentId == 0
       ? posts[feedId][postId]

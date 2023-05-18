@@ -1,10 +1,7 @@
 import { BigNumber } from 'ethers'
 import { IncrementalMerkleTree } from '@zk-kit/incremental-merkle-tree'
-import { OBSSStorage } from 'typechain'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { buildPoseidon } from 'circomlibjs'
 import { randomBytes } from 'ethers/lib/utils'
-import { waffle } from 'hardhat'
 import crypto from 'crypto'
 
 export const zeroAddress = '0x0000000000000000000000000000000000000000'
@@ -16,30 +13,6 @@ export const MOCK_CID = {
 
 function generateRandomBytes32(): string {
   return `0x${crypto.randomBytes(32).toString('hex')}`
-}
-
-export async function getFakeAllowMapContract(signer: SignerWithAddress) {
-  return await waffle.deployMockContract(signer, [
-    {
-      inputs: [
-        {
-          internalType: 'address',
-          name: '_address',
-          type: 'address',
-        },
-      ],
-      name: 'isAddressAllowed',
-      outputs: [
-        {
-          internalType: 'bool',
-          name: '',
-          type: 'bool',
-        },
-      ],
-      stateMutability: 'view',
-      type: 'function',
-    },
-  ])
 }
 
 export async function getFakeCommitmentProof() {
@@ -115,70 +88,4 @@ export function getFeedPostsBatch(length = 10) {
   }
 
   return posts
-}
-
-export function getLegacyFeedPostsBatch(length = 10) {
-  const posts: OBSSStorage.LegacyPostStruct[] = []
-
-  for (let i = 0; i < length; i++) {
-    posts.push({
-      post: {
-        author: `0x000000000000000000000000000000000000000${i}`,
-        metadata: {
-          digest: generateRandomBytes32(),
-          hashFunction: BigNumber.from(0),
-          size: BigNumber.from(0),
-        },
-        commentsFeedId: i + 1,
-        timestamp: 1000000 * i,
-      },
-      feedId: 0,
-    })
-    posts[i].post.metadata.digest = generateRandomBytes32()
-  }
-
-  return posts
-}
-
-export function getReactionsBatch(length = 10) {
-  const reactions: {
-    postId: number
-    reactionType: number
-  }[] = []
-
-  for (let i = 0; i < length; i++) {
-    reactions.push({ postId: i, reactionType: 1 })
-  }
-
-  return reactions
-}
-
-export function getLegacyReactionsBatch(length = 10) {
-  const reactions: OBSSStorage.LegacyReactionStruct[] = []
-
-  for (let i = 0; i < length; i++) {
-    reactions.push({
-      reaction: {
-        postId: i + 1,
-        reactionType: 1,
-        value: 0,
-        reactionOwner: `0x000000000000000000000000000000000000000${i}`,
-      },
-    })
-  }
-
-  return reactions
-}
-
-export function getRemoveReactionsBatch(length = 10) {
-  const reactions: {
-    postId: number
-    reactionId: number
-  }[] = []
-
-  for (let i = 0; i < length; i++) {
-    reactions.push({ postId: i, reactionId: 1 })
-  }
-
-  return reactions
 }

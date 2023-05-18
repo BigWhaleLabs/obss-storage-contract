@@ -61,7 +61,7 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "../../node_modules/@big-whale-labs/ketl-attestation-token/contracts/KetlAttestation.sol";
+import "@big-whale-labs/ketl-attestation-token/contracts/KetlAttestation.sol";
 
 contract KetlGuarded is Initializable, OwnableUpgradeable {
   KetlAttestation public attestationToken;
