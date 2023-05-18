@@ -63,7 +63,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "./superclasses/KetlGuarded.sol";
 
 contract Karma is ERC20Upgradeable, KetlGuarded {
-  function initialize(
+  function initializeKarma(
     string memory name,
     string memory symbol,
     address _allowedCaller
