@@ -74,6 +74,7 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
   Karma public karma;
   Profiles public profiles;
   Feeds public feeds;
+  mapping(uint => mapping(uint => mapping(uint => mapping(address => bool)))) karmaGranted;
 
   // Constructor
   function initialize(
@@ -114,6 +115,7 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
     AddReactionRequest memory reactionRequest
   ) external payable {
     profiles.addReaction(_msgSender(), reactionRequest);
+    grantKarma(reactionRequest);
   }
 
   function removeProfileReaction(
@@ -148,13 +150,14 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
 
   function addFeedReaction(
     AddReactionRequest memory reactionRequest
-  ) external payable {
+  ) public payable {
     feeds.addReaction(_msgSender(), reactionRequest);
+    grantKarma(reactionRequest);
   }
 
   function removeFeedReaction(
     RemoveReactionRequest memory reactionRequest
-  ) external {
+  ) public {
     feeds.removeReaction(_msgSender(), reactionRequest);
   }
 
@@ -163,10 +166,10 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
     RemoveReactionRequest[] memory removeReactionRequests
   ) public {
     for (uint i = 0; i < addReactionRequests.length; i++) {
-      feeds.addReaction(_msgSender(), addReactionRequests[i]);
+      addFeedReaction(addReactionRequests[i]);
     }
     for (uint i = 0; i < removeReactionRequests.length; i++) {
-      feeds.removeReaction(_msgSender(), removeReactionRequests[i]);
+      removeFeedReaction(removeReactionRequests[i]);
     }
   }
 
@@ -179,6 +182,21 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
     addBatchFeedPosts(postRequests);
     addBatchFeedComments(commentRequests);
     batchAddRemoveReactions(addReactionRequests, removeReactionRequests);
+  }
+
+  // Karma
+
+  function grantKarma(AddReactionRequest memory reactionRequest) internal {
+    if (
+      !karmaGranted[reactionRequest.feedId][reactionRequest.postId][
+        reactionRequest.commentId
+      ][_msgSender()]
+    ) {
+      karmaGranted[reactionRequest.feedId][reactionRequest.postId][
+        reactionRequest.commentId
+      ][_msgSender()] = true;
+      karma.mint(_msgSender(), 1);
+    }
   }
 
   // OpenGSN boilerplate
