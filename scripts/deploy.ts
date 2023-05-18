@@ -161,8 +161,7 @@ async function main() {
 
   // Feeds
 
-  const feedsConstructorArguments = ['Kekl', 'KEK', deployer.address] as [
-    string,
+  const feedsConstructorArguments = [ketlAttestation, deployer.address] as [
     string,
     string
   ]
