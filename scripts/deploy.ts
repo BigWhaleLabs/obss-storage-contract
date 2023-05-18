@@ -116,7 +116,7 @@ async function main() {
     karmaFactory,
     karmaConstructorArguments,
     {
-      initializer: 'initialize',
+      initializer: 'initializeKarma',
     }
   )
   console.log(
