@@ -60,6 +60,7 @@
 pragma solidity ^0.8.19;
 
 import "@opengsn/contracts/src/ERC2771Recipient.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "./Karma.sol";
 import "./Profiles.sol";
 import "./Feeds.sol";
