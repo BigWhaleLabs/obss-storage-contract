@@ -65,14 +65,17 @@ import "@big-whale-labs/ketl-attestation-token/contracts/KetlAttestation.sol";
 
 contract KetlGuarded is Initializable, OwnableUpgradeable {
   KetlAttestation public attestationToken;
+  uint public ketlTeamTokenId;
   address public allowedCaller;
 
   function initialize(
     address _attestationToken,
+    uint _ketlTeamTokenId,
     address _allowedCaller
   ) public onlyInitializing {
     __Ownable_init();
     attestationToken = KetlAttestation(_attestationToken);
+    ketlTeamTokenId = _ketlTeamTokenId;
     allowedCaller = _allowedCaller;
   }
 

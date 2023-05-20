@@ -72,6 +72,7 @@ contract Posts is KetlGuarded {
 
   // State
   mapping(uint => Post[]) public posts;
+  mapping(uint => mapping(uint => bool)) public pinnedPosts;
   mapping(uint => Counters.Counter) public lastPostIds;
   mapping(uint => mapping(uint => address[])) public participants;
   mapping(uint => mapping(uint => mapping(address => bool)))
@@ -89,6 +90,8 @@ contract Posts is KetlGuarded {
 
   // Events
   event PostAdded(uint indexed feedId, uint indexed postId, Post post);
+  event PostPinned(uint indexed feedId, uint indexed postId);
+  event PostUnpinned(uint indexed feedId, uint indexed postId);
   event CommentAdded(
     uint indexed feedId,
     uint indexed postId,
@@ -114,6 +117,9 @@ contract Posts is KetlGuarded {
 
   // Modifiers
   modifier onlyAllowedFeedId(uint feedId) virtual {
+    _;
+  }
+  modifier onlyElevatedPriveleges(uint feedId, address sender) virtual {
     _;
   }
 
@@ -151,6 +157,27 @@ contract Posts is KetlGuarded {
     lastPostIds[feedId].increment();
   }
 
+  function pinOrUnpinPost(
+    address sender,
+    uint feedId,
+    uint postId,
+    bool pin
+  )
+    public
+    onlyAllowedCaller
+    onlyAllowedFeedId(feedId)
+    onlyKetlTokenOwners(sender)
+    onlyElevatedPriveleges(feedId, sender)
+  {
+    require(postId < lastPostIds[feedId].current(), "Post not found");
+    pinnedPosts[feedId][postId] = pin;
+    if (pin) {
+      emit PostPinned(feedId, postId);
+    } else {
+      emit PostUnpinned(feedId, postId);
+    }
+  }
+
   function getPostsAndParticipants(
     uint feedId,
     uint skip,
@@ -162,14 +189,30 @@ contract Posts is KetlGuarded {
     if (skip > countPosts) {
       return new PostAndParticipants[](0);
     }
+    // Create an temporary array of posts
+    PostAndParticipants[] memory tempPosts = new PostAndParticipants[](
+      countPosts - skip
+    );
+    // Fill the temporary array of posts
+    uint index = 0;
+    for (uint i = 0; i < countPosts - skip; i++) {
+      // Skip pinned posts
+      if (!pinnedPosts[feedId][skip + i]) {
+        Post memory post = posts[feedId][skip + i];
+        tempPosts[index] = PostAndParticipants(
+          post,
+          participants[feedId][skip + i]
+        );
+        index++;
+      }
+    }
     // Get the number of posts to return
-    uint length = skip + limit > countPosts - 1 ? countPosts - skip : limit;
-    // Create the array of posts
+    uint length = index < limit ? index : limit;
+    // Create the final array of posts
     PostAndParticipants[] memory allPosts = new PostAndParticipants[](length);
-    // Fill the array of posts
+    // Copy posts from the temporary array to the final one
     for (uint i = 0; i < length; i++) {
-      Post memory post = posts[feedId][skip + i];
-      allPosts[i] = PostAndParticipants(post, participants[feedId][skip + i]);
+      allPosts[i] = tempPosts[i];
     }
     // Return the array of posts
     return allPosts;

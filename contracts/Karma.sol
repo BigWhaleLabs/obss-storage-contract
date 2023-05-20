@@ -66,10 +66,11 @@ contract Karma is ERC20Upgradeable, KetlGuarded {
   function initialize(
     string memory name,
     string memory symbol,
+    uint _ketlTeamTokenId,
     address _allowedCaller
   ) public initializer {
     __ERC20_init(name, symbol);
-    KetlGuarded.initialize(address(this), _allowedCaller);
+    KetlGuarded.initialize(address(this), _ketlTeamTokenId, _allowedCaller);
   }
 
   function mint(address to, uint amount) public onlyAllowedCaller {
