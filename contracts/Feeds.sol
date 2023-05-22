@@ -76,6 +76,13 @@ contract Feeds is Posts {
     require(feedId < lastFeedId.current(), "Feed does not exist");
     _;
   }
+  modifier onlyElevatedPriveleges(uint feedId, address sender) override {
+    require(
+      attestationToken.balanceOf(sender, ketlTeamTokenId) > 0,
+      "Sender does not have elevated priveleges"
+    );
+    _;
+  }
 
   function addFeed(CID memory feedMetadata) public onlyOwner returns (uint) {
     uint feedId = lastFeedId.current();
