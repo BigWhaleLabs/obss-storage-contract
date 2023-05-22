@@ -88,7 +88,7 @@ async function main() {
     utils.formatEther(await deployer.getBalance())
   )
 
-  const { forwarder, ketlAttestation } = await prompt.get({
+  const { forwarder, ketlAttestation, ketlTeamTokenId } = await prompt.get({
     properties: {
       forwarder: {
         required: true,
@@ -99,6 +99,10 @@ async function main() {
         required: true,
         pattern: ethereumRegex,
         default: '0xc98cD68E59D8C25Fc2FaF1A09Ea8010Ad4D6D52f',
+      },
+      ketlTeamTokenId: {
+        required: true,
+        default: '0',
       },
     },
   })
@@ -116,17 +120,23 @@ async function main() {
   } as { [chainId: number]: string }
   const chainName = chains[chainId]
 
-  const profilesConstructorArguments = [ketlAttestation, deployer.address] as [
-    string,
-    string
-  ]
+  const profilesConstructorArguments = [
+    ketlAttestation,
+    ketlTeamTokenId,
+    deployer.address,
+  ] as [string, string, string]
   const profilesContract = await deployContact({
     constructorArguments: profilesConstructorArguments,
     contractName: 'Profiles',
     chainName,
   })
 
-  const karmaConstructorArguments = ['Kekl', 'KEK', deployer.address]
+  const karmaConstructorArguments = [
+    'Kekl',
+    'KEK',
+    ketlTeamTokenId as string,
+    deployer.address,
+  ]
   const karmaContract = await deployContact({
     constructorArguments: karmaConstructorArguments,
     contractName: 'Karma',
@@ -134,10 +144,11 @@ async function main() {
     initializer: 'initializeKarma',
   })
 
-  const feedsConstructorArguments = [ketlAttestation, deployer.address] as [
-    string,
-    string
-  ]
+  const feedsConstructorArguments = [
+    ketlAttestation,
+    ketlTeamTokenId,
+    deployer.address,
+  ] as [string, string, string]
   const feedsContract = await deployContact({
     constructorArguments: feedsConstructorArguments,
     contractName: 'Feeds',
