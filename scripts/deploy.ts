@@ -98,7 +98,7 @@ async function main() {
       ketlAttestation: {
         required: true,
         pattern: ethereumRegex,
-        default: '0xc98cD68E59D8C25Fc2FaF1A09Ea8010Ad4D6D52f',
+        default: '0xe2eAbeB4dA625449BE1460c54508A6202C314008',
       },
       ketlTeamTokenId: {
         required: true,
