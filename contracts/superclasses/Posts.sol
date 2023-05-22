@@ -181,7 +181,8 @@ contract Posts is KetlGuarded {
   function getPostsAndParticipants(
     uint feedId,
     uint skip,
-    uint limit
+    uint limit,
+    bool pinned
   ) external view returns (PostAndParticipants[] memory) {
     // Get the number of posts
     uint countPosts = lastPostIds[feedId].current();
@@ -196,8 +197,8 @@ contract Posts is KetlGuarded {
     // Fill the temporary array of posts
     uint index = 0;
     for (uint i = 0; i < countPosts - skip; i++) {
-      // Skip pinned posts
-      if (!pinnedPosts[feedId][skip + i]) {
+      // Check if post is pinned or unpinned based on the argument passed
+      if (pinnedPosts[feedId][skip + i] == pinned) {
         Post memory post = posts[feedId][skip + i];
         tempPosts[index] = PostAndParticipants(
           post,
