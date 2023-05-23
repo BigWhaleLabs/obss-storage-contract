@@ -60,6 +60,7 @@
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 import "../models/PostAndParticipants.sol";
 import "../models/Reaction.sol";
 import "../models/PostRequest.sol";
@@ -304,7 +305,7 @@ contract Posts is KetlGuarded {
     lastReactionIds[feedId][postId][commentId].increment();
     // If ether was sent, transfer it to the author
     if (msg.value > 0) {
-      payable(post.author).transfer(msg.value);
+      Address.sendValue(payable(post.author), msg.value);
     }
     // Emit the event
     emit ReactionAdded(
