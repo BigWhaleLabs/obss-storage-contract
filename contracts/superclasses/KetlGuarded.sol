@@ -57,7 +57,7 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -72,7 +72,7 @@ contract KetlGuarded is Initializable, OwnableUpgradeable {
     address _attestationToken,
     uint _ketlTeamTokenId,
     address _allowedCaller
-  ) public onlyInitializing {
+  ) public initializer {
     __Ownable_init();
     attestationToken = KetlAttestation(_attestationToken);
     ketlTeamTokenId = _ketlTeamTokenId;

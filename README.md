@@ -1,18 +1,18 @@
 # OBSS storage contract
 
-The main storage contract. Heavily influenced by the [Big Whale Labs repos](https://github.com/BigWhaleLabs).
+The main storage contract made specially for [Big Whale Labs projects](https://github.com/BigWhaleLabs).
 
 # Deployments
 
 | Contract                    | Address                                      |
 | --------------------------- | -------------------------------------------- |
-| Proxy                       | `0x333c1990fCa4d333DEe0458fd56e1F35463c32a9` |
-| Implementation(OBSSStorage) | `0x60DE8a503083F46f10Ea6d2AEd8864a97263244E` |
-| Proxy Admin                 | `0x50B76E93c14F7C2DBc50608d458Bb5B5fBf3eb8E` |
+| Proxy                       | `0x320E80744Af5C485B9fCFE2102E6E5d4B21D2743` |
+| Implementation(OBSSStorage) | `0xfC79654612F35A2E9660e665aF6214052fDe241A` |
+| Proxy Admin                 | `0x619Ec5c3fc767dFbC6e359Ea520b1ab512d87916` |
 
 ## Usage
 
-1. Clone the repository with `git clone git@github.com:backmeupplz/obss-storage-contract.git`
+1. Clone the repository with `git clone https://github.com/BigWhaleLabs/obss-storage-contract.git`
 2. Install the dependencies with `yarn`
 3. Add environment variables to your `.env` file
 4. Run the scripts below
