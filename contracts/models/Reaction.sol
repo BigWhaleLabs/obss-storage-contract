@@ -59,12 +59,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-// 1 = upvote, 2 = downvote
 struct Reaction {
   address sender;
   uint feedId;
   uint postId;
   uint commentId;
-  uint8 reactionType;
+  uint8 reactionType; // 1 = upvote, 2 = downvote
   uint value;
 }
