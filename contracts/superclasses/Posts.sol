@@ -279,6 +279,12 @@ contract Posts is KetlGuarded {
   ) external view returns (Post[] memory) {
     // Get the number of comments
     uint countComments = lastCommentIds[feedId][postId].current();
+
+    // Return an empty array if there are no comments
+    if (countComments == 0) {
+      return new Post[](0);
+    }
+
     // Check if there are comments to return after skip
     if (skip > countComments) {
       return new Post[](0);
