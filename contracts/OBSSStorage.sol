@@ -75,7 +75,8 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
   Karma public karma;
   Profiles public profiles;
   Feeds public feeds;
-  mapping(uint => mapping(uint => mapping(uint => mapping(address => bool)))) karmaGranted;
+  mapping(uint => mapping(uint => mapping(uint => mapping(address => bool))))
+    public karmaGranted;
 
   // Constructor
   function initialize(

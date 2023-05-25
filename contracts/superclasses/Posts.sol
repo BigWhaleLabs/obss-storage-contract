@@ -178,7 +178,19 @@ contract Posts is KetlGuarded {
   {
     uint lastPostId = lastPostIds[feedId].current();
     // @Todo: remove after debugging
-    require(postId < lastPostId, string(abi.encodePacked("Post not found for feedId: ", Strings.toString(feedId), ", postId: ", Strings.toString(postId), ", lastPostId: ", Strings.toString(lastPostId))));
+    require(
+      postId < lastPostId,
+      string(
+        abi.encodePacked(
+          "Post not found for feedId: ",
+          Strings.toString(feedId),
+          ", postId: ",
+          Strings.toString(postId),
+          ", lastPostId: ",
+          Strings.toString(lastPostId)
+        )
+      )
+    );
     pinnedPosts[feedId][postId] = pin;
     if (pin) {
       emit PostPinned(feedId, postId);
