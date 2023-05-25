@@ -61,6 +61,7 @@ pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 import "../models/PostAndParticipants.sol";
 import "../models/Reaction.sol";
 import "../models/PostRequest.sol";
@@ -176,7 +177,9 @@ contract Posts is KetlGuarded {
     onlyKetlTokenOwners(sender)
     onlyElevatedPriveleges(feedId, sender)
   {
-    require(postId < lastPostIds[feedId].current(), "Post not found");
+    uint lastPostId = lastPostIds[feedId].current();
+    // @Todo: remove after debugging
+    require(postId < lastPostId, string(abi.encodePacked("Post not found for feedId: ", Strings.toString(feedId), ", postId: ", Strings.toString(postId), ", lastPostId: ", Strings.toString(lastPostId))));
     pinnedPosts[feedId][postId] = pin;
     if (pin) {
       emit PostPinned(feedId, postId);
