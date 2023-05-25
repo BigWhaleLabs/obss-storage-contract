@@ -176,7 +176,7 @@ contract Posts is KetlGuarded {
     onlyKetlTokenOwners(sender)
     onlyElevatedPriveleges(feedId, sender)
   {
-    require(postId < lastPostIds[feedId].current(), "Post not found");
+    require(postId > lastPostIds[feedId].current(), "Post not found");
     pinnedPosts[feedId][postId] = pin;
     if (pin) {
       emit PostPinned(feedId, postId);
