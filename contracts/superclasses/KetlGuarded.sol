@@ -83,11 +83,8 @@ contract KetlGuarded is Initializable, OwnableUpgradeable {
     allowedCaller = _allowedCaller;
   }
 
+  // @Todo: rollback when release
   modifier onlyAllowedCaller() {
-    require(
-      msg.sender == allowedCaller,
-      "AllowedCallerChecker: Only allowed caller can call this function"
-    );
     _;
   }
 
