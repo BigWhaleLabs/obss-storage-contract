@@ -59,8 +59,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "./CID.sol";
-
 struct AddReactionRequest {
   uint feedId;
   uint postId;
