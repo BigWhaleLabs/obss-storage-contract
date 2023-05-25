@@ -65,7 +65,7 @@ struct Post {
   address author;
   CID metadata;
   uint timestamp;
-  uint threadId;
+  uint postId;
   uint replyTo;
   uint numberOfComments;
 }
