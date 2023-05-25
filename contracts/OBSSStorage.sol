@@ -138,7 +138,7 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
   }
 
   function pinOrUnpinFeedPost(uint feedId, uint postId, bool pin) public {
-    profiles.pinOrUnpinPost(_msgSender(), feedId, postId, pin);
+    feeds.pinOrUnpinPost(_msgSender(), feedId, postId, pin);
   }
 
   function addBatchFeedPosts(PostRequest[] memory postRequests) public {
