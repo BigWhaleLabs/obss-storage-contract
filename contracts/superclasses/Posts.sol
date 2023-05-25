@@ -103,8 +103,7 @@ contract Posts is KetlGuarded {
     uint indexed feedId,
     uint indexed postId,
     uint indexed commentId,
-    Post comment,
-    address indexed sender
+    Post comment
   );
   event ReactionAdded(
     address indexed sender,
@@ -280,8 +279,7 @@ contract Posts is KetlGuarded {
       feedId,
       postId,
       lastCommentIds[feedId][postId].current(),
-      comment,
-      sender
+      comment
     );
   }
 
