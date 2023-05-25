@@ -90,14 +90,20 @@ contract Posts is KetlGuarded {
     public usersToReactions;
 
   // Events
-  event PostAdded(uint indexed feedId, uint indexed postId, Post post);
+  event PostAdded(
+    uint indexed feedId,
+    uint indexed postId,
+    Post post,
+    address indexed author
+  );
   event PostPinned(uint indexed feedId, uint indexed postId);
   event PostUnpinned(uint indexed feedId, uint indexed postId);
   event CommentAdded(
     uint indexed feedId,
     uint indexed postId,
     uint indexed commentId,
-    Post comment
+    Post comment,
+    address indexed author
   );
   event ReactionAdded(
     address indexed sender,
@@ -153,7 +159,7 @@ contract Posts is KetlGuarded {
     participants[feedId][currentPostId].push(sender);
     participantsMap[feedId][currentPostId][sender] = true;
     // Emit the event
-    emit PostAdded(feedId, lastPostIds[feedId].current(), post);
+    emit PostAdded(feedId, lastPostIds[feedId].current(), post, sender);
     // Increment current post id
     lastPostIds[feedId].increment();
   }
@@ -234,14 +240,14 @@ contract Posts is KetlGuarded {
     uint feedId = commentRequest.feedId;
     uint postId = commentRequest.postId;
     uint replyTo = commentRequest.replyTo;
-    // Fetch parent post
-    Post memory parentPost = posts[feedId][postId];
     // Check if parent post exists
-    require(parentPost.author != address(0), "Post not found");
+    require(posts[feedId][postId].author != address(0), "Post not found");
     // Fetch parent comment and check if it exists
     if (replyTo > 0) {
-      Post memory parentComment = comments[feedId][postId][replyTo];
-      require(parentComment.author != address(0), "Comment not found");
+      require(
+        comments[feedId][postId][replyTo].author != address(0),
+        "Comment not found"
+      );
     }
     // Increment comment id (so that we start with 1)
     lastCommentIds[feedId][postId].increment();
@@ -262,13 +268,17 @@ contract Posts is KetlGuarded {
       participantsMap[feedId][postId][sender] = true;
     }
     // Increment comments count
-    parentPost.numberOfComments++;
+    posts[feedId][postId].numberOfComments++;
+    if (replyTo > 0) {
+      comments[feedId][postId][replyTo].numberOfComments++;
+    }
     // Emit the event
     emit CommentAdded(
       feedId,
       postId,
       lastCommentIds[feedId][postId].current(),
-      comment
+      comment,
+      sender
     );
   }
 
