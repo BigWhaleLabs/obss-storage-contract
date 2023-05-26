@@ -355,8 +355,7 @@ contract Posts is KetlGuarded {
     ];
     // Check if reaction already exists
     require(oldReaction.sender == address(0), "Reaction already exists");
-    // Increment and get lastReactionIds
-    lastReactionIds[feedId][postId][commentId].increment();
+    // Get lastReactionIds
     uint reactionId = lastReactionIds[feedId][postId][commentId].current();
     // Create reaction
     Reaction memory reaction = Reaction(
@@ -372,6 +371,8 @@ contract Posts is KetlGuarded {
     reactions[feedId][postId][commentId][reactionId] = reaction;
     // Remember the reaction for user
     usersToReactions[feedId][postId][commentId][sender] = reaction;
+    // Increment lastReactionId
+    lastReactionIds[feedId][postId][commentId].increment();
     // If ether was sent, transfer it to the sender
     if (msg.value > 0) {
       Address.sendValue(payable(post.sender), msg.value);
