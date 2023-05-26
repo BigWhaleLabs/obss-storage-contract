@@ -176,21 +176,7 @@ contract Posts is KetlGuarded {
     onlyKetlTokenOwners(sender)
     onlyElevatedPriveleges(feedId, sender)
   {
-    uint lastPostId = lastPostIds[feedId].current();
-    // @Todo: remove after debugging
-    require(
-      postId < lastPostId,
-      string(
-        abi.encodePacked(
-          "Post not found for feedId: ",
-          Strings.toString(feedId),
-          ", postId: ",
-          Strings.toString(postId),
-          ", lastPostId: ",
-          Strings.toString(lastPostId)
-        )
-      )
-    );
+    require(postId < lastPostIds[feedId].current(), "Post not found");
     pinnedPosts[feedId][postId] = pin;
     if (pin) {
       emit PostPinned(feedId, postId);
@@ -259,7 +245,7 @@ contract Posts is KetlGuarded {
     // Fetch parent comment and check if it exists
     if (replyTo > 0) {
       require(
-        comments[feedId][postId][replyTo].sender != address(0),
+        comments[feedId][postId][replyTo - 1].sender != address(0),
         "Comment not found"
       );
     }
@@ -284,7 +270,7 @@ contract Posts is KetlGuarded {
     // Increment comments count
     posts[feedId][postId].numberOfComments++;
     if (replyTo > 0) {
-      comments[feedId][postId][replyTo].numberOfComments++;
+      comments[feedId][postId][replyTo - 1].numberOfComments++;
     }
     // Emit the event
     emit CommentAdded(
