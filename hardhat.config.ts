@@ -4,17 +4,21 @@ import '@typechain/hardhat'
 import 'hardhat-gas-reporter'
 import 'solidity-coverage'
 import * as dotenv from 'dotenv'
-import { ETH_RPC as FALLBACK_ETH_RPC } from '@big-whale-labs/constants'
+import {
+  ETH_RPC as FALLBACK_ETH_RPC,
+  GSN_MUMBAI_PAYMASTER_CONTRACT_ADDRESS,
+} from '@big-whale-labs/constants'
 import { HardhatUserConfig } from 'hardhat/config'
 import { cleanEnv, str, testOnly } from 'envalid'
 
 dotenv.config()
 
-const {
+export const {
   CONTRACT_OWNER_PRIVATE_KEY,
   ETH_RPC,
   ETHERSCAN_API_KEY,
   COINMARKETCAP_API_KEY,
+  GSN_PAYMASTER_CONTRACT,
 } = cleanEnv(process.env, {
   CONTRACT_OWNER_PRIVATE_KEY: str({
     devDefault: testOnly(
@@ -24,6 +28,9 @@ const {
   ETH_RPC: str({ default: FALLBACK_ETH_RPC }),
   ETHERSCAN_API_KEY: str({ devDefault: testOnly('') }),
   COINMARKETCAP_API_KEY: str({ devDefault: testOnly('') }),
+  GSN_PAYMASTER_CONTRACT: str({
+    default: GSN_MUMBAI_PAYMASTER_CONTRACT_ADDRESS,
+  }),
 })
 
 const config: HardhatUserConfig = {

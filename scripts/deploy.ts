@@ -1,82 +1,12 @@
 import { GSN_MUMBAI_FORWARDER_CONTRACT_ADDRESS } from '@big-whale-labs/constants'
-import { ethers, run, upgrades } from 'hardhat'
+import { ethers } from 'hardhat'
 import { utils } from 'ethers'
 import { version } from '../package.json'
+import addContractToPaymaster from './addContractToPaymaster'
+import deployContact from './deployContract'
 import prompt from 'prompt'
 
 const ethereumRegex = /^0x[a-fA-F0-9]{40}$/
-
-function parseError(error: unknown) {
-  error instanceof Error ? error.message : error
-}
-
-async function deployContact({
-  constructorArguments,
-  contractName,
-  chainName,
-  initializer = 'initialize',
-}: {
-  constructorArguments: string[]
-  contractName: string
-  chainName: string
-  initializer?: string
-}) {
-  console.log('---------------')
-  console.log(
-    `Deploying ${contractName} with arguments ${constructorArguments}...`
-  )
-  const contractFactory = await ethers.getContractFactory(contractName)
-  const contract = await upgrades.deployProxy(
-    contractFactory,
-    constructorArguments,
-    { initializer }
-  )
-  console.log(
-    'Deploy tx gas price:',
-    utils.formatEther(contract.deployTransaction.gasPrice || 0)
-  )
-  console.log(
-    'Deploy tx gas limit:',
-    utils.formatEther(contract.deployTransaction.gasLimit)
-  )
-  await contract.deployed()
-
-  const contractImplementationAddress =
-    await upgrades.erc1967.getImplementationAddress(contract.address)
-  const contractAdminAddress = await upgrades.erc1967.getAdminAddress(
-    contract.address
-  )
-
-  console.log(`${contractName} Proxy address: `, contract.address)
-  console.log(
-    `${contractName} Implementation address: `,
-    contractImplementationAddress
-  )
-  console.log(`${contractName} Admin address: `, contractAdminAddress)
-
-  console.log('Wait for 1 minute to make sure blockchain is updated')
-  await new Promise((resolve) => setTimeout(resolve, 15 * 1000))
-
-  console.log(`Verifying ${contractName} contract`)
-  try {
-    await run('verify:verify', { address: contractImplementationAddress })
-  } catch (err) {
-    console.error('Error verifying contract on Etherscan:', parseError(err))
-  }
-
-  // Print out the information
-  console.log(`${contractName} deployed and verified!`)
-  console.log(`${contractName} contract address: `, contract.address)
-  console.log(
-    `${contractName} scanner URL:`,
-    `https://${
-      chainName === 'polygon' ? '' : `${chainName}.`
-    }polygonscan.com/address/${contract.address}`
-  )
-  console.log('---------------')
-
-  return contract
-}
 
 async function main() {
   const [deployer] = await ethers.getSigners()
@@ -163,11 +93,12 @@ async function main() {
     profilesContract.address,
     feedsContract.address,
   ] as [string, string, string, string, string]
-  await deployContact({
+  const { address } = await deployContact({
     constructorArguments: obssConstructorArguments,
     contractName: 'OBSSStorage',
     chainName,
   })
+  await addContractToPaymaster(address, deployer)
 }
 
 main().catch((error) => {

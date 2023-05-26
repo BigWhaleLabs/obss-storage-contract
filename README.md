@@ -19,12 +19,13 @@ The main storage contract made specially for [Big Whale Labs projects](https://g
 
 ## Environment variables
 
-| Name                         | Description                                               |
-| ---------------------------- | --------------------------------------------------------- |
-| `ETHERSCAN_API_KEY`          | Etherscan API key                                         |
-| `ETH_RPC`                    | Ethereum RPC URL                                          |
-| `CONTRACT_OWNER_PRIVATE_KEY` | Private key of the contract owner to deploy the contracts |
-| `COINMARKETCAP_API_KEY`      | Coinmarketcap API key                                     |
+| Name                         | Description                                                                                   |
+| ---------------------------- | --------------------------------------------------------------------------------------------- |
+| `ETHERSCAN_API_KEY`          | Etherscan API key                                                                             |
+| `ETH_RPC`                    | Ethereum RPC URL                                                                              |
+| `CONTRACT_OWNER_PRIVATE_KEY` | Private key of the contract owner to deploy the contracts                                     |
+| `COINMARKETCAP_API_KEY`      | Coinmarketcap API key                                                                         |
+| `GSN_PAYMASTER_CONTRACT`     | Paymaster contract to add deployed OBSS into targets automatically, defaults to BWL constants |
 
 Also check out the `.env.sample` file for more information.
 
@@ -32,8 +33,8 @@ Also check out the `.env.sample` file for more information.
 
 - `yarn build` — compiles the contract ts interface to the `typechain` directory
 - `yarn test` — runs the test suite
-- `yarn deploy` — deploys the contract to the network
+- `yarn deploy` — deploys the contract to the network. After deploying go to blockchain scanner address in the console and verify your contract as proxy to use it
 - `yarn eth-lint` — runs the linter for the solidity contract
 - `yarn lint` — runs all the linters
 - `yarn prettify` — prettifies the code in th project
-- `yarn release` — relases the `typechain` directory to NPM
+- `yarn release` — releases the `typechain` directory to NPM
