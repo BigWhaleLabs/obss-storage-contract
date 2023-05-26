@@ -66,5 +66,6 @@ struct Reaction {
   uint postId;
   uint commentId;
   uint8 reactionType;
+  uint reactionId;
   uint value;
 }

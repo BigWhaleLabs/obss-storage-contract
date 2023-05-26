@@ -83,7 +83,7 @@ contract Posts is KetlGuarded {
   mapping(uint => mapping(uint => Post[])) public comments;
   mapping(uint => mapping(uint => Counters.Counter)) public lastCommentIds;
 
-  mapping(uint => mapping(uint => mapping(uint => Reaction[])))
+  mapping(uint => mapping(uint => mapping(uint => mapping(uint => Reaction))))
     public reactions;
   mapping(uint => mapping(uint => mapping(uint => Counters.Counter)))
     public lastReactionIds;
@@ -355,6 +355,9 @@ contract Posts is KetlGuarded {
     ];
     // Check if reaction already exists
     require(oldReaction.sender == address(0), "Reaction already exists");
+    // Increment and get lastReactionIds
+    lastReactionIds[feedId][postId][commentId].increment();
+    uint reactionId = lastReactionIds[feedId][postId][commentId].current();
     // Create reaction
     Reaction memory reaction = Reaction(
       sender,
@@ -362,14 +365,13 @@ contract Posts is KetlGuarded {
       postId,
       commentId,
       reactionType,
+      reactionId,
       msg.value
     );
     // Add reaction
-    reactions[feedId][postId][commentId].push(reaction);
+    reactions[feedId][postId][commentId][reactionId] = reaction;
     // Remember the reaction for user
     usersToReactions[feedId][postId][commentId][sender] = reaction;
-    // Increment reaction id
-    lastReactionIds[feedId][postId][commentId].increment();
     // If ether was sent, transfer it to the sender
     if (msg.value > 0) {
       Address.sendValue(payable(post.sender), msg.value);
@@ -381,7 +383,7 @@ contract Posts is KetlGuarded {
       postId,
       commentId,
       reactionType,
-      lastReactionIds[feedId][postId][commentId].current(),
+      reactionId,
       msg.value
     );
   }
