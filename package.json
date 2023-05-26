@@ -1,6 +1,6 @@
 {
   "name": "@big-whale-labs/obss-storage-contract",
-  "version": "0.2.6-2",
+  "version": "0.2.7-0",
   "description": "Storage contract for OBSS",
   "repository": {
     "type": "git",
