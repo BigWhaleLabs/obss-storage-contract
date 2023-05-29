@@ -2,7 +2,8 @@ import { GSN_MUMBAI_FORWARDER_CONTRACT_ADDRESS } from '@big-whale-labs/constants
 import { ethers } from 'hardhat'
 import { utils } from 'ethers'
 import { version } from '../package.json'
-import addContractToPaymaster from './addContractToPaymaster'
+import addBasicFeeds from './helpers/addBasicFeeds'
+import addContractToPaymaster from './helpers/addContractToPaymaster'
 import deployContact from './deployContract'
 import prompt from 'prompt'
 
@@ -18,7 +19,13 @@ async function main() {
     utils.formatEther(await deployer.getBalance())
   )
 
-  const { forwarder, ketlAttestation, ketlTeamTokenId } = await prompt.get({
+  const {
+    forwarder,
+    ketlAttestation,
+    ketlTeamTokenId,
+    shouldAddBasicFeeds,
+    shouldAddObssToPaymasterTargets,
+  } = await prompt.get({
     properties: {
       forwarder: {
         required: true,
@@ -32,7 +39,18 @@ async function main() {
       },
       ketlTeamTokenId: {
         required: true,
+        type: 'number',
         default: '0',
+      },
+      shouldAddObssToPaymasterTargets: {
+        type: 'boolean',
+        required: true,
+        default: true,
+      },
+      shouldAddBasicFeeds: {
+        type: 'boolean',
+        required: true,
+        default: true,
       },
     },
   })
@@ -84,8 +102,8 @@ async function main() {
     contractName: 'Feeds',
     chainName,
   })
+  if (shouldAddBasicFeeds) await addBasicFeeds(feedsContract.address, deployer)
 
-  // OBSSStorage
   const obssConstructorArguments = [
     forwarder,
     version,
@@ -93,12 +111,13 @@ async function main() {
     profilesContract.address,
     feedsContract.address,
   ] as [string, string, string, string, string]
-  const { address } = await deployContact({
+  const obss = await deployContact({
     constructorArguments: obssConstructorArguments,
     contractName: 'OBSSStorage',
     chainName,
   })
-  await addContractToPaymaster(address, deployer)
+  if (shouldAddObssToPaymasterTargets)
+    await addContractToPaymaster(obss.address, deployer)
 }
 
 main().catch((error) => {
