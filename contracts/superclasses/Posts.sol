@@ -340,7 +340,16 @@ contract Posts is KetlGuarded {
       sender
     ];
     // Check if reaction already exists
-    require(oldReaction.sender == address(0), "Reaction already exists");
+    require(
+      oldReaction.reactionType != reactionType,
+      "Reaction of this type already exists"
+    );
+    if (oldReaction.reactionType != 0) {
+      this.removeReaction(
+        sender,
+        RemoveReactionRequest(feedId, postId, commentId, reactionType)
+      );
+    }
     // Get lastReactionIds
     uint reactionId = lastReactionIds[feedId][postId][commentId].current();
     // Create reaction
