@@ -423,7 +423,7 @@ contract Posts is KetlGuarded {
     // Fetch post or comment
     Post memory post = commentId == 0
       ? posts[feedId][postId]
-      : comments[feedId][postId][commentId];
+      : comments[feedId][postId][commentId - 1];
     // Check if post or comment exists
     require(post.sender != address(0), "Post or comment not found");
     // Get the number of reactions
