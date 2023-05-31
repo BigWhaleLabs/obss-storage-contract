@@ -347,7 +347,7 @@ contract Posts is KetlGuarded {
     if (oldReaction.reactionType != 0) {
       this.removeReaction(
         sender,
-        RemoveReactionRequest(feedId, postId, commentId, reactionType)
+        RemoveReactionRequest(feedId, postId, commentId, oldReaction.reactionId)
       );
     }
     // Get lastReactionIds
