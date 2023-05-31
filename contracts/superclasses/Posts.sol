@@ -332,7 +332,7 @@ contract Posts is KetlGuarded {
     // Fetch post or comment
     Post memory post = commentId == 0
       ? posts[feedId][postId]
-      : comments[feedId][postId][commentId - 1];
+      : comments[feedId][postId][commentId - 1]; // -1 because we're reading array
     // Check if post or comment exists
     require(post.sender != address(0), "Post or comment not found");
     // Get old reaction if it exists
@@ -400,7 +400,7 @@ contract Posts is KetlGuarded {
     // Fetch post or comment
     Post memory post = commentId == 0
       ? posts[feedId][postId]
-      : comments[feedId][postId][commentId - 1];
+      : comments[feedId][postId][commentId - 1]; // -1 because we're reading array
     // Check if post or comment exists
     require(post.sender != address(0), "Post or comment not found");
     // Check if sent by the owner
@@ -423,7 +423,7 @@ contract Posts is KetlGuarded {
     // Fetch post or comment
     Post memory post = commentId == 0
       ? posts[feedId][postId]
-      : comments[feedId][postId][commentId - 1];
+      : comments[feedId][postId][commentId - 1]; // -1 because we're reading array
     // Check if post or comment exists
     require(post.sender != address(0), "Post or comment not found");
     // Get the number of reactions
