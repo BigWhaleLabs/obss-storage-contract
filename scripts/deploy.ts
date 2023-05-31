@@ -12,8 +12,22 @@ const ethereumRegex = /^0x[a-fA-F0-9]{40}$/
 async function main() {
   const [deployer] = await ethers.getSigners()
 
+  const provider = ethers.provider
+
+  const { chainId } = await provider.getNetwork()
+  const chains = {
+    1: 'mainnet',
+    3: 'ropsten',
+    4: 'rinkeby',
+    5: 'goerli',
+    137: 'polygon',
+    80001: 'mumbai',
+  } as { [chainId: number]: string }
+  const chainName = chains[chainId]
+
   // Deploy the contract
   console.log('Deploying contracts with the account:', deployer.address)
+  console.log('Using network:', chainName)
   console.log(
     'Account balance:',
     utils.formatEther(await deployer.getBalance())
@@ -54,19 +68,6 @@ async function main() {
       },
     },
   })
-
-  const provider = ethers.provider
-
-  const { chainId } = await provider.getNetwork()
-  const chains = {
-    1: 'mainnet',
-    3: 'ropsten',
-    4: 'rinkeby',
-    5: 'goerli',
-    137: 'polygon',
-    80001: 'mumbai',
-  } as { [chainId: number]: string }
-  const chainName = chains[chainId]
 
   const profilesConstructorArguments = [
     ketlAttestation,
