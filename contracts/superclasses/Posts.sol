@@ -344,7 +344,7 @@ contract Posts is KetlGuarded {
       "Reaction of this type already exists"
     );
     if (oldReaction.reactionType != 0) {
-      this.removeReaction(
+      removeReaction(
         sender,
         RemoveReactionRequest(feedId, postId, commentId, oldReaction.reactionId)
       );
@@ -387,7 +387,7 @@ contract Posts is KetlGuarded {
     address sender,
     RemoveReactionRequest memory reactionRequest
   )
-    external
+    public
     onlyAllowedCaller
     onlyKetlTokenOwners(sender)
     onlyAllowedFeedId(reactionRequest.feedId)
