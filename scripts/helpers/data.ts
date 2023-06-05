@@ -2,7 +2,7 @@ import { CIDStruct } from '../../typechain/contracts/Feeds'
 
 const hashAndSize = { hashFunction: 18, size: 32 }
 
-const basicFeeds: CIDStruct[] = [
+export default [
   {
     // t/devFeed
     digest:
@@ -21,6 +21,4 @@ const basicFeeds: CIDStruct[] = [
       '0x0b071ef9c2bb401453036d9c96debd2c9478ec185f2a903edaf5afff2ae791db',
     ...hashAndSize,
   },
-]
-
-export default basicFeeds
+] as CIDStruct[]

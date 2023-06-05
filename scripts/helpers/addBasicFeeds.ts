@@ -3,10 +3,7 @@ import { Signer } from 'ethers'
 import basicFeeds from './data'
 import parseError from './parseError'
 
-export default async function addBasicFeeds(
-  contractAddress: string,
-  signer: Signer
-) {
+export default async function (contractAddress: string, signer: Signer) {
   try {
     console.log('Adding basic feeds')
     const contract = Feeds__factory.connect(contractAddress, signer)

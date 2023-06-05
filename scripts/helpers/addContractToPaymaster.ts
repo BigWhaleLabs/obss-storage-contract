@@ -3,10 +3,7 @@ import { GSN_PAYMASTER_CONTRACT } from '../../hardhat.config'
 import { Signer } from 'ethers'
 import parseError from './parseError'
 
-export default async function addContractToPaymaster(
-  contractAddress: string,
-  signer: Signer
-) {
+export default async function (contractAddress: string, signer: Signer) {
   try {
     console.log(
       `Adding ${contractAddress} to ${GSN_PAYMASTER_CONTRACT} paymaster targets`

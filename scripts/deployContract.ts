@@ -2,7 +2,7 @@ import { ethers, run, upgrades } from 'hardhat'
 import { utils } from 'ethers'
 import parseError from './helpers/parseError'
 
-export default async function deployContact({
+export default async function ({
   constructorArguments,
   contractName,
   chainName,
