@@ -270,9 +270,6 @@ contract Posts is KetlGuarded {
     }
     // Increment comments count
     parentPost.numberOfComments++;
-    if (replyTo > 0) {
-      comments[feedId][postId][replyTo - 1].numberOfComments++;
-    }
     // Emit the event
     emit CommentAdded(
       feedId,
