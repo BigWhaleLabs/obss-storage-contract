@@ -95,7 +95,7 @@ contract Posts is KetlGuarded {
     uint indexed feedId,
     uint indexed postId,
     Post post,
-    address indexed sender
+    address indexed author
   );
   event PostPinned(uint indexed feedId, uint indexed postId);
   event PostUnpinned(uint indexed feedId, uint indexed postId);
@@ -177,7 +177,6 @@ contract Posts is KetlGuarded {
     onlyElevatedPriveleges(feedId, sender)
   {
     require(postId < lastPostIds[feedId].current(), "Post not found");
-    require(pinnedPosts[feedId][postId] != pin, "Post already pinned/unpinned");
     pinnedPosts[feedId][postId] = pin;
     if (pin) {
       emit PostPinned(feedId, postId);
@@ -333,7 +332,7 @@ contract Posts is KetlGuarded {
     // Fetch post or comment
     Post memory post = commentId == 0
       ? posts[feedId][postId]
-      : comments[feedId][postId][commentId - 1]; // -1 because we're reading array
+      : comments[feedId][postId][commentId - 1]; // -1 because commentIds starts with 1
     // Check if post or comment exists
     require(post.sender != address(0), "Post or comment not found");
     // Get old reaction if it exists
@@ -401,7 +400,7 @@ contract Posts is KetlGuarded {
     // Fetch post or comment
     Post memory post = commentId == 0
       ? posts[feedId][postId]
-      : comments[feedId][postId][commentId - 1]; // -1 because we're reading array
+      : comments[feedId][postId][commentId - 1]; // -1 because commentIds starts with 1
     // Check if post or comment exists
     require(post.sender != address(0), "Post or comment not found");
     // Check if sent by the owner
@@ -424,7 +423,7 @@ contract Posts is KetlGuarded {
     // Fetch post or comment
     Post memory post = commentId == 0
       ? posts[feedId][postId]
-      : comments[feedId][postId][commentId - 1]; // -1 because we're reading array
+      : comments[feedId][postId][commentId - 1]; // -1 because commentIds starts with 1
     // Check if post or comment exists
     require(post.sender != address(0), "Post or comment not found");
     // Get the number of reactions

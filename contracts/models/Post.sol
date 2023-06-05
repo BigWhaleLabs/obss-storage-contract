@@ -62,10 +62,10 @@ pragma solidity ^0.8.19;
 import "./CID.sol";
 
 struct Post {
-  address sender;
+  address author;
   CID metadata;
   uint timestamp;
-  uint postId;
+  uint threadId;
   uint replyTo;
   uint numberOfComments;
 }
