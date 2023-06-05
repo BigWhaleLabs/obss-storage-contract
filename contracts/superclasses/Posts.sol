@@ -334,7 +334,7 @@ contract Posts is KetlGuarded {
       ? posts[feedId][postId]
       : comments[feedId][postId][commentId - 1]; // -1 because commentIds starts with 1
     // Check if post or comment exists
-    require(post.sender != address(0), "Post or comment not found");
+    require(post.author != address(0), "Post or comment not found");
     // Get old reaction if it exists
     Reaction memory oldReaction = usersToReactions[feedId][postId][commentId][
       sender
@@ -370,7 +370,7 @@ contract Posts is KetlGuarded {
     lastReactionIds[feedId][postId][commentId].increment();
     // If ether was sent, transfer it to the sender
     if (msg.value > 0) {
-      Address.sendValue(payable(post.sender), msg.value);
+      Address.sendValue(payable(post.author), msg.value);
     }
     // Emit the event
     emit ReactionAdded(
@@ -402,7 +402,7 @@ contract Posts is KetlGuarded {
       ? posts[feedId][postId]
       : comments[feedId][postId][commentId - 1]; // -1 because commentIds starts with 1
     // Check if post or comment exists
-    require(post.sender != address(0), "Post or comment not found");
+    require(post.author != address(0), "Post or comment not found");
     // Check if sent by the owner
     require(
       reactions[feedId][postId][commentId][reactionId].sender == sender,
@@ -425,7 +425,7 @@ contract Posts is KetlGuarded {
       ? posts[feedId][postId]
       : comments[feedId][postId][commentId - 1]; // -1 because commentIds starts with 1
     // Check if post or comment exists
-    require(post.sender != address(0), "Post or comment not found");
+    require(post.author != address(0), "Post or comment not found");
     // Get the number of reactions
     uint reactionsLength = lastReactionIds[feedId][postId][commentId].current();
     // Create the array of reactions
