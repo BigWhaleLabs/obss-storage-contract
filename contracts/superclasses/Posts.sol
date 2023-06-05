@@ -82,7 +82,7 @@ contract Posts is KetlGuarded {
   mapping(uint => mapping(uint => Post[])) public comments;
   mapping(uint => mapping(uint => Counters.Counter)) public lastCommentIds;
 
-  mapping(uint => mapping(uint => mapping(uint => mapping(uint => Reaction))))
+  mapping(uint => mapping(uint => mapping(uint => Reaction[])))
     public reactions;
   mapping(uint => mapping(uint => mapping(uint => Counters.Counter)))
     public lastReactionIds;
