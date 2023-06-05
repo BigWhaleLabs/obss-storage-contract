@@ -239,8 +239,10 @@ contract Posts is KetlGuarded {
     uint feedId = commentRequest.feedId;
     uint postId = commentRequest.postId;
     uint replyTo = commentRequest.replyTo;
+    // Fetch parent post
+    Post memory parentPost = posts[feedId][postId];
     // Check if parent post exists
-    require(posts[feedId][postId].author != address(0), "Post not found");
+    require(parentPost.author != address(0), "Post not found");
     // Fetch parent comment and check if it exists
     if (replyTo > 0) {
       require(
@@ -267,7 +269,7 @@ contract Posts is KetlGuarded {
       participantsMap[feedId][postId][sender] = true;
     }
     // Increment comments count
-    posts[feedId][postId].numberOfComments++;
+    parentPost.numberOfComments++;
     if (replyTo > 0) {
       comments[feedId][postId][replyTo - 1].numberOfComments++;
     }
@@ -362,7 +364,7 @@ contract Posts is KetlGuarded {
       msg.value
     );
     // Add reaction
-    reactions[feedId][postId][commentId][reactionId] = reaction;
+    reactions[feedId][postId][commentId].push(reaction);
     // Remember the reaction for user
     usersToReactions[feedId][postId][commentId][sender] = reaction;
     // Increment lastReactionId
