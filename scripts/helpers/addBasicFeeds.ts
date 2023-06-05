@@ -1,6 +1,6 @@
 import { Feeds__factory } from 'typechain'
 import { Signer } from 'ethers'
-import basicFeeds from './data'
+import { basicFeeds } from './data'
 import parseError from './parseError'
 
 export default async function (contractAddress: string, signer: Signer) {

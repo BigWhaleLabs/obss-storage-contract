@@ -2,7 +2,16 @@ import { CIDStruct } from '../../typechain/contracts/Feeds'
 
 const hashAndSize = { hashFunction: 18, size: 32 }
 
-export default [
+export const chains = {
+  1: 'mainnet',
+  3: 'ropsten',
+  4: 'rinkeby',
+  5: 'goerli',
+  137: 'polygon',
+  80001: 'mumbai',
+} as { [chainId: number]: string }
+
+export const basicFeeds = [
   {
     // t/devFeed
     digest:

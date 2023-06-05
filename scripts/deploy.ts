@@ -1,13 +1,11 @@
-import { GSN_MUMBAI_FORWARDER_CONTRACT_ADDRESS } from '@big-whale-labs/constants'
+import { chains } from './helpers/data'
 import { ethers } from 'hardhat'
 import { utils } from 'ethers'
 import { version } from '../package.json'
 import addBasicFeeds from './helpers/addBasicFeeds'
 import addContractToPaymaster from './helpers/addContractToPaymaster'
 import deployContact from './deployContract'
-import prompt from 'prompt'
-
-const ethereumRegex = /^0x[a-fA-F0-9]{40}$/
+import getPromptData from './helpers/getPromptData'
 
 async function main() {
   const [deployer] = await ethers.getSigners()
@@ -15,14 +13,6 @@ async function main() {
   const provider = ethers.provider
 
   const { chainId } = await provider.getNetwork()
-  const chains = {
-    1: 'mainnet',
-    3: 'ropsten',
-    4: 'rinkeby',
-    5: 'goerli',
-    137: 'polygon',
-    80001: 'mumbai',
-  } as { [chainId: number]: string }
   const chainName = chains[chainId]
 
   // Deploy the contract
@@ -39,43 +29,15 @@ async function main() {
     ketlTeamTokenId,
     shouldAddBasicFeeds,
     shouldAddObssToPaymasterTargets,
-  } = await prompt.get({
-    properties: {
-      forwarder: {
-        required: true,
-        pattern: ethereumRegex,
-        default: GSN_MUMBAI_FORWARDER_CONTRACT_ADDRESS,
-      },
-      ketlAttestation: {
-        required: true,
-        pattern: ethereumRegex,
-        default: '0xe2eAbeB4dA625449BE1460c54508A6202C314008',
-      },
-      ketlTeamTokenId: {
-        required: true,
-        type: 'number',
-        default: '0',
-      },
-      shouldAddObssToPaymasterTargets: {
-        type: 'boolean',
-        required: true,
-        default: true,
-      },
-      shouldAddBasicFeeds: {
-        type: 'boolean',
-        required: true,
-        default: true,
-      },
-    },
-  })
+  } = await getPromptData()
 
-  const profilesConstructorArguments = [
+  const constructorArguments = [
     ketlAttestation,
     ketlTeamTokenId,
     deployer.address,
   ] as [string, string, string]
   const profilesContract = await deployContact({
-    constructorArguments: profilesConstructorArguments,
+    constructorArguments,
     contractName: 'Profiles',
     chainName,
   })
@@ -93,13 +55,8 @@ async function main() {
     initializer: 'initializeKarma',
   })
 
-  const feedsConstructorArguments = [
-    ketlAttestation,
-    ketlTeamTokenId,
-    deployer.address,
-  ] as [string, string, string]
   const feedsContract = await deployContact({
-    constructorArguments: feedsConstructorArguments,
+    constructorArguments,
     contractName: 'Feeds',
     chainName,
   })
