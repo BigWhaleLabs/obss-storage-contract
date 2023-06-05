@@ -61,7 +61,6 @@ pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
 import "../models/PostAndParticipants.sol";
 import "../models/Reaction.sol";
 import "../models/PostRequest.sol";
@@ -332,7 +331,7 @@ contract Posts is KetlGuarded {
     // Fetch post or comment
     Post memory post = commentId == 0
       ? posts[feedId][postId]
-      : comments[feedId][postId][commentId - 1]; // -1 because commentIds starts with 1
+      : comments[feedId][postId][commentId - 1]; // comments start with 1
     // Check if post or comment exists
     require(post.author != address(0), "Post or comment not found");
     // Get old reaction if it exists
@@ -400,7 +399,7 @@ contract Posts is KetlGuarded {
     // Fetch post or comment
     Post memory post = commentId == 0
       ? posts[feedId][postId]
-      : comments[feedId][postId][commentId - 1]; // -1 because commentIds starts with 1
+      : comments[feedId][postId][commentId - 1]; // comments start with 1
     // Check if post or comment exists
     require(post.author != address(0), "Post or comment not found");
     // Check if sent by the owner
@@ -423,7 +422,7 @@ contract Posts is KetlGuarded {
     // Fetch post or comment
     Post memory post = commentId == 0
       ? posts[feedId][postId]
-      : comments[feedId][postId][commentId - 1]; // -1 because commentIds starts with 1
+      : comments[feedId][postId][commentId - 1]; // comments start with 1
     // Check if post or comment exists
     require(post.author != address(0), "Post or comment not found");
     // Get the number of reactions
