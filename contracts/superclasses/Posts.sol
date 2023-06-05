@@ -241,11 +241,11 @@ contract Posts is KetlGuarded {
     uint postId = commentRequest.postId;
     uint replyTo = commentRequest.replyTo;
     // Check if parent post exists
-    require(posts[feedId][postId].sender != address(0), "Post not found");
+    require(posts[feedId][postId].author != address(0), "Post not found");
     // Fetch parent comment and check if it exists
     if (replyTo > 0) {
       require(
-        comments[feedId][postId][replyTo - 1].sender != address(0),
+        comments[feedId][postId][replyTo - 1].author != address(0),
         "Comment not found"
       );
     }
