@@ -15,7 +15,7 @@ export default async function (contractAddress: string, signer: Signer) {
   } catch (e) {
     console.error('Error while adding feeds: ', parseError(e))
     console.error(
-      'Please take add feeds manually for this address: ',
+      'Please add feeds manually for this address: ',
       contractAddress
     )
   }
