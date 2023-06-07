@@ -79,6 +79,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@big-whale-labs/gsn-paymaster-contract@npm:^0.1.1":
+  version: 0.1.1
+  resolution: "@big-whale-labs/gsn-paymaster-contract@npm:0.1.1"
+  checksum: d80c8595c9b4d3e9c093883ba0ab02f6195c155dd58818a36151e61b0a4356b7e53a7f248d64f9d3b7e0c79ed8cfa0f90811862e9b77972b9d2f95e406199662
+  languageName: node
+  linkType: hard
+
 "@big-whale-labs/ketl-attestation-token@npm:^0.0.10":
   version: 0.0.10
   resolution: "@big-whale-labs/ketl-attestation-token@npm:0.0.10"
@@ -97,6 +104,7 @@ __metadata:
   resolution: "@big-whale-labs/obss-storage-contract@workspace:."
   dependencies:
     "@big-whale-labs/constants": ^0.1.85
+    "@big-whale-labs/gsn-paymaster-contract": ^0.1.1
     "@big-whale-labs/ketl-attestation-token": ^0.0.10
     "@big-whale-labs/versioned-contract": ^1.0.2
     "@ethersproject/providers": ^5.7.2

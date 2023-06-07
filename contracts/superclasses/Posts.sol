@@ -90,7 +90,12 @@ contract Posts is KetlGuarded {
     public usersToReactions;
 
   // Events
-  event PostAdded(uint indexed feedId, uint indexed postId, Post post);
+  event PostAdded(
+    uint indexed feedId,
+    uint indexed postId,
+    Post post,
+    address indexed author
+  );
   event PostPinned(uint indexed feedId, uint indexed postId);
   event PostUnpinned(uint indexed feedId, uint indexed postId);
   event CommentAdded(
@@ -153,7 +158,7 @@ contract Posts is KetlGuarded {
     participants[feedId][currentPostId].push(sender);
     participantsMap[feedId][currentPostId][sender] = true;
     // Emit the event
-    emit PostAdded(feedId, lastPostIds[feedId].current(), post);
+    emit PostAdded(feedId, lastPostIds[feedId].current(), post, sender);
     // Increment current post id
     lastPostIds[feedId].increment();
   }
@@ -240,8 +245,10 @@ contract Posts is KetlGuarded {
     require(parentPost.author != address(0), "Post not found");
     // Fetch parent comment and check if it exists
     if (replyTo > 0) {
-      Post memory parentComment = comments[feedId][postId][replyTo];
-      require(parentComment.author != address(0), "Comment not found");
+      require(
+        comments[feedId][postId][replyTo - 1].author != address(0),
+        "Comment not found"
+      );
     }
     // Increment comment id (so that we start with 1)
     lastCommentIds[feedId][postId].increment();
@@ -323,7 +330,7 @@ contract Posts is KetlGuarded {
     // Fetch post or comment
     Post memory post = commentId == 0
       ? posts[feedId][postId]
-      : comments[feedId][postId][commentId];
+      : comments[feedId][postId][commentId - 1]; // comments start with 1
     // Check if post or comment exists
     require(post.author != address(0), "Post or comment not found");
     // Get old reaction if it exists
@@ -331,7 +338,18 @@ contract Posts is KetlGuarded {
       sender
     ];
     // Check if reaction already exists
-    require(oldReaction.sender == address(0), "Reaction already exists");
+    require(
+      oldReaction.reactionType != reactionType,
+      "Reaction of this type already exists"
+    );
+    if (oldReaction.reactionType != 0) {
+      removeReaction(
+        sender,
+        RemoveReactionRequest(feedId, postId, commentId, oldReaction.reactionId)
+      );
+    }
+    // Get lastReactionIds
+    uint reactionId = lastReactionIds[feedId][postId][commentId].current();
     // Create reaction
     Reaction memory reaction = Reaction(
       sender,
@@ -339,15 +357,16 @@ contract Posts is KetlGuarded {
       postId,
       commentId,
       reactionType,
+      reactionId,
       msg.value
     );
     // Add reaction
     reactions[feedId][postId][commentId].push(reaction);
     // Remember the reaction for user
     usersToReactions[feedId][postId][commentId][sender] = reaction;
-    // Increment reaction id
+    // Increment lastReactionId
     lastReactionIds[feedId][postId][commentId].increment();
-    // If ether was sent, transfer it to the author
+    // If ether was sent, transfer it to the sender
     if (msg.value > 0) {
       Address.sendValue(payable(post.author), msg.value);
     }
@@ -358,7 +377,7 @@ contract Posts is KetlGuarded {
       postId,
       commentId,
       reactionType,
-      lastReactionIds[feedId][postId][commentId].current(),
+      reactionId,
       msg.value
     );
   }
@@ -367,7 +386,7 @@ contract Posts is KetlGuarded {
     address sender,
     RemoveReactionRequest memory reactionRequest
   )
-    external
+    public
     onlyAllowedCaller
     onlyKetlTokenOwners(sender)
     onlyAllowedFeedId(reactionRequest.feedId)
@@ -379,7 +398,7 @@ contract Posts is KetlGuarded {
     // Fetch post or comment
     Post memory post = commentId == 0
       ? posts[feedId][postId]
-      : comments[feedId][postId][commentId];
+      : comments[feedId][postId][commentId - 1]; // comments start with 1
     // Check if post or comment exists
     require(post.author != address(0), "Post or comment not found");
     // Check if sent by the owner
@@ -402,7 +421,7 @@ contract Posts is KetlGuarded {
     // Fetch post or comment
     Post memory post = commentId == 0
       ? posts[feedId][postId]
-      : comments[feedId][postId][commentId];
+      : comments[feedId][postId][commentId - 1]; // comments start with 1
     // Check if post or comment exists
     require(post.author != address(0), "Post or comment not found");
     // Get the number of reactions
