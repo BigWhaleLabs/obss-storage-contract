@@ -134,12 +134,7 @@ contract Posts is KetlGuarded {
   function addPost(
     address sender,
     PostRequest memory postRequest
-  )
-    external
-    onlyAllowedCaller
-    onlyKetlTokenOwners(sender)
-    onlyAllowedFeedId(postRequest.feedId)
-  {
+  ) external onlyKetlTokenOwners(sender) onlyAllowedFeedId(postRequest.feedId) {
     uint feedId = postRequest.feedId;
     // Get current post id
     uint currentPostId = lastPostIds[feedId].current();
@@ -170,7 +165,6 @@ contract Posts is KetlGuarded {
     bool pin
   )
     public
-    onlyAllowedCaller
     onlyAllowedFeedId(feedId)
     onlyKetlTokenOwners(sender)
     onlyElevatedPriveleges(feedId, sender)
@@ -232,7 +226,6 @@ contract Posts is KetlGuarded {
     CommentRequest memory commentRequest
   )
     external
-    onlyAllowedCaller
     onlyKetlTokenOwners(sender)
     onlyAllowedFeedId(commentRequest.feedId)
   {
@@ -319,7 +312,6 @@ contract Posts is KetlGuarded {
   )
     external
     payable
-    onlyAllowedCaller
     onlyKetlTokenOwners(sender)
     onlyAllowedFeedId(reactionRequest.feedId)
   {
@@ -387,7 +379,6 @@ contract Posts is KetlGuarded {
     RemoveReactionRequest memory reactionRequest
   )
     public
-    onlyAllowedCaller
     onlyKetlTokenOwners(sender)
     onlyAllowedFeedId(reactionRequest.feedId)
   {

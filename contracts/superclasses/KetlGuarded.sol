@@ -91,6 +91,8 @@ contract KetlGuarded is Initializable, OwnableUpgradeable {
     _;
   }
 
+  // 0x550060f9b15Ae39F924fAbd80958eAB2361Da2D1
+
   modifier onlyKetlTokenOwners(address sender) {
     for (uint32 i = 0; i < attestationToken.currentTokenId(); i++) {
       if (attestationToken.balanceOf(sender, i) > 0) {

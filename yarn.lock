@@ -79,6 +79,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@big-whale-labs/constants@npm:^0.2.0":
+  version: 0.2.3
+  resolution: "@big-whale-labs/constants@npm:0.2.3"
+  checksum: adddc1d42306ad578d304b902bc026fe2cff42ed92885ba4f0335965d3204809a35a8e3dd0538753aa042953e7d4de6c76f7552315ea1b15e0259f7d2ad493ca
+  languageName: node
+  linkType: hard
+
 "@big-whale-labs/gsn-paymaster-contract@npm:^0.1.1":
   version: 0.1.1
   resolution: "@big-whale-labs/gsn-paymaster-contract@npm:0.1.1"
@@ -86,16 +93,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@big-whale-labs/ketl-attestation-token@npm:^0.0.10":
-  version: 0.0.10
-  resolution: "@big-whale-labs/ketl-attestation-token@npm:0.0.10"
+"@big-whale-labs/ketl-allow-map-contract@npm:^0.0.3":
+  version: 0.0.3
+  resolution: "@big-whale-labs/ketl-allow-map-contract@npm:0.0.3"
+  checksum: 5b547e98d189a99b9b2cf3b0cb53c173e75458bc6f54142dcadb6cc9478f4bf7328510c4cfe121bd1ae0e6f69714258413ecc61d2b7ef696ed079df58a0397da
+  languageName: node
+  linkType: hard
+
+"@big-whale-labs/ketl-attestation-token@npm:^0.0.15":
+  version: 0.0.15
+  resolution: "@big-whale-labs/ketl-attestation-token@npm:0.0.15"
   dependencies:
-    "@big-whale-labs/constants": ^0.1.85
+    "@big-whale-labs/constants": ^0.2.0
+    "@big-whale-labs/ketl-allow-map-contract": ^0.0.3
     "@big-whale-labs/versioned-contract": ^1.0.2
     "@zk-kit/incremental-merkle-tree": ^1.1.0
     "@zk-kit/incremental-merkle-tree.sol": ^1.7.0
     prompt: ^1.3.0
-  checksum: 59e8d86efa87ecd3354a789dd509b4863199ce188e1e17809f4db9b2459f0286916a355bf6b14af0db7c020af570784e2a0f263f7fc8ff55d1990502e24f3752
+  checksum: 2ce4504e6c6b1b73b3facbe72f9dc723aeadbe6ce5dc476ae254bb91d92a61edbfafeea086c9815f4df426aa911056628e332ade21737956dbbee6fed8e66378
   languageName: node
   linkType: hard
 
@@ -105,7 +120,7 @@ __metadata:
   dependencies:
     "@big-whale-labs/constants": ^0.1.85
     "@big-whale-labs/gsn-paymaster-contract": ^0.1.1
-    "@big-whale-labs/ketl-attestation-token": ^0.0.10
+    "@big-whale-labs/ketl-attestation-token": ^0.0.15
     "@big-whale-labs/versioned-contract": ^1.0.2
     "@ethersproject/providers": ^5.7.2
     "@nomiclabs/hardhat-ethers": ^2.2.3
