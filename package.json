@@ -1,6 +1,6 @@
 {
   "name": "@big-whale-labs/obss-storage-contract",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Storage contract for OBSS",
   "repository": {
     "type": "git",
@@ -77,7 +77,7 @@
   "dependencies": {
     "@big-whale-labs/constants": "^0.1.85",
     "@big-whale-labs/gsn-paymaster-contract": "^0.1.1",
-    "@big-whale-labs/ketl-attestation-token": "^0.0.10",
+    "@big-whale-labs/ketl-attestation-token": "^0.0.15",
     "@openzeppelin/contracts-upgradeable": "^4.8.3",
     "@openzeppelin/hardhat-upgrades": "^1.26.0",
     "@zk-kit/incremental-merkle-tree": "^1.1.0",
