@@ -60,7 +60,6 @@ async function main() {
     contractName: 'Feeds',
     chainName,
   })
-  if (shouldAddBasicFeeds) await addBasicFeeds(feedsContract.address, deployer)
 
   const obssConstructorArguments = [
     forwarder,
@@ -76,6 +75,12 @@ async function main() {
   })
   if (shouldAddObssToPaymasterTargets)
     await addContractToPaymaster(obss.address, deployer)
+
+  if (shouldAddBasicFeeds) await addBasicFeeds(feedsContract.address, deployer)
+
+  await karmaContract.setAllowedCaller(obss.address)
+  await profilesContract.setAllowedCaller(obss.address)
+  await feedsContract.setAllowedCaller(obss.address)
 }
 
 main().catch((error) => {
