@@ -43,8 +43,8 @@ async function main() {
   })
 
   const karmaConstructorArguments = [
-    'Kekl',
-    'KEK',
+    'Ketl',
+    'KETL',
     ketlTeamTokenId as string,
     deployer.address,
   ]
