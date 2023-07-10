@@ -205,7 +205,7 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
     if (
       !ketlCredGranted[reactionRequest.feedId][reactionRequest.postId][
         reactionRequest.commentId
-      ][_msgSender()]
+      ][_msgSender()] && post.author != _msgSender()
     ) {
       ketlCredGranted[reactionRequest.feedId][reactionRequest.postId][
         reactionRequest.commentId
