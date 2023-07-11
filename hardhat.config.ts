@@ -1,3 +1,4 @@
+import '@nomicfoundation/hardhat-chai-matchers'
 import '@nomiclabs/hardhat-etherscan'
 import '@openzeppelin/hardhat-upgrades'
 import '@typechain/hardhat'
