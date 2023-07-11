@@ -1,16 +1,14 @@
+import { Feeds, KetlCred, OBSSStorage, Profiles } from '../typechain'
 import { MOCK_CID, zeroAddress } from './utils'
 import { ethers, upgrades } from 'hardhat'
+import { expect } from 'chai'
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { smock } from '@defi-wonderland/smock'
 import { version } from '../package.json'
 
-import { expect } from 'chai'
-
-import { Feeds, KetlCred, OBSSStorage, Profiles } from 'typechain'
-import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-
 describe('OBSSStorage: KetlKred', () => {
   async function setupOBSS() {
-    const [deployer, user] = await ethers.getSigners()
+    const [deployer, user1, user2, user3] = await ethers.getSigners()
 
     const ketlAttestationContractMock = await smock.fake([
       {
@@ -81,7 +79,9 @@ describe('OBSSStorage: KetlKred', () => {
 
     return {
       deployer,
-      user,
+      user1,
+      user2,
+      user3,
       profilesContract,
       ketlCredContract,
       feedsContract,
@@ -91,7 +91,7 @@ describe('OBSSStorage: KetlKred', () => {
 
   it('should grant KetlCred to author when post is upvoted', async function () {
     const {
-      user,
+      user1,
       deployer,
       feedsContract,
       obssStorageContract,
@@ -103,7 +103,7 @@ describe('OBSSStorage: KetlKred', () => {
       feedId: 0,
       postMetadata: MOCK_CID,
     })
-    await obssStorageContract.connect(user).addFeedReaction({
+    await obssStorageContract.connect(user1).addFeedReaction({
       feedId: 0,
       postId: 0,
       commentId: 0,
