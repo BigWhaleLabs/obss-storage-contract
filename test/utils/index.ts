@@ -15,19 +15,7 @@ function generateRandomBytes32(): string {
   return `0x${crypto.randomBytes(32).toString('hex')}`
 }
 
-export async function getFakeCommitmentProof() {
-  return {
-    a: [1, 2],
-    b: [
-      [1, 2],
-      [3, 4],
-    ],
-    c: [1, 2],
-    input: await allowMapInput(),
-  }
-}
-
-async function allowMapInput() {
+export async function allowMapInput() {
   const randomUint256 = () => BigNumber.from(randomBytes(32)).toBigInt()
   const thousandRandomUint256 = Array.from({ length: 1000 }, randomUint256)
   const leaf = thousandRandomUint256[0]
