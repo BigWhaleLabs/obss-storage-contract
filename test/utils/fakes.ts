@@ -1,3 +1,4 @@
+import { KetlAttestation__factory } from '@big-whale-labs/ketl-attestation-token'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { allowMapInput } from '.'
 import { deployMockContract } from 'ethereum-waffle'
@@ -17,23 +18,5 @@ export async function getFakeCommitmentProof() {
 export async function getFakeKetlAttestationContract(
   signer: SignerWithAddress
 ) {
-  return await deployMockContract(signer, [
-    {
-      inputs: [
-        { internalType: 'address', name: 'account', type: 'address' },
-        { internalType: 'uint256', name: 'id', type: 'uint256' },
-      ],
-      name: 'balanceOf',
-      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-      stateMutability: 'view',
-      type: 'function',
-    },
-    {
-      inputs: [],
-      name: 'currentTokenId',
-      outputs: [{ internalType: 'uint32', name: '', type: 'uint32' }],
-      stateMutability: 'view',
-      type: 'function',
-    },
-  ])
+  return await deployMockContract(signer, [...KetlAttestation__factory.abi])
 }
