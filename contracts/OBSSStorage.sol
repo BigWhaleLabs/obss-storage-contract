@@ -61,7 +61,7 @@ pragma solidity ^0.8.19;
 
 import "@opengsn/contracts/src/ERC2771Recipient.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "./Karma.sol";
+import "./KetlCred.sol";
 import "./Profiles.sol";
 import "./Feeds.sol";
 
@@ -72,17 +72,17 @@ import "./Feeds.sol";
 contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
   // State
   string public version;
-  Karma public karma;
+  KetlCred public ketlCred;
   Profiles public profiles;
   Feeds public feeds;
   mapping(uint => mapping(uint => mapping(uint => mapping(address => bool))))
-    public karmaGranted;
+    public ketlCredGranted;
 
   // Constructor
   function initialize(
     address _forwarder,
     string memory _version,
-    address _karma,
+    address _ketlCred,
     address _profiles,
     address _feeds
   ) public initializer {
@@ -93,7 +93,7 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
     // Set version
     version = _version;
     // Set sub-contracts
-    karma = Karma(_karma);
+    ketlCred = KetlCred(_ketlCred);
     profiles = Profiles(_profiles);
     feeds = Feeds(_feeds);
   }
@@ -122,7 +122,7 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
     AddReactionRequest memory reactionRequest
   ) external payable {
     profiles.addReaction(_msgSender(), reactionRequest);
-    grantKarma(reactionRequest);
+    grantKetlCred(reactionRequest);
   }
 
   function removeProfileReaction(
@@ -163,7 +163,7 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
     AddReactionRequest memory reactionRequest
   ) public payable {
     feeds.addReaction(_msgSender(), reactionRequest);
-    grantKarma(reactionRequest);
+    grantKetlCred(reactionRequest);
   }
 
   function removeFeedReaction(
@@ -195,18 +195,18 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
     batchAddRemoveReactions(addReactionRequests, removeReactionRequests);
   }
 
-  // Karma
+  // KetlCred
 
-  function grantKarma(AddReactionRequest memory reactionRequest) internal {
+  function grantKetlCred(AddReactionRequest memory reactionRequest) internal {
     if (
-      !karmaGranted[reactionRequest.feedId][reactionRequest.postId][
+      !ketlCredGranted[reactionRequest.feedId][reactionRequest.postId][
         reactionRequest.commentId
       ][_msgSender()]
     ) {
-      karmaGranted[reactionRequest.feedId][reactionRequest.postId][
+      ketlCredGranted[reactionRequest.feedId][reactionRequest.postId][
         reactionRequest.commentId
       ][_msgSender()] = true;
-      karma.mint(_msgSender(), 1);
+      ketlCred.mint(_msgSender(), 1);
     }
   }
 

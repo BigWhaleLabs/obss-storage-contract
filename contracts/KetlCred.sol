@@ -62,8 +62,8 @@ pragma solidity ^0.8.19;
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "./superclasses/KetlGuarded.sol";
 
-contract Karma is ERC20Upgradeable, KetlGuarded {
-  function initializeKarma(
+contract KetlCred is ERC20Upgradeable, KetlGuarded {
+  function initializeKetlCred(
     string memory name,
     string memory symbol,
     uint _ketlTeamTokenId,
@@ -84,6 +84,6 @@ contract Karma is ERC20Upgradeable, KetlGuarded {
   ) internal virtual override {
     super._beforeTokenTransfer(from, to, amount);
 
-    require(from == address(0), "Karma: transfer not allowed");
+    require(from == address(0), "KetlCred: transfer not allowed");
   }
 }
