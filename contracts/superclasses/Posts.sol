@@ -130,6 +130,12 @@ contract Posts is KetlGuarded {
   }
 
   // Posts
+  function getPost(
+    uint feedId,
+    uint postId
+  ) external view returns (Post memory) {
+    return posts[feedId][postId];
+  }
 
   function addPost(
     address sender,
