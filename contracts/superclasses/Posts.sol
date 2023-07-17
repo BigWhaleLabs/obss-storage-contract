@@ -328,6 +328,7 @@ contract Posts is KetlGuarded {
     onlyAllowedCaller
     onlyKetlTokenOwners(sender)
     onlyAllowedFeedId(reactionRequest.feedId)
+    nonReentrant
   {
     uint feedId = reactionRequest.feedId;
     uint postId = reactionRequest.postId;
