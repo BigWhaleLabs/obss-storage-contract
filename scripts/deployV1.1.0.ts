@@ -83,21 +83,21 @@ async function main() {
     },
   })
 
-  // Deploy new Upgradeable KetlCred contract
+  // Deploy new Upgradeable Kred contract
   // (not upgrading previous one because we want to reset data)
-  const ketlCredConstructorArguments = [
-    'Ketl',
-    'KETL',
+  const kredConstructorArguments = [
+    'Kred',
+    'KRED',
     ketlAttestationAddress as string,
     String(ketlTeamTokenId),
     deployer.address,
     version,
   ]
-  const newKetlCredContract = await deployContact({
-    constructorArguments: ketlCredConstructorArguments,
-    contractName: 'KetlCred',
+  const newKredContract = await deployContact({
+    constructorArguments: kredConstructorArguments,
+    contractName: 'Kred',
     chainName,
-    initializer: 'initializeKetlCred',
+    initializer: 'initializeKred',
   })
 
   const ketlGuardedConstructorArguments = [
@@ -144,7 +144,7 @@ async function main() {
   const obssConstructorArguments = [
     forwarder,
     version,
-    newKetlCredContract.address,
+    newKredContract.address,
     profilesProxyAddress,
     feedsProxyAddress,
   ] as [string, string, string, string, string]
@@ -164,7 +164,7 @@ async function main() {
   )
   await obssStorage.initialize(...obssConstructorArguments)
 
-  await newKetlCredContract.setAllowedCaller(obssStorage.address)
+  await newKredContract.setAllowedCaller(obssStorage.address)
 }
 
 main().catch((error) => {
