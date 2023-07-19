@@ -73,7 +73,6 @@ async function main() {
       feedsProxyAddress: {
         required: true,
         message: 'Feeds proxy address',
-        type: 'string',
         pattern: ethAddressRegex,
         default: isProduction
           ? '0x9A35E42cCF1aC1772c75E2027b9D9fE56250a0a3'
@@ -88,7 +87,7 @@ async function main() {
     'Ketl',
     'KETL',
     ketlAttestationAddress as string,
-    ketlTeamTokenId as string,
+    String(ketlTeamTokenId),
     deployer.address,
     version,
   ]
@@ -101,7 +100,7 @@ async function main() {
 
   const ketlGuardedConstructorArguments = [
     ketlAttestationAddress,
-    ketlTeamTokenId,
+    String(ketlTeamTokenId),
     deployer.address,
   ] as [string, string, string]
 
