@@ -59,12 +59,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@big-whale-labs/ketl-attestation-token/contracts/KetlAttestation.sol";
 
-contract KetlGuarded is Initializable, OwnableUpgradeable, ReentrancyGuard {
+contract KetlGuarded is Initializable, OwnableUpgradeable {
   KetlAttestation public attestationToken;
   uint public ketlTeamTokenId;
   address public allowedCaller;
