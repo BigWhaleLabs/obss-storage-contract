@@ -1,5 +1,5 @@
+import { Feeds, OBSSStorage, Profiles } from 'typechain'
 import { GSN_MUMBAI_FORWARDER_CONTRACT_ADDRESS } from '@big-whale-labs/constants'
-import { OBSSStorage } from 'typechain'
 import { chains, ethAddressRegex } from './helpers/data'
 import { ethers, upgrades } from 'hardhat'
 import { utils } from 'ethers'
@@ -32,9 +32,10 @@ async function main() {
   const {
     forwarder,
     ketlTeamTokenId,
+    ketlAttestationAddress,
     obssProxyAddress,
-    profilesContractAddress,
-    feedsContractAddress,
+    profilesProxyAddress,
+    feedsProxyAddress,
   } = await prompt.get({
     properties: {
       forwarder: {
@@ -47,6 +48,12 @@ async function main() {
         type: 'number',
         default: '0',
       },
+      ketlAttestationAddress: {
+        required: true,
+        message: 'KetlAttestationContract address',
+        pattern: ethAddressRegex,
+        default: isProduction ? '0x00' : '0x00',
+      },
       obssProxyAddress: {
         required: true,
         message: 'OBSS Proxy address',
@@ -55,17 +62,17 @@ async function main() {
           ? '0x1cf77299EbCF74C5367cf621Bd2cBd49e3dFD368'
           : '0xDEEbFc3aab311EA6da04fE0541074722313A4DC4',
       },
-      profilesContractAddress: {
+      profilesProxyAddress: {
         required: true,
-        message: 'Profiles contract address',
+        message: 'Profiles proxy address',
         pattern: ethAddressRegex,
         default: isProduction
           ? '0x95fcaf414e2ad4ca949eb725e684fd196af1fba5'
           : '0x39d8EA89705B02bc020B9E1dF369C4d746761e44',
       },
-      feedsContractAddress: {
+      feedsProxyAddress: {
         required: true,
-        message: 'Feeds contract address',
+        message: 'Feeds proxy address',
         type: 'string',
         pattern: ethAddressRegex,
         default: isProduction
@@ -91,13 +98,53 @@ async function main() {
     initializer: 'initializeKetlCred',
   })
 
+  const ketlGuardedConstructorArguments = [
+    ketlAttestationAddress,
+    ketlTeamTokenId,
+    deployer.address,
+  ] as [string, string, string]
+
+  console.log('Upgrading Feeds to v1.1.0')
+  const feedsFactory = await ethers.getContractFactory('Feeds')
+  const feedsContract = (await upgrades.upgradeProxy(
+    feedsProxyAddress as string,
+    feedsFactory
+  )) as Feeds
+  console.log('Feeds upgraded')
+  console.log(
+    await upgrades.erc1967.getImplementationAddress(feedsContract.address),
+    ' getImplementationAddress'
+  )
+  console.log(
+    await upgrades.erc1967.getAdminAddress(feedsContract.address),
+    ' getAdminAddress'
+  )
+  await feedsContract.initialize(...ketlGuardedConstructorArguments)
+
+  console.log('Upgrading Profiles to v1.1.0')
+  const profilesFactory = await ethers.getContractFactory('Profiles')
+  const profilesContract = (await upgrades.upgradeProxy(
+    profilesProxyAddress as string,
+    profilesFactory
+  )) as Profiles
+  console.log('Profiles upgraded')
+  console.log(
+    await upgrades.erc1967.getImplementationAddress(profilesContract.address),
+    ' getImplementationAddress'
+  )
+  console.log(
+    await upgrades.erc1967.getAdminAddress(profilesContract.address),
+    ' getAdminAddress'
+  )
+  await profilesContract.initialize(...ketlGuardedConstructorArguments)
+
   console.log('Upgrading OBSSStorage to v1.1.0')
   const obssConstructorArguments = [
     forwarder,
     version,
     newKetlCredContract.address,
-    profilesContractAddress,
-    feedsContractAddress,
+    profilesProxyAddress,
+    feedsProxyAddress,
   ] as [string, string, string, string, string]
   const obssStorageFactory = await ethers.getContractFactory('OBSSStorage')
   const obssStorage = (await upgrades.upgradeProxy(
@@ -113,8 +160,8 @@ async function main() {
     await upgrades.erc1967.getAdminAddress(obssStorage.address),
     ' getAdminAddress'
   )
-
   await obssStorage.initialize(...obssConstructorArguments)
+
   await newKetlCredContract.setAllowedCaller(obssStorage.address)
 }
 
