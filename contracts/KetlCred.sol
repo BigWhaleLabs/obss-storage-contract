@@ -68,12 +68,13 @@ contract KetlCred is ERC20Upgradeable, KetlGuarded {
   function initializeKetlCred(
     string memory name,
     string memory symbol,
+    address _attestationToken,
     uint _ketlTeamTokenId,
     address _allowedCaller,
     string memory _version
   ) public initializer {
     __ERC20_init(name, symbol);
-    KetlGuarded.initialize(address(this), _ketlTeamTokenId, _allowedCaller);
+    KetlGuarded.initialize(_attestationToken, _ketlTeamTokenId, _allowedCaller);
     version = _version;
   }
 
