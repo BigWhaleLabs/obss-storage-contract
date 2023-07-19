@@ -3,8 +3,8 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import type {
   Feeds,
   Feeds__factory,
-  KetlCred,
-  KetlCred__factory,
+  Kred,
+  Kred__factory,
   OBSSStorage,
   OBSSStorage__factory,
   Profiles,
@@ -16,12 +16,12 @@ declare module 'mocha' {
     // Factories for contracts
     profilesFactory: Profiles__factory
     feedsFactory: Feeds__factory
-    ketlCredFactory: KetlCred__factory
+    kredFactory: Kred__factory
     obssStorageFactory: OBSSStorage__factory
     // Contract instances
     profiles: Profiles
     feeds: Feeds
-    ketlCred: KetlCred
+    kred: Kred
     obssStorage: OBSSStorage
     // Mock contracts
     fakeKetlAttestationContract: MockContract

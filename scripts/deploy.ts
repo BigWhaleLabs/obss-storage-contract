@@ -42,17 +42,17 @@ async function main() {
     chainName,
   })
 
-  const ketlCredConstructorArguments = [
-    'Ketl',
-    'KETL',
+  const kredConstructorArguments = [
+    'Kred',
+    'KRED',
     ketlTeamTokenId as string,
     deployer.address,
   ]
-  const ketlCredContract = await deployContact({
-    constructorArguments: ketlCredConstructorArguments,
-    contractName: 'KetlCred',
+  const kredContract = await deployContact({
+    constructorArguments: kredConstructorArguments,
+    contractName: 'Kred',
     chainName,
-    initializer: 'initializeKetlCred',
+    initializer: 'initializeKred',
   })
 
   const feedsContract = await deployContact({
@@ -64,7 +64,7 @@ async function main() {
   const obssConstructorArguments = [
     forwarder,
     version,
-    ketlCredContract.address,
+    kredContract.address,
     profilesContract.address,
     feedsContract.address,
   ] as [string, string, string, string, string]
@@ -78,7 +78,7 @@ async function main() {
 
   if (shouldAddBasicFeeds) await addBasicFeeds(feedsContract.address, deployer)
 
-  await ketlCredContract.setAllowedCaller(obss.address)
+  await kredContract.setAllowedCaller(obss.address)
   await profilesContract.setAllowedCaller(obss.address)
   await feedsContract.setAllowedCaller(obss.address)
 }

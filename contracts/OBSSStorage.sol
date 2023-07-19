@@ -61,7 +61,7 @@ pragma solidity ^0.8.19;
 
 import "@opengsn/contracts/src/ERC2771Recipient.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "./KetlCred.sol";
+import "./Kred.sol";
 import "./Profiles.sol";
 import "./Feeds.sol";
 
@@ -72,17 +72,17 @@ import "./Feeds.sol";
 contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
   // State
   string public version;
-  KetlCred public ketlCred;
+  Kred public kred;
   Profiles public profiles;
   Feeds public feeds;
   mapping(uint => mapping(uint => mapping(uint => mapping(address => bool))))
-    public ketlCredGranted;
+    public kredGranted;
 
   // Constructor
   function initialize(
     address _forwarder,
     string memory _version,
-    address _ketlCred,
+    address _kred,
     address _profiles,
     address _feeds
   ) public initializer {
@@ -93,7 +93,7 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
     // Set version
     version = _version;
     // Set sub-contracts
-    ketlCred = KetlCred(_ketlCred);
+    kred = Kred(_kred);
     profiles = Profiles(_profiles);
     feeds = Feeds(_feeds);
   }
@@ -107,7 +107,7 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
   function addProfilePost(CID memory postMetadata) external {
     uint feedId = uint(keccak256(abi.encodePacked(_msgSender())));
     profiles.addPost(_msgSender(), PostRequest(feedId, postMetadata));
-    ketlCred.mint(_msgSender(), 50);
+    kred.mint(_msgSender(), 50);
   }
 
   function pinOrUnpinProfilePost(uint postId, bool pin) public {
@@ -117,14 +117,14 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
 
   function addProfileComment(CommentRequest memory commentRequest) external {
     profiles.addComment(_msgSender(), commentRequest);
-    ketlCred.mint(_msgSender(), 10);
+    kred.mint(_msgSender(), 10);
   }
 
   function addProfileReaction(
     AddReactionRequest memory reactionRequest
   ) external payable {
     profiles.addReaction(_msgSender(), reactionRequest);
-    grantKetlCred(reactionRequest);
+    grantKred(reactionRequest);
   }
 
   function removeProfileReaction(
@@ -137,7 +137,7 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
 
   function addFeedPost(PostRequest memory postRequest) public {
     feeds.addPost(_msgSender(), postRequest);
-    ketlCred.mint(_msgSender(), 50);
+    kred.mint(_msgSender(), 50);
   }
 
   function pinOrUnpinFeedPost(uint feedId, uint postId, bool pin) public {
@@ -152,7 +152,7 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
 
   function addFeedComment(CommentRequest memory commentRequest) public {
     feeds.addComment(_msgSender(), commentRequest);
-    ketlCred.mint(_msgSender(), 10);
+    kred.mint(_msgSender(), 10);
   }
 
   function addBatchFeedComments(
@@ -167,7 +167,7 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
     AddReactionRequest memory reactionRequest
   ) public payable {
     feeds.addReaction(_msgSender(), reactionRequest);
-    grantKetlCred(reactionRequest);
+    grantKred(reactionRequest);
   }
 
   function removeFeedReaction(
@@ -199,24 +199,24 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
     batchAddRemoveReactions(addReactionRequests, removeReactionRequests);
   }
 
-  // KetlCred
+  // Kred
 
-  function grantKetlCred(AddReactionRequest memory reactionRequest) internal {
+  function grantKred(AddReactionRequest memory reactionRequest) internal {
     Post memory post = feeds.getPost(
       reactionRequest.feedId,
       reactionRequest.postId
     );
     if (
-      !ketlCredGranted[reactionRequest.feedId][reactionRequest.postId][
+      !kredGranted[reactionRequest.feedId][reactionRequest.postId][
         reactionRequest.commentId
       ][_msgSender()] &&
       post.author != _msgSender() &&
       reactionRequest.reactionType == 1
     ) {
-      ketlCredGranted[reactionRequest.feedId][reactionRequest.postId][
+      kredGranted[reactionRequest.feedId][reactionRequest.postId][
         reactionRequest.commentId
       ][_msgSender()] = true;
-      ketlCred.mint(post.author, 1);
+      kred.mint(post.author, 1);
     }
   }
 
