@@ -52,7 +52,9 @@ async function main() {
         required: true,
         message: 'KetlAttestationContract address',
         pattern: ethAddressRegex,
-        default: isProduction ? '0x00' : '0x00',
+        default: isProduction
+          ? '0x929Da562A21Fb8bc5f0408Bf6D63e0c82b6f0c4B'
+          : '0x550060f9b15Ae39F924fAbd80958eAB2361Da2D1',
       },
       obssProxyAddress: {
         required: true,
