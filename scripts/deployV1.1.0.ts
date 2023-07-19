@@ -87,6 +87,7 @@ async function main() {
   const ketlCredConstructorArguments = [
     'Ketl',
     'KETL',
+    ketlAttestationAddress as string,
     ketlTeamTokenId as string,
     deployer.address,
     version,
