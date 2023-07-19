@@ -59,45 +59,31 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@big-whale-labs/ketl-attestation-token/contracts/KetlAttestation.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import "./superclasses/KetlGuarded.sol";
 
-contract KetlGuarded is Initializable, OwnableUpgradeable {
-  KetlAttestation public attestationToken;
-  uint public ketlTeamTokenId;
-  address public allowedCaller;
-
-  function initialize(
-    address _attestationToken,
+contract Karma is ERC20Upgradeable, KetlGuarded {
+  function initializeKarma(
+    string memory name,
+    string memory symbol,
     uint _ketlTeamTokenId,
     address _allowedCaller
   ) public initializer {
-    __Ownable_init();
-    attestationToken = KetlAttestation(_attestationToken);
-    ketlTeamTokenId = _ketlTeamTokenId;
-    allowedCaller = _allowedCaller;
+    __ERC20_init(name, symbol);
+    KetlGuarded.initialize(address(this), _ketlTeamTokenId, _allowedCaller);
   }
 
-  function setAllowedCaller(address _allowedCaller) public onlyOwner {
-    allowedCaller = _allowedCaller;
+  function mint(address to, uint amount) public onlyAllowedCaller {
+    _mint(to, amount);
   }
 
-  modifier onlyAllowedCaller() {
-    require(
-      msg.sender == allowedCaller,
-      "AllowedCallerChecker: Only allowed caller can call this function"
-    );
-    _;
-  }
+  function _beforeTokenTransfer(
+    address from,
+    address to,
+    uint amount
+  ) internal virtual override {
+    super._beforeTokenTransfer(from, to, amount);
 
-  modifier onlyKetlTokenOwners(address sender) {
-    for (uint32 i = 0; i < attestationToken.currentTokenId(); i++) {
-      if (attestationToken.balanceOf(sender, i) > 0) {
-        _;
-        return;
-      }
-    }
-    revert("KetlGuarded: sender not allowed");
+    require(from == address(0), "Karma: transfer not allowed");
   }
 }

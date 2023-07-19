@@ -59,7 +59,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "../models/PostAndParticipants.sol";
@@ -69,7 +68,7 @@ import "../models/CommentRequest.sol";
 import "../models/ReactionRequests.sol";
 import "./KetlGuarded.sol";
 
-contract Posts is KetlGuarded, ReentrancyGuardUpgradeable {
+contract Posts is KetlGuarded {
   using Counters for Counters.Counter;
 
   // State
@@ -131,12 +130,6 @@ contract Posts is KetlGuarded, ReentrancyGuardUpgradeable {
   }
 
   // Posts
-  function getPost(
-    uint feedId,
-    uint postId
-  ) external view returns (Post memory) {
-    return posts[feedId][postId];
-  }
 
   function addPost(
     address sender,
@@ -329,7 +322,6 @@ contract Posts is KetlGuarded, ReentrancyGuardUpgradeable {
     onlyAllowedCaller
     onlyKetlTokenOwners(sender)
     onlyAllowedFeedId(reactionRequest.feedId)
-    nonReentrant
   {
     uint feedId = reactionRequest.feedId;
     uint postId = reactionRequest.postId;

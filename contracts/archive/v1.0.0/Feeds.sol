@@ -59,45 +59,36 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@big-whale-labs/ketl-attestation-token/contracts/KetlAttestation.sol";
+import "./superclasses/Posts.sol";
 
-contract KetlGuarded is Initializable, OwnableUpgradeable {
-  KetlAttestation public attestationToken;
-  uint public ketlTeamTokenId;
-  address public allowedCaller;
+contract Feeds is Posts {
+  using Counters for Counters.Counter;
 
-  function initialize(
-    address _attestationToken,
-    uint _ketlTeamTokenId,
-    address _allowedCaller
-  ) public initializer {
-    __Ownable_init();
-    attestationToken = KetlAttestation(_attestationToken);
-    ketlTeamTokenId = _ketlTeamTokenId;
-    allowedCaller = _allowedCaller;
+  // State
+  CID[] public feeds;
+  Counters.Counter public lastFeedId;
+
+  // Events
+  event FeedAdded(uint indexed id, CID metadata);
+
+  // Modifiers
+  modifier onlyAllowedFeedId(uint feedId) override {
+    require(feedId < lastFeedId.current(), "Feed does not exist");
+    _;
   }
-
-  function setAllowedCaller(address _allowedCaller) public onlyOwner {
-    allowedCaller = _allowedCaller;
-  }
-
-  modifier onlyAllowedCaller() {
+  modifier onlyElevatedPriveleges(uint feedId, address sender) override {
     require(
-      msg.sender == allowedCaller,
-      "AllowedCallerChecker: Only allowed caller can call this function"
+      attestationToken.balanceOf(sender, ketlTeamTokenId) > 0,
+      "Sender does not have elevated priveleges"
     );
     _;
   }
 
-  modifier onlyKetlTokenOwners(address sender) {
-    for (uint32 i = 0; i < attestationToken.currentTokenId(); i++) {
-      if (attestationToken.balanceOf(sender, i) > 0) {
-        _;
-        return;
-      }
-    }
-    revert("KetlGuarded: sender not allowed");
+  function addFeed(CID memory feedMetadata) public onlyOwner returns (uint) {
+    uint feedId = lastFeedId.current();
+    feeds.push(feedMetadata);
+    emit FeedAdded(feedId, feedMetadata);
+    lastFeedId.increment();
+    return feedId;
   }
 }
