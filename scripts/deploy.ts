@@ -4,7 +4,7 @@ import { utils } from 'ethers'
 import { version } from '../package.json'
 import addBasicFeeds from './helpers/addBasicFeeds'
 import addContractToPaymaster from './helpers/addContractToPaymaster'
-import deployContact from './deployContract'
+import deployContact from './helpers/deployContract'
 import getPromptData from './helpers/getPromptData'
 
 async function main() {

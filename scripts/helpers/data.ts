@@ -31,3 +31,5 @@ export const basicFeeds = [
     ...hashAndSize,
   },
 ] as CIDStruct[]
+
+export const ethereumRegex = /^0x[a-fA-F0-9]{40}$/
