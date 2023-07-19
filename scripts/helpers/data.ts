@@ -32,4 +32,4 @@ export const basicFeeds = [
   },
 ] as CIDStruct[]
 
-export const ethereumRegex = /^0x[a-fA-F0-9]{40}$/
+export const ethAddressRegex = /^0x[a-fA-F0-9]{40}$/
