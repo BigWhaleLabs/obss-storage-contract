@@ -107,6 +107,7 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
   function addProfilePost(CID memory postMetadata) external {
     uint feedId = uint(keccak256(abi.encodePacked(_msgSender())));
     profiles.addPost(_msgSender(), PostRequest(feedId, postMetadata));
+    ketlCred.mint(_msgSender(), 50);
   }
 
   function pinOrUnpinProfilePost(uint postId, bool pin) public {
@@ -116,6 +117,7 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
 
   function addProfileComment(CommentRequest memory commentRequest) external {
     profiles.addComment(_msgSender(), commentRequest);
+    ketlCred.mint(_msgSender(), 10);
   }
 
   function addProfileReaction(
@@ -133,8 +135,9 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
 
   // Feeds
 
-  function addFeedPost(PostRequest memory postRequest) external {
+  function addFeedPost(PostRequest memory postRequest) public {
     feeds.addPost(_msgSender(), postRequest);
+    ketlCred.mint(_msgSender(), 50);
   }
 
   function pinOrUnpinFeedPost(uint feedId, uint postId, bool pin) public {
@@ -143,19 +146,20 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
 
   function addBatchFeedPosts(PostRequest[] memory postRequests) public {
     for (uint i = 0; i < postRequests.length; i++) {
-      feeds.addPost(_msgSender(), postRequests[i]);
+      addFeedPost(postRequests[i]);
     }
   }
 
-  function addFeedComment(CommentRequest memory commentRequest) external {
+  function addFeedComment(CommentRequest memory commentRequest) public {
     feeds.addComment(_msgSender(), commentRequest);
+    ketlCred.mint(_msgSender(), 10);
   }
 
   function addBatchFeedComments(
     CommentRequest[] memory commentRequests
   ) public {
     for (uint i = 0; i < commentRequests.length; i++) {
-      feeds.addComment(_msgSender(), commentRequests[i]);
+      addFeedComment((commentRequests[i]));
     }
   }
 
