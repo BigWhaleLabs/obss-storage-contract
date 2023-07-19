@@ -1,7 +1,6 @@
 import { GSN_MUMBAI_FORWARDER_CONTRACT_ADDRESS } from '@big-whale-labs/constants'
+import { ethereumRegex } from './data'
 import prompt from 'prompt'
-
-const ethereumRegex = /^0x[a-fA-F0-9]{40}$/
 
 export default function () {
   return prompt.get({

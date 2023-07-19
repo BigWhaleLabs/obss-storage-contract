@@ -63,14 +63,18 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "./superclasses/KetlGuarded.sol";
 
 contract KetlCred is ERC20Upgradeable, KetlGuarded {
+  string public version;
+
   function initializeKetlCred(
     string memory name,
     string memory symbol,
     uint _ketlTeamTokenId,
-    address _allowedCaller
+    address _allowedCaller,
+    string memory _version
   ) public initializer {
     __ERC20_init(name, symbol);
     KetlGuarded.initialize(address(this), _ketlTeamTokenId, _allowedCaller);
+    version = _version;
   }
 
   function mint(address to, uint amount) public onlyAllowedCaller {
