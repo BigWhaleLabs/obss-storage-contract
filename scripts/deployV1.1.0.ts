@@ -1,4 +1,4 @@
-import { Feeds, OBSSStorage, Profiles } from 'typechain'
+import { Feeds, OBSSStorage, Profiles } from '../typechain'
 import { GSN_MUMBAI_FORWARDER_CONTRACT_ADDRESS } from '@big-whale-labs/constants'
 import { chains, ethAddressRegex } from './helpers/data'
 import { ethers, upgrades } from 'hardhat'
