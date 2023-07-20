@@ -1,11 +1,11 @@
-import { Feeds, OBSSStorage, Profiles } from '../typechain'
 import { GSN_MUMBAI_FORWARDER_CONTRACT_ADDRESS } from '@big-whale-labs/constants'
 import { chains, ethAddressRegex } from './helpers/data'
-import { ethers, upgrades } from 'hardhat'
+import { ethers } from 'hardhat'
 import { utils } from 'ethers'
 import { version } from '../package.json'
 import deployContact from './helpers/deployContract'
 import prompt from 'prompt'
+import upgradeAndInitializeContract from './helpers/upgradeAndInitializeContract'
 
 async function main() {
   const [deployer] = await ethers.getSigners()
@@ -85,6 +85,7 @@ async function main() {
 
   // Deploy new Upgradeable Kred contract
   // (not upgrading previous one because we want to reset data)
+  console.log('Deploying Kred v1.1.0')
   const kredConstructorArguments = [
     'Kred',
     'KRED',
@@ -97,7 +98,7 @@ async function main() {
     constructorArguments: kredConstructorArguments,
     contractName: 'Kred',
     chainName,
-    initializer: 'initializeKred',
+    initializer: 'initializeKred', // Kred initializer
   })
 
   const ketlGuardedConstructorArguments = [
@@ -107,38 +108,22 @@ async function main() {
   ] as [string, string, string]
 
   console.log('Upgrading Feeds to v1.1.0')
-  const feedsFactory = await ethers.getContractFactory('Feeds')
-  const feedsContract = (await upgrades.upgradeProxy(
-    feedsProxyAddress as string,
-    feedsFactory
-  )) as Feeds
-  console.log('Feeds upgraded')
-  console.log(
-    await upgrades.erc1967.getImplementationAddress(feedsContract.address),
-    ' getImplementationAddress'
-  )
-  console.log(
-    await upgrades.erc1967.getAdminAddress(feedsContract.address),
-    ' getAdminAddress'
-  )
-  await feedsContract.initialize(...ketlGuardedConstructorArguments)
+  const feedsContract = await upgradeAndInitializeContract({
+    proxyAddress: feedsProxyAddress as string,
+    constructorArguments: ketlGuardedConstructorArguments,
+    contractName: 'Feeds',
+    chainName,
+    initializer: 'initialize', // KetlGuarded initializer
+  })
 
   console.log('Upgrading Profiles to v1.1.0')
-  const profilesFactory = await ethers.getContractFactory('Profiles')
-  const profilesContract = (await upgrades.upgradeProxy(
-    profilesProxyAddress as string,
-    profilesFactory
-  )) as Profiles
-  console.log('Profiles upgraded')
-  console.log(
-    await upgrades.erc1967.getImplementationAddress(profilesContract.address),
-    ' getImplementationAddress'
-  )
-  console.log(
-    await upgrades.erc1967.getAdminAddress(profilesContract.address),
-    ' getAdminAddress'
-  )
-  await profilesContract.initialize(...ketlGuardedConstructorArguments)
+  const profilesContract = await upgradeAndInitializeContract({
+    proxyAddress: feedsProxyAddress as string,
+    constructorArguments: ketlGuardedConstructorArguments,
+    contractName: 'Profiles',
+    chainName,
+    initializer: 'initialize', // KetlGuarded initializer
+  })
 
   console.log('Upgrading OBSSStorage to v1.1.0')
   const obssConstructorArguments = [
@@ -148,23 +133,17 @@ async function main() {
     profilesProxyAddress,
     feedsProxyAddress,
   ] as [string, string, string, string, string]
-  const obssStorageFactory = await ethers.getContractFactory('OBSSStorage')
-  const obssStorage = (await upgrades.upgradeProxy(
-    obssProxyAddress as string,
-    obssStorageFactory
-  )) as OBSSStorage
-  console.log('OBSSStorage upgraded')
-  console.log(
-    await upgrades.erc1967.getImplementationAddress(obssStorage.address),
-    ' getImplementationAddress'
-  )
-  console.log(
-    await upgrades.erc1967.getAdminAddress(obssStorage.address),
-    ' getAdminAddress'
-  )
-  await obssStorage.initialize(...obssConstructorArguments)
+  const obssStorage = await upgradeAndInitializeContract({
+    proxyAddress: obssProxyAddress as string,
+    constructorArguments: obssConstructorArguments,
+    contractName: 'OBSSStorage',
+    chainName,
+    initializer: 'initialize', // OBSSStorage initializer
+  })
 
   await newKredContract.setAllowedCaller(obssStorage.address)
+  await profilesContract.setAllowedCaller(obssStorage.address) // allowedCaller is reset by initialize
+  await feedsContract.setAllowedCaller(obssStorage.address) // allowedCaller is reset by initialize
 }
 
 main().catch((error) => {
