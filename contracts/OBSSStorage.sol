@@ -98,6 +98,28 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
     feeds = Feeds(_feeds);
   }
 
+  // Setters
+
+  function setKredContract(address _kred) public onlyOwner {
+    kred = Kred(_kred);
+  }
+
+  function setProfilesContract(address _profiles) public onlyOwner {
+    profiles = Profiles(_profiles);
+  }
+
+  function setFeedsContract(address _feeds) public onlyOwner {
+    feeds = Feeds(_feeds);
+  }
+
+  function setTrustedForwarder(address _forwarder) public onlyOwner {
+    _setTrustedForwarder(_forwarder);
+  }
+
+  function setVersion(string memory _version) public onlyOwner {
+    version = _version;
+  }
+
   // Profiles
 
   function setProfile(CID memory profileMetadata) external {

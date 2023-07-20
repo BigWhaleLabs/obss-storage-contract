@@ -79,6 +79,10 @@ contract KetlGuarded is Initializable, OwnableUpgradeable {
     allowedCaller = _allowedCaller;
   }
 
+  function setAttestationToken(address _attestationToken) public onlyOwner {
+    attestationToken = KetlAttestation(_attestationToken);
+  }
+
   function setAllowedCaller(address _allowedCaller) public onlyOwner {
     allowedCaller = _allowedCaller;
   }

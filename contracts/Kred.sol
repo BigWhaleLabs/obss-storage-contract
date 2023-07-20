@@ -78,6 +78,10 @@ contract Kred is ERC20Upgradeable, KetlGuarded {
     version = _version;
   }
 
+  function setVersion(string memory _version) public onlyOwner {
+    version = _version;
+  }
+
   function mint(address to, uint amount) public onlyAllowedCaller {
     _mint(to, amount);
   }
