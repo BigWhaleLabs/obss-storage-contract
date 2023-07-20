@@ -1,9 +1,6 @@
+import { ethAddressRegex } from './helpers/data'
 import { ethers, upgrades } from 'hardhat'
 import prompt from 'prompt'
-
-const regexes = {
-  ethereumAddress: /^0x[a-fA-F0-9]{40}$/,
-}
 
 async function main() {
   const factory = await ethers.getContractFactory('OBSSStorage')
@@ -12,7 +9,7 @@ async function main() {
       proxyAddress: {
         required: true,
         message: 'Proxy address',
-        pattern: regexes.ethereumAddress,
+        pattern: ethAddressRegex,
         default: '0x333c1990fCa4d333DEe0458fd56e1F35463c32a9',
       },
     },

@@ -1,19 +1,18 @@
 import { GSN_MUMBAI_FORWARDER_CONTRACT_ADDRESS } from '@big-whale-labs/constants'
+import { ethAddressRegex } from './data'
 import prompt from 'prompt'
-
-const ethereumRegex = /^0x[a-fA-F0-9]{40}$/
 
 export default function () {
   return prompt.get({
     properties: {
       forwarder: {
         required: true,
-        pattern: ethereumRegex,
+        pattern: ethAddressRegex,
         default: GSN_MUMBAI_FORWARDER_CONTRACT_ADDRESS,
       },
       ketlAttestation: {
         required: true,
-        pattern: ethereumRegex,
+        pattern: ethAddressRegex,
         default: '0xe2eAbeB4dA625449BE1460c54508A6202C314008',
       },
       ketlTeamTokenId: {

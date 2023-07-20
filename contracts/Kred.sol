@@ -62,15 +62,20 @@ pragma solidity ^0.8.19;
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "./superclasses/KetlGuarded.sol";
 
-contract KetlCred is ERC20Upgradeable, KetlGuarded {
-  function initializeKetlCred(
+contract Kred is ERC20Upgradeable, KetlGuarded {
+  string public version;
+
+  function initializeKred(
     string memory name,
     string memory symbol,
+    address _attestationToken,
     uint _ketlTeamTokenId,
-    address _allowedCaller
+    address _allowedCaller,
+    string memory _version
   ) public initializer {
     __ERC20_init(name, symbol);
-    KetlGuarded.initialize(address(this), _ketlTeamTokenId, _allowedCaller);
+    KetlGuarded.initialize(_attestationToken, _ketlTeamTokenId, _allowedCaller);
+    version = _version;
   }
 
   function mint(address to, uint amount) public onlyAllowedCaller {
@@ -84,6 +89,6 @@ contract KetlCred is ERC20Upgradeable, KetlGuarded {
   ) internal virtual override {
     super._beforeTokenTransfer(from, to, amount);
 
-    require(from == address(0), "KetlCred: transfer not allowed");
+    require(from == address(0), "Kred: transfer not allowed");
   }
 }
