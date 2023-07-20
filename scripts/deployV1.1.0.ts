@@ -5,7 +5,7 @@ import { utils } from 'ethers'
 import { version } from '../package.json'
 import deployContact from './helpers/deployContract'
 import prompt from 'prompt'
-import upgradeAndInitializeContract from './helpers/upgradeContract'
+import upgradeContract from './helpers/upgradeContract'
 
 async function main() {
   const [deployer] = await ethers.getSigners()
@@ -95,21 +95,21 @@ async function main() {
   })) as Kred
 
   console.log('Upgrading Feeds to v1.1.0')
-  await upgradeAndInitializeContract({
+  await upgradeContract({
     proxyAddress: feedsProxyAddress as string,
     contractName: 'Feeds',
     chainName,
   })
 
   console.log('Upgrading Profiles to v1.1.0')
-  await upgradeAndInitializeContract({
+  await upgradeContract({
     proxyAddress: profilesProxyAddress as string,
     contractName: 'Profiles',
     chainName,
   })
 
   console.log('Upgrading OBSSStorage to v1.1.0')
-  const obssStorage = (await upgradeAndInitializeContract({
+  const obssStorage = (await upgradeContract({
     proxyAddress: obssProxyAddress as string,
     contractName: 'OBSSStorage',
     chainName,
