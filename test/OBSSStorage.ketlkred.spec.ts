@@ -32,7 +32,14 @@ describe('OBSSStorage: Kred', () => {
       ])) as Profiles
       this.kred = (await upgrades.deployProxy(
         this.kredFactory,
-        ['Ketl', 'KETL', 0, this.owner.address],
+        [
+          'Ketl',
+          'KETL',
+          this.fakeKetlAttestationContract.address,
+          0,
+          this.owner.address,
+          'v1.1.0',
+        ],
         {
           initializer: 'initializeKred',
         }
@@ -67,14 +74,26 @@ describe('OBSSStorage: Kred', () => {
       })
     })
 
-    it('should grant Kred when feedPost is upvoted by different user', async function () {
+    it('should grant 50 Kred when feedPost is created', async function () {
+      expect(await this.kred.balanceOf(this.owner.address)).to.equal(50)
+    })
+    it('should grant 10 Kred when feedPost is commented', async function () {
+      await this.obssStorage.addFeedComment({
+        feedId: 0,
+        postId: 0,
+        replyTo: 0,
+        commentMetadata: MOCK_CID,
+      })
+      expect(await this.kred.balanceOf(this.owner.address)).to.equal(60)
+    })
+    it('should grant 1 Kred when feedPost is upvoted by different user', async function () {
       await this.obssStorage.connect(this.user).addFeedReaction({
         feedId: 0,
         postId: 0,
         commentId: 0,
         reactionType: 1,
       })
-      expect(await this.kred.balanceOf(this.owner.address)).to.equal(1)
+      expect(await this.kred.balanceOf(this.owner.address)).to.equal(51)
     })
     it('should not grant Kred when feedPost is downvoted by user', async function () {
       await this.obssStorage.connect(this.user).addFeedReaction({
@@ -83,7 +102,7 @@ describe('OBSSStorage: Kred', () => {
         commentId: 0,
         reactionType: 2,
       })
-      expect(await this.kred.balanceOf(this.owner.address)).to.equal(0)
+      expect(await this.kred.balanceOf(this.owner.address)).to.equal(50)
     })
     it('should not grant Kred when feedPost is upvoted by author', async function () {
       await this.obssStorage.connect(this.owner).addFeedReaction({
@@ -92,7 +111,7 @@ describe('OBSSStorage: Kred', () => {
         commentId: 0,
         reactionType: 1,
       })
-      expect(await this.kred.balanceOf(this.owner.address)).to.equal(0)
+      expect(await this.kred.balanceOf(this.owner.address)).to.equal(50)
     })
     it('should not burn Kred when upvote is replaced with downvote', async function () {
       await this.obssStorage.connect(this.user).addFeedReaction({
@@ -121,7 +140,7 @@ describe('OBSSStorage: Kred', () => {
         this.user.address
       )
       expect(reactionAfter.reactionType).to.equal(2)
-      expect(await this.kred.balanceOf(this.owner.address)).to.equal(1)
+      expect(await this.kred.balanceOf(this.owner.address)).to.equal(51)
     })
     it('should not burn Kred when upvote is removed', async function () {
       await this.obssStorage.connect(this.user).addFeedReaction({
@@ -150,7 +169,7 @@ describe('OBSSStorage: Kred', () => {
         this.user.address
       )
       expect(reactionAfter.sender).to.equal(zeroAddress)
-      expect(await this.kred.balanceOf(this.owner.address)).to.equal(1)
+      expect(await this.kred.balanceOf(this.owner.address)).to.equal(51)
     })
   })
 })
