@@ -1,5 +1,6 @@
 import { ethers, run, upgrades } from 'hardhat'
 import { utils } from 'ethers'
+import getScannerUrl from './getScannerUrl'
 import parseError from './parseError'
 
 export default async function ({
@@ -61,9 +62,7 @@ export default async function ({
   console.log(`${contractName} contract address: `, contract.address)
   console.log(
     `${contractName} scanner URL:`,
-    `https://${
-      chainName === 'polygon' ? '' : `${chainName}.`
-    }polygonscan.com/address/${contract.address}`
+    getScannerUrl(chainName, contract.address)
   )
   console.log('---------------')
 
