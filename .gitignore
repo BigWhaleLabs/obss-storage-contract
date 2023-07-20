@@ -5,7 +5,6 @@ coverage.json
 typechain
 .DS_Store
 dist
-.openzeppelin
 
 # Hardhat files
 cache
