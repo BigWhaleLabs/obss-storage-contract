@@ -1,11 +1,11 @@
-import { GSN_MUMBAI_FORWARDER_CONTRACT_ADDRESS } from '@big-whale-labs/constants'
+import { Kred, OBSSStorage } from '../typechain'
 import { chains, ethAddressRegex } from './helpers/data'
 import { ethers } from 'hardhat'
 import { utils } from 'ethers'
 import { version } from '../package.json'
 import deployContact from './helpers/deployContract'
 import prompt from 'prompt'
-import upgradeAndInitializeContract from './helpers/upgradeAndInitializeContract'
+import upgradeContract from './helpers/upgradeContract'
 
 async function main() {
   const [deployer] = await ethers.getSigners()
@@ -30,7 +30,6 @@ async function main() {
   })
 
   const {
-    forwarder,
     ketlTeamTokenId,
     ketlAttestationAddress,
     obssProxyAddress,
@@ -38,11 +37,6 @@ async function main() {
     feedsProxyAddress,
   } = await prompt.get({
     properties: {
-      forwarder: {
-        required: true,
-        pattern: ethAddressRegex,
-        default: GSN_MUMBAI_FORWARDER_CONTRACT_ADDRESS,
-      },
       ketlTeamTokenId: {
         required: true,
         type: 'number',
@@ -83,9 +77,8 @@ async function main() {
     },
   })
 
-  // Deploy new Upgradeable Kred contract
-  // (not upgrading previous one because we want to reset data)
   console.log('Deploying Kred v1.1.0')
+  // (not upgrading previous one because we want to reset data)
   const kredConstructorArguments = [
     'Kred',
     'KRED',
@@ -94,56 +87,37 @@ async function main() {
     deployer.address,
     version,
   ]
-  const newKredContract = await deployContact({
+  const newKredContract = (await deployContact({
     constructorArguments: kredConstructorArguments,
     contractName: 'Kred',
     chainName,
-    initializer: 'initializeKred', // Kred initializer
-  })
-
-  const ketlGuardedConstructorArguments = [
-    ketlAttestationAddress,
-    String(ketlTeamTokenId),
-    deployer.address,
-  ] as [string, string, string]
+    initializer: 'initializeKred',
+  })) as Kred
 
   console.log('Upgrading Feeds to v1.1.0')
-  const feedsContract = await upgradeAndInitializeContract({
+  await upgradeContract({
     proxyAddress: feedsProxyAddress as string,
-    constructorArguments: ketlGuardedConstructorArguments,
     contractName: 'Feeds',
     chainName,
-    initializer: 'initialize', // KetlGuarded initializer
   })
 
   console.log('Upgrading Profiles to v1.1.0')
-  const profilesContract = await upgradeAndInitializeContract({
+  await upgradeContract({
     proxyAddress: profilesProxyAddress as string,
-    constructorArguments: ketlGuardedConstructorArguments,
     contractName: 'Profiles',
     chainName,
-    initializer: 'initialize', // KetlGuarded initializer
   })
 
   console.log('Upgrading OBSSStorage to v1.1.0')
-  const obssConstructorArguments = [
-    forwarder,
-    version,
-    newKredContract.address,
-    profilesProxyAddress,
-    feedsProxyAddress,
-  ] as [string, string, string, string, string]
-  const obssStorage = await upgradeAndInitializeContract({
+  const obssStorage = (await upgradeContract({
     proxyAddress: obssProxyAddress as string,
-    constructorArguments: obssConstructorArguments,
     contractName: 'OBSSStorage',
     chainName,
-    initializer: 'initialize', // OBSSStorage initializer
-  })
+  })) as OBSSStorage
 
   await newKredContract.setAllowedCaller(obssStorage.address)
-  await profilesContract.setAllowedCaller(obssStorage.address) // allowedCaller is reset by initialize
-  await feedsContract.setAllowedCaller(obssStorage.address) // allowedCaller is reset by initialize
+  await obssStorage.setKredContract(newKredContract.address)
+  await obssStorage.setVersion(version)
 }
 
 main().catch((error) => {
