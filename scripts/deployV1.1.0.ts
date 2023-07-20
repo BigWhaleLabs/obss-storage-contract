@@ -118,7 +118,7 @@ async function main() {
 
   console.log('Upgrading Profiles to v1.1.0')
   const profilesContract = await upgradeAndInitializeContract({
-    proxyAddress: feedsProxyAddress as string,
+    proxyAddress: profilesProxyAddress as string,
     constructorArguments: ketlGuardedConstructorArguments,
     contractName: 'Profiles',
     chainName,
