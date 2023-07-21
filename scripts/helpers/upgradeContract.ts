@@ -15,6 +15,7 @@ export default async function ({
   console.log(`Upgrading ${contractName} at proxy address ${proxyAddress}...`)
   const contractFactory = await ethers.getContractFactory(contractName)
   const contract = await upgrades.upgradeProxy(proxyAddress, contractFactory)
+  await contract.deployed()
 
   console.log('Wait for 15 seconds to make sure blockchain is updated')
   await new Promise((resolve) => setTimeout(resolve, 15 * 1000))
