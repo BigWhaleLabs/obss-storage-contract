@@ -129,7 +129,7 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
   function addProfilePost(CID memory postMetadata) external {
     uint feedId = uint(keccak256(abi.encodePacked(_msgSender())));
     profiles.addPost(_msgSender(), PostRequest(feedId, postMetadata));
-    kred.mint(_msgSender(), 50);
+    kred.mint(_msgSender(), 5);
   }
 
   function pinOrUnpinProfilePost(uint postId, bool pin) public {
@@ -139,7 +139,7 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
 
   function addProfileComment(CommentRequest memory commentRequest) external {
     profiles.addComment(_msgSender(), commentRequest);
-    kred.mint(_msgSender(), 10);
+    kred.mint(_msgSender(), 5);
   }
 
   function addProfileReaction(
@@ -159,7 +159,7 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
 
   function addFeedPost(PostRequest memory postRequest) public {
     feeds.addPost(_msgSender(), postRequest);
-    kred.mint(_msgSender(), 50);
+    kred.mint(_msgSender(), 5);
   }
 
   function pinOrUnpinFeedPost(uint feedId, uint postId, bool pin) public {
@@ -174,7 +174,7 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
 
   function addFeedComment(CommentRequest memory commentRequest) public {
     feeds.addComment(_msgSender(), commentRequest);
-    kred.mint(_msgSender(), 10);
+    kred.mint(_msgSender(), 5);
   }
 
   function addBatchFeedComments(
@@ -238,7 +238,7 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
       kredGranted[reactionRequest.feedId][reactionRequest.postId][
         reactionRequest.commentId
       ][_msgSender()] = true;
-      kred.mint(post.author, 1);
+      kred.mint(post.author, 5);
     }
   }
 
