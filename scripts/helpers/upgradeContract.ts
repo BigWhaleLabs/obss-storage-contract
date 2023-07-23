@@ -15,6 +15,10 @@ export default async function ({
   console.log(`Upgrading ${contractName} at proxy address ${proxyAddress}...`)
   const contractFactory = await ethers.getContractFactory(contractName)
   const contract = await upgrades.upgradeProxy(proxyAddress, contractFactory)
+  await contract.deployed()
+
+  console.log('Wait for 15 seconds to make sure blockchain is updated')
+  await new Promise((resolve) => setTimeout(resolve, 15 * 1000))
 
   const contractImplementationAddress =
     await upgrades.erc1967.getImplementationAddress(contract.address)
@@ -29,9 +33,6 @@ export default async function ({
     contractImplementationAddress
   )
   console.log(`${contractName} Admin address: `, contractAdminAddress)
-
-  console.log('Wait for 15 seconds to make sure blockchain is updated')
-  await new Promise((resolve) => setTimeout(resolve, 15 * 1000))
 
   console.log(`Verifying ${contractName} Implementation contract`)
   try {

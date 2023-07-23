@@ -1,0 +1,2005 @@
+{
+  "manifestVersion": "3.2",
+  "admin": {
+    "address": "0x9d1a0f9C510fDeC39686F93c257101cd267FAEF0"
+  },
+  "proxies": [
+    {
+      "address": "0x6deC0F6832772fC7F511E2ccFe1c5d046a174d5F",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x39d8EA89705B02bc020B9E1dF369C4d746761e44",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xDEEbFc3aab311EA6da04fE0541074722313A4DC4",
+      "kind": "transparent"
+    }
+  ],
+  "impls": {
+    "4a43f476503a304e74887b7a46e21404487e27a570cdf7e43684d8dddd751c4c": {
+      "address": "0x2eC705486C9Ea8D117A4d0f7bF64cdF5473Fe82A",
+      "layout": {
+        "solcVersion": "0.8.19",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:94"
+          },
+          {
+            "label": "attestationToken",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_contract(KetlAttestation)539",
+            "contract": "KetlGuarded",
+            "src": "contracts/superclasses/KetlGuarded.sol:68"
+          },
+          {
+            "label": "ketlTeamTokenId",
+            "offset": 0,
+            "slot": "102",
+            "type": "t_uint256",
+            "contract": "KetlGuarded",
+            "src": "contracts/superclasses/KetlGuarded.sol:69"
+          },
+          {
+            "label": "allowedCaller",
+            "offset": 0,
+            "slot": "103",
+            "type": "t_address",
+            "contract": "KetlGuarded",
+            "src": "contracts/superclasses/KetlGuarded.sol:71"
+          },
+          {
+            "label": "posts",
+            "offset": 0,
+            "slot": "104",
+            "type": "t_mapping(t_uint256,t_array(t_struct(Post)5716_storage)dyn_storage)",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:76"
+          },
+          {
+            "label": "pinnedPosts",
+            "offset": 0,
+            "slot": "105",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_bool))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:76"
+          },
+          {
+            "label": "lastPostIds",
+            "offset": 0,
+            "slot": "106",
+            "type": "t_mapping(t_uint256,t_struct(Counter)3947_storage)",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:77"
+          },
+          {
+            "label": "participants",
+            "offset": 0,
+            "slot": "107",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_array(t_address)dyn_storage))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:78"
+          },
+          {
+            "label": "participantsMap",
+            "offset": 0,
+            "slot": "108",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_address,t_bool)))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:79"
+          },
+          {
+            "label": "comments",
+            "offset": 0,
+            "slot": "109",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_array(t_struct(Post)5716_storage)dyn_storage))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:82"
+          },
+          {
+            "label": "lastCommentIds",
+            "offset": 0,
+            "slot": "110",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_struct(Counter)3947_storage))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:83"
+          },
+          {
+            "label": "reactions",
+            "offset": 0,
+            "slot": "111",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_uint256,t_array(t_struct(Reaction)5752_storage)dyn_storage)))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:85"
+          },
+          {
+            "label": "lastReactionIds",
+            "offset": 0,
+            "slot": "112",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_uint256,t_struct(Counter)3947_storage)))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:87"
+          },
+          {
+            "label": "usersToReactions",
+            "offset": 0,
+            "slot": "113",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_address,t_struct(Reaction)5752_storage))))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:89"
+          },
+          {
+            "label": "feeds",
+            "offset": 0,
+            "slot": "114",
+            "type": "t_array(t_struct(CID)5686_storage)dyn_storage",
+            "contract": "Feeds",
+            "src": "contracts/Feeds.sol:69"
+          },
+          {
+            "label": "lastFeedId",
+            "offset": 0,
+            "slot": "115",
+            "type": "t_struct(Counter)3947_storage",
+            "contract": "Feeds",
+            "src": "contracts/Feeds.sol:71"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_address)dyn_storage": {
+            "label": "address[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_struct(CID)5686_storage)dyn_storage": {
+            "label": "struct CID[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_struct(Post)5716_storage)dyn_storage": {
+            "label": "struct Post[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_struct(Reaction)5752_storage)dyn_storage": {
+            "label": "struct Reaction[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(KetlAttestation)539": {
+            "label": "contract KetlAttestation",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(Reaction)5752_storage)": {
+            "label": "mapping(address => struct Reaction)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_array(t_address)dyn_storage)": {
+            "label": "mapping(uint256 => address[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_array(t_struct(Post)5716_storage)dyn_storage)": {
+            "label": "mapping(uint256 => struct Post[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_array(t_struct(Reaction)5752_storage)dyn_storage)": {
+            "label": "mapping(uint256 => struct Reaction[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_bool)": {
+            "label": "mapping(uint256 => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_address,t_bool))": {
+            "label": "mapping(uint256 => mapping(address => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_address,t_struct(Reaction)5752_storage))": {
+            "label": "mapping(uint256 => mapping(address => struct Reaction))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_array(t_address)dyn_storage))": {
+            "label": "mapping(uint256 => mapping(uint256 => address[]))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_array(t_struct(Post)5716_storage)dyn_storage))": {
+            "label": "mapping(uint256 => mapping(uint256 => struct Post[]))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_array(t_struct(Reaction)5752_storage)dyn_storage))": {
+            "label": "mapping(uint256 => mapping(uint256 => struct Reaction[]))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_bool))": {
+            "label": "mapping(uint256 => mapping(uint256 => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_address,t_bool)))": {
+            "label": "mapping(uint256 => mapping(uint256 => mapping(address => bool)))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_address,t_struct(Reaction)5752_storage)))": {
+            "label": "mapping(uint256 => mapping(uint256 => mapping(address => struct Reaction)))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_uint256,t_array(t_struct(Reaction)5752_storage)dyn_storage)))": {
+            "label": "mapping(uint256 => mapping(uint256 => mapping(uint256 => struct Reaction[])))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_address,t_struct(Reaction)5752_storage))))": {
+            "label": "mapping(uint256 => mapping(uint256 => mapping(uint256 => mapping(address => struct Reaction))))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_uint256,t_struct(Counter)3947_storage)))": {
+            "label": "mapping(uint256 => mapping(uint256 => mapping(uint256 => struct Counters.Counter)))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_struct(Counter)3947_storage))": {
+            "label": "mapping(uint256 => mapping(uint256 => struct Counters.Counter))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(Counter)3947_storage)": {
+            "label": "mapping(uint256 => struct Counters.Counter)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(CID)5686_storage": {
+            "label": "struct CID",
+            "members": [
+              {
+                "label": "digest",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "hashFunction",
+                "type": "t_uint8",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "size",
+                "type": "t_uint8",
+                "offset": 1,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Counter)3947_storage": {
+            "label": "struct Counters.Counter",
+            "members": [
+              {
+                "label": "_value",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(Post)5716_storage": {
+            "label": "struct Post",
+            "members": [
+              {
+                "label": "author",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "metadata",
+                "type": "t_struct(CID)5686_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "timestamp",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "threadId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "replyTo",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "numberOfComments",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "6"
+              }
+            ],
+            "numberOfBytes": "224"
+          },
+          "t_struct(Reaction)5752_storage": {
+            "label": "struct Reaction",
+            "members": [
+              {
+                "label": "sender",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "feedId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "postId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "commentId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "reactionType",
+                "type": "t_uint8",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "reactionId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "value",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "6"
+              }
+            ],
+            "numberOfBytes": "224"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "d54d6b5f78698c15edf6734b176de9c6bff2ad64564fe5db61fdde2167423b69": {
+      "address": "0xAC7309b0Df445D5dD95955e2DE089aD20EcFAB92",
+      "layout": {
+        "solcVersion": "0.8.19",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:94"
+          },
+          {
+            "label": "attestationToken",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_contract(KetlAttestation)539",
+            "contract": "KetlGuarded",
+            "src": "contracts/superclasses/KetlGuarded.sol:68"
+          },
+          {
+            "label": "ketlTeamTokenId",
+            "offset": 0,
+            "slot": "102",
+            "type": "t_uint256",
+            "contract": "KetlGuarded",
+            "src": "contracts/superclasses/KetlGuarded.sol:69"
+          },
+          {
+            "label": "allowedCaller",
+            "offset": 0,
+            "slot": "103",
+            "type": "t_address",
+            "contract": "KetlGuarded",
+            "src": "contracts/superclasses/KetlGuarded.sol:71"
+          },
+          {
+            "label": "posts",
+            "offset": 0,
+            "slot": "104",
+            "type": "t_mapping(t_uint256,t_array(t_struct(Post)5716_storage)dyn_storage)",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:76"
+          },
+          {
+            "label": "pinnedPosts",
+            "offset": 0,
+            "slot": "105",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_bool))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:76"
+          },
+          {
+            "label": "lastPostIds",
+            "offset": 0,
+            "slot": "106",
+            "type": "t_mapping(t_uint256,t_struct(Counter)3947_storage)",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:77"
+          },
+          {
+            "label": "participants",
+            "offset": 0,
+            "slot": "107",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_array(t_address)dyn_storage))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:78"
+          },
+          {
+            "label": "participantsMap",
+            "offset": 0,
+            "slot": "108",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_address,t_bool)))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:79"
+          },
+          {
+            "label": "comments",
+            "offset": 0,
+            "slot": "109",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_array(t_struct(Post)5716_storage)dyn_storage))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:82"
+          },
+          {
+            "label": "lastCommentIds",
+            "offset": 0,
+            "slot": "110",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_struct(Counter)3947_storage))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:83"
+          },
+          {
+            "label": "reactions",
+            "offset": 0,
+            "slot": "111",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_uint256,t_array(t_struct(Reaction)5752_storage)dyn_storage)))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:85"
+          },
+          {
+            "label": "lastReactionIds",
+            "offset": 0,
+            "slot": "112",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_uint256,t_struct(Counter)3947_storage)))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:87"
+          },
+          {
+            "label": "usersToReactions",
+            "offset": 0,
+            "slot": "113",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_address,t_struct(Reaction)5752_storage))))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:89"
+          },
+          {
+            "label": "profiles",
+            "offset": 0,
+            "slot": "114",
+            "type": "t_mapping(t_address,t_struct(CID)5686_storage)",
+            "contract": "Profiles",
+            "src": "contracts/Profiles.sol:68"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_address)dyn_storage": {
+            "label": "address[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_struct(Post)5716_storage)dyn_storage": {
+            "label": "struct Post[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_struct(Reaction)5752_storage)dyn_storage": {
+            "label": "struct Reaction[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(KetlAttestation)539": {
+            "label": "contract KetlAttestation",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(CID)5686_storage)": {
+            "label": "mapping(address => struct CID)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(Reaction)5752_storage)": {
+            "label": "mapping(address => struct Reaction)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_array(t_address)dyn_storage)": {
+            "label": "mapping(uint256 => address[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_array(t_struct(Post)5716_storage)dyn_storage)": {
+            "label": "mapping(uint256 => struct Post[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_array(t_struct(Reaction)5752_storage)dyn_storage)": {
+            "label": "mapping(uint256 => struct Reaction[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_bool)": {
+            "label": "mapping(uint256 => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_address,t_bool))": {
+            "label": "mapping(uint256 => mapping(address => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_address,t_struct(Reaction)5752_storage))": {
+            "label": "mapping(uint256 => mapping(address => struct Reaction))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_array(t_address)dyn_storage))": {
+            "label": "mapping(uint256 => mapping(uint256 => address[]))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_array(t_struct(Post)5716_storage)dyn_storage))": {
+            "label": "mapping(uint256 => mapping(uint256 => struct Post[]))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_array(t_struct(Reaction)5752_storage)dyn_storage))": {
+            "label": "mapping(uint256 => mapping(uint256 => struct Reaction[]))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_bool))": {
+            "label": "mapping(uint256 => mapping(uint256 => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_address,t_bool)))": {
+            "label": "mapping(uint256 => mapping(uint256 => mapping(address => bool)))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_address,t_struct(Reaction)5752_storage)))": {
+            "label": "mapping(uint256 => mapping(uint256 => mapping(address => struct Reaction)))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_uint256,t_array(t_struct(Reaction)5752_storage)dyn_storage)))": {
+            "label": "mapping(uint256 => mapping(uint256 => mapping(uint256 => struct Reaction[])))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_address,t_struct(Reaction)5752_storage))))": {
+            "label": "mapping(uint256 => mapping(uint256 => mapping(uint256 => mapping(address => struct Reaction))))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_uint256,t_struct(Counter)3947_storage)))": {
+            "label": "mapping(uint256 => mapping(uint256 => mapping(uint256 => struct Counters.Counter)))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_struct(Counter)3947_storage))": {
+            "label": "mapping(uint256 => mapping(uint256 => struct Counters.Counter))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(Counter)3947_storage)": {
+            "label": "mapping(uint256 => struct Counters.Counter)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(CID)5686_storage": {
+            "label": "struct CID",
+            "members": [
+              {
+                "label": "digest",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "hashFunction",
+                "type": "t_uint8",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "size",
+                "type": "t_uint8",
+                "offset": 1,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Counter)3947_storage": {
+            "label": "struct Counters.Counter",
+            "members": [
+              {
+                "label": "_value",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(Post)5716_storage": {
+            "label": "struct Post",
+            "members": [
+              {
+                "label": "author",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "metadata",
+                "type": "t_struct(CID)5686_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "timestamp",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "threadId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "replyTo",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "numberOfComments",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "6"
+              }
+            ],
+            "numberOfBytes": "224"
+          },
+          "t_struct(Reaction)5752_storage": {
+            "label": "struct Reaction",
+            "members": [
+              {
+                "label": "sender",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "feedId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "postId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "commentId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "reactionType",
+                "type": "t_uint8",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "reactionId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "value",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "6"
+              }
+            ],
+            "numberOfBytes": "224"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "40017f5ca4f3e1e00bdc862944d6ccfbbf0e6ac2891c72c72ec513da1aec8123": {
+      "address": "0x72df6827B35042b2a8069088DEdfA6c6aB1D165D",
+      "layout": {
+        "solcVersion": "0.8.19",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:94"
+          },
+          {
+            "label": "_trustedForwarder",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_address",
+            "contract": "ERC2771Recipient",
+            "src": "@opengsn/contracts/src/ERC2771Recipient.sol:21"
+          },
+          {
+            "label": "version",
+            "offset": 0,
+            "slot": "102",
+            "type": "t_string_storage",
+            "contract": "OBSSStorage",
+            "src": "contracts/OBSSStorage.sol:75"
+          },
+          {
+            "label": "karma",
+            "offset": 0,
+            "slot": "103",
+            "type": "t_contract(Karma)5125",
+            "contract": "OBSSStorage",
+            "src": "contracts/OBSSStorage.sol:76"
+          },
+          {
+            "label": "profiles",
+            "offset": 0,
+            "slot": "104",
+            "type": "t_contract(Profiles)5677",
+            "contract": "OBSSStorage",
+            "src": "contracts/OBSSStorage.sol:77"
+          },
+          {
+            "label": "feeds",
+            "offset": 0,
+            "slot": "105",
+            "type": "t_contract(Feeds)5042",
+            "contract": "OBSSStorage",
+            "src": "contracts/OBSSStorage.sol:78"
+          },
+          {
+            "label": "karmaGranted",
+            "offset": 0,
+            "slot": "106",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_address,t_bool))))",
+            "contract": "OBSSStorage",
+            "src": "contracts/OBSSStorage.sol:78"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_contract(Feeds)5042": {
+            "label": "contract Feeds",
+            "numberOfBytes": "20"
+          },
+          "t_contract(Karma)5125": {
+            "label": "contract Karma",
+            "numberOfBytes": "20"
+          },
+          "t_contract(Profiles)5677": {
+            "label": "contract Profiles",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_address,t_bool))": {
+            "label": "mapping(uint256 => mapping(address => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_address,t_bool)))": {
+            "label": "mapping(uint256 => mapping(uint256 => mapping(address => bool)))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_address,t_bool))))": {
+            "label": "mapping(uint256 => mapping(uint256 => mapping(uint256 => mapping(address => bool))))",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "ef36ce3eb05d4935f334eca116067db7c1ec2dc97c38898315b68b8c191dd3a3": {
+      "address": "0x52134489717Da3b27D702a7B46e36F74E2D849e5",
+      "txHash": "0x20cc21db2562b3b08eecffdce96b2a5b147a068392583a96dd94145e7bebbe76",
+      "layout": {
+        "solcVersion": "0.8.19",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:94"
+          },
+          {
+            "label": "attestationToken",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_contract(KetlAttestation)539",
+            "contract": "KetlGuarded",
+            "src": "contracts/superclasses/KetlGuarded.sol:68"
+          },
+          {
+            "label": "ketlTeamTokenId",
+            "offset": 0,
+            "slot": "102",
+            "type": "t_uint256",
+            "contract": "KetlGuarded",
+            "src": "contracts/superclasses/KetlGuarded.sol:69"
+          },
+          {
+            "label": "allowedCaller",
+            "offset": 0,
+            "slot": "103",
+            "type": "t_address",
+            "contract": "KetlGuarded",
+            "src": "contracts/superclasses/KetlGuarded.sol:71"
+          },
+          {
+            "label": "posts",
+            "offset": 0,
+            "slot": "104",
+            "type": "t_mapping(t_uint256,t_array(t_struct(Post)5848_storage)dyn_storage)",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:76"
+          },
+          {
+            "label": "pinnedPosts",
+            "offset": 0,
+            "slot": "105",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_bool))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:76"
+          },
+          {
+            "label": "lastPostIds",
+            "offset": 0,
+            "slot": "106",
+            "type": "t_mapping(t_uint256,t_struct(Counter)3947_storage)",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:77"
+          },
+          {
+            "label": "participants",
+            "offset": 0,
+            "slot": "107",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_array(t_address)dyn_storage))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:78"
+          },
+          {
+            "label": "participantsMap",
+            "offset": 0,
+            "slot": "108",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_address,t_bool)))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:79"
+          },
+          {
+            "label": "comments",
+            "offset": 0,
+            "slot": "109",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_array(t_struct(Post)5848_storage)dyn_storage))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:82"
+          },
+          {
+            "label": "lastCommentIds",
+            "offset": 0,
+            "slot": "110",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_struct(Counter)3947_storage))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:83"
+          },
+          {
+            "label": "reactions",
+            "offset": 0,
+            "slot": "111",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_uint256,t_array(t_struct(Reaction)5884_storage)dyn_storage)))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:85"
+          },
+          {
+            "label": "lastReactionIds",
+            "offset": 0,
+            "slot": "112",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_uint256,t_struct(Counter)3947_storage)))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:87"
+          },
+          {
+            "label": "usersToReactions",
+            "offset": 0,
+            "slot": "113",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_address,t_struct(Reaction)5884_storage))))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:89"
+          },
+          {
+            "label": "feeds",
+            "offset": 0,
+            "slot": "114",
+            "type": "t_array(t_struct(CID)5818_storage)dyn_storage",
+            "contract": "Feeds",
+            "src": "contracts/Feeds.sol:69"
+          },
+          {
+            "label": "lastFeedId",
+            "offset": 0,
+            "slot": "115",
+            "type": "t_struct(Counter)3947_storage",
+            "contract": "Feeds",
+            "src": "contracts/Feeds.sol:71"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_address)dyn_storage": {
+            "label": "address[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_struct(CID)5818_storage)dyn_storage": {
+            "label": "struct CID[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_struct(Post)5848_storage)dyn_storage": {
+            "label": "struct Post[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_struct(Reaction)5884_storage)dyn_storage": {
+            "label": "struct Reaction[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(KetlAttestation)539": {
+            "label": "contract KetlAttestation",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(Reaction)5884_storage)": {
+            "label": "mapping(address => struct Reaction)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_array(t_address)dyn_storage)": {
+            "label": "mapping(uint256 => address[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_array(t_struct(Post)5848_storage)dyn_storage)": {
+            "label": "mapping(uint256 => struct Post[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_array(t_struct(Reaction)5884_storage)dyn_storage)": {
+            "label": "mapping(uint256 => struct Reaction[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_bool)": {
+            "label": "mapping(uint256 => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_address,t_bool))": {
+            "label": "mapping(uint256 => mapping(address => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_address,t_struct(Reaction)5884_storage))": {
+            "label": "mapping(uint256 => mapping(address => struct Reaction))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_array(t_address)dyn_storage))": {
+            "label": "mapping(uint256 => mapping(uint256 => address[]))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_array(t_struct(Post)5848_storage)dyn_storage))": {
+            "label": "mapping(uint256 => mapping(uint256 => struct Post[]))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_array(t_struct(Reaction)5884_storage)dyn_storage))": {
+            "label": "mapping(uint256 => mapping(uint256 => struct Reaction[]))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_bool))": {
+            "label": "mapping(uint256 => mapping(uint256 => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_address,t_bool)))": {
+            "label": "mapping(uint256 => mapping(uint256 => mapping(address => bool)))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_address,t_struct(Reaction)5884_storage)))": {
+            "label": "mapping(uint256 => mapping(uint256 => mapping(address => struct Reaction)))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_uint256,t_array(t_struct(Reaction)5884_storage)dyn_storage)))": {
+            "label": "mapping(uint256 => mapping(uint256 => mapping(uint256 => struct Reaction[])))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_address,t_struct(Reaction)5884_storage))))": {
+            "label": "mapping(uint256 => mapping(uint256 => mapping(uint256 => mapping(address => struct Reaction))))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_uint256,t_struct(Counter)3947_storage)))": {
+            "label": "mapping(uint256 => mapping(uint256 => mapping(uint256 => struct Counters.Counter)))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_struct(Counter)3947_storage))": {
+            "label": "mapping(uint256 => mapping(uint256 => struct Counters.Counter))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(Counter)3947_storage)": {
+            "label": "mapping(uint256 => struct Counters.Counter)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(CID)5818_storage": {
+            "label": "struct CID",
+            "members": [
+              {
+                "label": "digest",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "hashFunction",
+                "type": "t_uint8",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "size",
+                "type": "t_uint8",
+                "offset": 1,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Counter)3947_storage": {
+            "label": "struct Counters.Counter",
+            "members": [
+              {
+                "label": "_value",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(Post)5848_storage": {
+            "label": "struct Post",
+            "members": [
+              {
+                "label": "author",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "metadata",
+                "type": "t_struct(CID)5818_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "timestamp",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "threadId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "replyTo",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "numberOfComments",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "6"
+              }
+            ],
+            "numberOfBytes": "224"
+          },
+          "t_struct(Reaction)5884_storage": {
+            "label": "struct Reaction",
+            "members": [
+              {
+                "label": "sender",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "feedId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "postId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "commentId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "reactionType",
+                "type": "t_uint8",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "reactionId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "value",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "6"
+              }
+            ],
+            "numberOfBytes": "224"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "148b03ccf35321f3277a5317ee1bb592d470b8ef34a04acf7289006c64c12f20": {
+      "address": "0xB332225818f0D60F58A72F5F8a638C2261adca5c",
+      "txHash": "0x0240b645a9d0cc74ff891f56db2beb2d8802df0451ed8f72727149bfc6ad0712",
+      "layout": {
+        "solcVersion": "0.8.19",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:94"
+          },
+          {
+            "label": "attestationToken",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_contract(KetlAttestation)539",
+            "contract": "KetlGuarded",
+            "src": "contracts/superclasses/KetlGuarded.sol:68"
+          },
+          {
+            "label": "ketlTeamTokenId",
+            "offset": 0,
+            "slot": "102",
+            "type": "t_uint256",
+            "contract": "KetlGuarded",
+            "src": "contracts/superclasses/KetlGuarded.sol:69"
+          },
+          {
+            "label": "allowedCaller",
+            "offset": 0,
+            "slot": "103",
+            "type": "t_address",
+            "contract": "KetlGuarded",
+            "src": "contracts/superclasses/KetlGuarded.sol:71"
+          },
+          {
+            "label": "posts",
+            "offset": 0,
+            "slot": "104",
+            "type": "t_mapping(t_uint256,t_array(t_struct(Post)5848_storage)dyn_storage)",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:76"
+          },
+          {
+            "label": "pinnedPosts",
+            "offset": 0,
+            "slot": "105",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_bool))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:76"
+          },
+          {
+            "label": "lastPostIds",
+            "offset": 0,
+            "slot": "106",
+            "type": "t_mapping(t_uint256,t_struct(Counter)3947_storage)",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:77"
+          },
+          {
+            "label": "participants",
+            "offset": 0,
+            "slot": "107",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_array(t_address)dyn_storage))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:78"
+          },
+          {
+            "label": "participantsMap",
+            "offset": 0,
+            "slot": "108",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_address,t_bool)))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:79"
+          },
+          {
+            "label": "comments",
+            "offset": 0,
+            "slot": "109",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_array(t_struct(Post)5848_storage)dyn_storage))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:82"
+          },
+          {
+            "label": "lastCommentIds",
+            "offset": 0,
+            "slot": "110",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_struct(Counter)3947_storage))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:83"
+          },
+          {
+            "label": "reactions",
+            "offset": 0,
+            "slot": "111",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_uint256,t_array(t_struct(Reaction)5884_storage)dyn_storage)))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:85"
+          },
+          {
+            "label": "lastReactionIds",
+            "offset": 0,
+            "slot": "112",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_uint256,t_struct(Counter)3947_storage)))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:87"
+          },
+          {
+            "label": "usersToReactions",
+            "offset": 0,
+            "slot": "113",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_address,t_struct(Reaction)5884_storage))))",
+            "contract": "Posts",
+            "src": "contracts/superclasses/Posts.sol:89"
+          },
+          {
+            "label": "profiles",
+            "offset": 0,
+            "slot": "114",
+            "type": "t_mapping(t_address,t_struct(CID)5818_storage)",
+            "contract": "Profiles",
+            "src": "contracts/Profiles.sol:68"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_address)dyn_storage": {
+            "label": "address[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_struct(Post)5848_storage)dyn_storage": {
+            "label": "struct Post[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_struct(Reaction)5884_storage)dyn_storage": {
+            "label": "struct Reaction[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(KetlAttestation)539": {
+            "label": "contract KetlAttestation",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(CID)5818_storage)": {
+            "label": "mapping(address => struct CID)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(Reaction)5884_storage)": {
+            "label": "mapping(address => struct Reaction)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_array(t_address)dyn_storage)": {
+            "label": "mapping(uint256 => address[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_array(t_struct(Post)5848_storage)dyn_storage)": {
+            "label": "mapping(uint256 => struct Post[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_array(t_struct(Reaction)5884_storage)dyn_storage)": {
+            "label": "mapping(uint256 => struct Reaction[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_bool)": {
+            "label": "mapping(uint256 => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_address,t_bool))": {
+            "label": "mapping(uint256 => mapping(address => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_address,t_struct(Reaction)5884_storage))": {
+            "label": "mapping(uint256 => mapping(address => struct Reaction))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_array(t_address)dyn_storage))": {
+            "label": "mapping(uint256 => mapping(uint256 => address[]))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_array(t_struct(Post)5848_storage)dyn_storage))": {
+            "label": "mapping(uint256 => mapping(uint256 => struct Post[]))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_array(t_struct(Reaction)5884_storage)dyn_storage))": {
+            "label": "mapping(uint256 => mapping(uint256 => struct Reaction[]))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_bool))": {
+            "label": "mapping(uint256 => mapping(uint256 => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_address,t_bool)))": {
+            "label": "mapping(uint256 => mapping(uint256 => mapping(address => bool)))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_address,t_struct(Reaction)5884_storage)))": {
+            "label": "mapping(uint256 => mapping(uint256 => mapping(address => struct Reaction)))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_uint256,t_array(t_struct(Reaction)5884_storage)dyn_storage)))": {
+            "label": "mapping(uint256 => mapping(uint256 => mapping(uint256 => struct Reaction[])))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_address,t_struct(Reaction)5884_storage))))": {
+            "label": "mapping(uint256 => mapping(uint256 => mapping(uint256 => mapping(address => struct Reaction))))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_uint256,t_struct(Counter)3947_storage)))": {
+            "label": "mapping(uint256 => mapping(uint256 => mapping(uint256 => struct Counters.Counter)))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_struct(Counter)3947_storage))": {
+            "label": "mapping(uint256 => mapping(uint256 => struct Counters.Counter))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(Counter)3947_storage)": {
+            "label": "mapping(uint256 => struct Counters.Counter)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(CID)5818_storage": {
+            "label": "struct CID",
+            "members": [
+              {
+                "label": "digest",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "hashFunction",
+                "type": "t_uint8",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "size",
+                "type": "t_uint8",
+                "offset": 1,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Counter)3947_storage": {
+            "label": "struct Counters.Counter",
+            "members": [
+              {
+                "label": "_value",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(Post)5848_storage": {
+            "label": "struct Post",
+            "members": [
+              {
+                "label": "author",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "metadata",
+                "type": "t_struct(CID)5818_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "timestamp",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "threadId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "replyTo",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "numberOfComments",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "6"
+              }
+            ],
+            "numberOfBytes": "224"
+          },
+          "t_struct(Reaction)5884_storage": {
+            "label": "struct Reaction",
+            "members": [
+              {
+                "label": "sender",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "feedId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "postId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "commentId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "reactionType",
+                "type": "t_uint8",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "reactionId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "value",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "6"
+              }
+            ],
+            "numberOfBytes": "224"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "1f87ee1d454cfb21c7888a97c41e9dd5fea11817bfeaddaf5ec1305bd04552c7": {
+      "address": "0x47ccB9613e0e555754F24FbA380A219e9501e432",
+      "txHash": "0x7a7b2571b91840538ee2991f11fc33499039301faa4a2ff63102a3c5c45a836b",
+      "layout": {
+        "solcVersion": "0.8.19",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:94"
+          },
+          {
+            "label": "_trustedForwarder",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_address",
+            "contract": "ERC2771Recipient",
+            "src": "@opengsn/contracts/src/ERC2771Recipient.sol:21"
+          },
+          {
+            "label": "version",
+            "offset": 0,
+            "slot": "102",
+            "type": "t_string_storage",
+            "contract": "OBSSStorage",
+            "src": "contracts/OBSSStorage.sol:75"
+          },
+          {
+            "label": "kred",
+            "offset": 0,
+            "slot": "103",
+            "type": "t_contract(Kred)5144",
+            "contract": "OBSSStorage",
+            "src": "contracts/OBSSStorage.sol:77",
+            "renamedFrom": "karma"
+          },
+          {
+            "label": "profiles",
+            "offset": 0,
+            "slot": "104",
+            "type": "t_contract(Profiles)5811",
+            "contract": "OBSSStorage",
+            "src": "contracts/OBSSStorage.sol:78"
+          },
+          {
+            "label": "feeds",
+            "offset": 0,
+            "slot": "105",
+            "type": "t_contract(Feeds)5042",
+            "contract": "OBSSStorage",
+            "src": "contracts/OBSSStorage.sol:79"
+          },
+          {
+            "label": "kredGranted",
+            "offset": 0,
+            "slot": "106",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_address,t_bool))))",
+            "contract": "OBSSStorage",
+            "src": "contracts/OBSSStorage.sol:80",
+            "renamedFrom": "karmaGranted"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_contract(Feeds)5042": {
+            "label": "contract Feeds",
+            "numberOfBytes": "20"
+          },
+          "t_contract(Kred)5144": {
+            "label": "contract Kred",
+            "numberOfBytes": "20"
+          },
+          "t_contract(Profiles)5811": {
+            "label": "contract Profiles",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_address,t_bool))": {
+            "label": "mapping(uint256 => mapping(address => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_address,t_bool)))": {
+            "label": "mapping(uint256 => mapping(uint256 => mapping(address => bool)))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_uint256,t_mapping(t_address,t_bool))))": {
+            "label": "mapping(uint256 => mapping(uint256 => mapping(uint256 => mapping(address => bool))))",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    }
+  }
+}

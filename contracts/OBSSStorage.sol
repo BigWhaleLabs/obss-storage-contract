@@ -72,9 +72,11 @@ import "./Feeds.sol";
 contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
   // State
   string public version;
+  /// @custom:oz-renamed-from karma
   Kred public kred;
   Profiles public profiles;
   Feeds public feeds;
+  /// @custom:oz-renamed-from karmaGranted
   mapping(uint => mapping(uint => mapping(uint => mapping(address => bool))))
     public kredGranted;
 
