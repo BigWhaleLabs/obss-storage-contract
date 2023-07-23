@@ -72,21 +72,25 @@ contract Posts is KetlGuarded {
   using Counters for Counters.Counter;
 
   // State
-  mapping(uint => Post[]) public posts;
-  mapping(uint => mapping(uint => bool)) public pinnedPosts;
-  mapping(uint => Counters.Counter) public lastPostIds;
-  mapping(uint => mapping(uint => address[])) public participants;
-  mapping(uint => mapping(uint => mapping(address => bool)))
+  mapping(uint feedId => Post[] posts) public posts;
+  mapping(uint feedId => mapping(uint postId => bool isPinned))
+    public pinnedPosts;
+  mapping(uint feedId => Counters.Counter lastPostId) public lastPostIds;
+  mapping(uint feedId => mapping(uint postId => address[] participants))
+    public participants;
+  mapping(uint feedId => mapping(uint postId => mapping(address participant => bool isParticipant)))
     public participantsMap;
 
-  mapping(uint => mapping(uint => Post[])) public comments;
-  mapping(uint => mapping(uint => Counters.Counter)) public lastCommentIds;
+  mapping(uint feedId => mapping(uint postId => Post[] comments))
+    public comments;
+  mapping(uint feedId => mapping(uint postId => Counters.Counter lastCommentId))
+    public lastCommentIds;
 
-  mapping(uint => mapping(uint => mapping(uint => Reaction[])))
+  mapping(uint feedId => mapping(uint postId => mapping(uint commentId => Reaction[] reactions)))
     public reactions;
-  mapping(uint => mapping(uint => mapping(uint => Counters.Counter)))
+  mapping(uint feedId => mapping(uint postId => mapping(uint commentId => Counters.Counter lastReactionId)))
     public lastReactionIds;
-  mapping(uint => mapping(uint => mapping(uint => mapping(address => Reaction))))
+  mapping(uint feedId => mapping(uint postId => mapping(uint commentId => mapping(address sender => Reaction reaction))))
     public usersToReactions;
 
   // Events
@@ -139,7 +143,7 @@ contract Posts is KetlGuarded {
 
   function addPost(
     address sender,
-    PostRequest memory postRequest
+    PostRequest calldata postRequest
   )
     external
     onlyAllowedCaller
@@ -235,7 +239,7 @@ contract Posts is KetlGuarded {
 
   function addComment(
     address sender,
-    CommentRequest memory commentRequest
+    CommentRequest calldata commentRequest
   )
     external
     onlyAllowedCaller
@@ -321,7 +325,7 @@ contract Posts is KetlGuarded {
 
   function addReaction(
     address sender,
-    AddReactionRequest memory reactionRequest
+    AddReactionRequest calldata reactionRequest
   )
     external
     payable
@@ -329,49 +333,60 @@ contract Posts is KetlGuarded {
     onlyKetlTokenOwners(sender)
     onlyAllowedFeedId(reactionRequest.feedId)
   {
-    uint feedId = reactionRequest.feedId;
-    uint postId = reactionRequest.postId;
-    uint commentId = reactionRequest.commentId;
-    uint8 reactionType = reactionRequest.reactionType;
     // Fetch post or comment
-    Post memory post = commentId == 0
-      ? posts[feedId][postId]
-      : comments[feedId][postId][commentId - 1]; // comments start with 1
+    Post memory post = reactionRequest.commentId == 0
+      ? posts[reactionRequest.feedId][reactionRequest.postId]
+      : comments[reactionRequest.feedId][reactionRequest.postId][
+        reactionRequest.commentId - 1
+      ]; // comments start with 1
     // Check if post or comment exists
     require(post.author != address(0), "Post or comment not found");
     // Get old reaction if it exists
-    Reaction memory oldReaction = usersToReactions[feedId][postId][commentId][
-      sender
-    ];
+    Reaction memory oldReaction = usersToReactions[reactionRequest.feedId][
+      reactionRequest.postId
+    ][reactionRequest.commentId][sender];
     // Check if reaction already exists
     require(
-      oldReaction.reactionType != reactionType,
+      oldReaction.reactionType != reactionRequest.reactionType,
       "Reaction of this type already exists"
     );
     if (oldReaction.reactionType != 0) {
       removeReaction(
         sender,
-        RemoveReactionRequest(feedId, postId, commentId, oldReaction.reactionId)
+        RemoveReactionRequest(
+          reactionRequest.feedId,
+          reactionRequest.postId,
+          reactionRequest.commentId,
+          oldReaction.reactionId
+        )
       );
     }
     // Get lastReactionIds
-    uint reactionId = lastReactionIds[feedId][postId][commentId].current();
+    uint reactionId = lastReactionIds[reactionRequest.feedId][
+      reactionRequest.postId
+    ][reactionRequest.commentId].current();
     // Create reaction
     Reaction memory reaction = Reaction(
       sender,
-      feedId,
-      postId,
-      commentId,
-      reactionType,
+      reactionRequest.feedId,
+      reactionRequest.postId,
+      reactionRequest.commentId,
+      reactionRequest.reactionType,
       reactionId,
       msg.value
     );
     // Add reaction
-    reactions[feedId][postId][commentId].push(reaction);
+    reactions[reactionRequest.feedId][reactionRequest.postId][
+      reactionRequest.commentId
+    ].push(reaction);
     // Remember the reaction for user
-    usersToReactions[feedId][postId][commentId][sender] = reaction;
+    usersToReactions[reactionRequest.feedId][reactionRequest.postId][
+      reactionRequest.commentId
+    ][sender] = reaction;
     // Increment lastReactionId
-    lastReactionIds[feedId][postId][commentId].increment();
+    lastReactionIds[reactionRequest.feedId][reactionRequest.postId][
+      reactionRequest.commentId
+    ].increment();
     // If ether was sent, transfer it to the sender
     if (msg.value > 0) {
       Address.sendValue(payable(post.author), msg.value);
@@ -379,10 +394,10 @@ contract Posts is KetlGuarded {
     // Emit the event
     emit ReactionAdded(
       sender,
-      feedId,
-      postId,
-      commentId,
-      reactionType,
+      reactionRequest.feedId,
+      reactionRequest.postId,
+      reactionRequest.commentId,
+      reactionRequest.reactionType,
       reactionId,
       msg.value
     );

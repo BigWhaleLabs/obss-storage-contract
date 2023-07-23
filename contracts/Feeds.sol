@@ -84,7 +84,7 @@ contract Feeds is Posts {
     _;
   }
 
-  function addFeed(CID memory feedMetadata) public onlyOwner returns (uint) {
+  function addFeed(CID calldata feedMetadata) public onlyOwner returns (uint) {
     uint feedId = lastFeedId.current();
     feeds.push(feedMetadata);
     emit FeedAdded(feedId, feedMetadata);

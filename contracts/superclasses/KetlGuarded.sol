@@ -64,6 +64,9 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@big-whale-labs/ketl-attestation-token/contracts/KetlAttestation.sol";
 
 contract KetlGuarded is Initializable, OwnableUpgradeable {
+  error SenderNotAllowed(address sender);
+  error CallerNotAllowed(address caller);
+
   KetlAttestation public attestationToken;
   uint public ketlTeamTokenId;
   address public allowedCaller;
@@ -88,20 +91,20 @@ contract KetlGuarded is Initializable, OwnableUpgradeable {
   }
 
   modifier onlyAllowedCaller() {
-    require(
-      msg.sender == allowedCaller,
-      "AllowedCallerChecker: Only allowed caller can call this function"
-    );
+    if (msg.sender != allowedCaller) {
+      revert CallerNotAllowed(msg.sender);
+    }
     _;
   }
 
   modifier onlyKetlTokenOwners(address sender) {
-    for (uint32 i = 0; i < attestationToken.currentTokenId(); i++) {
+    uint currentTokenId = attestationToken.currentTokenId();
+    for (uint i = 0; i < currentTokenId; i++) {
       if (attestationToken.balanceOf(sender, i) > 0) {
         _;
         return;
       }
     }
-    revert("KetlGuarded: sender not allowed");
+    revert SenderNotAllowed(sender);
   }
 }

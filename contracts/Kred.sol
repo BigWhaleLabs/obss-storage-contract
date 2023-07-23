@@ -66,19 +66,19 @@ contract Kred is ERC20Upgradeable, KetlGuarded {
   string public version;
 
   function initializeKred(
-    string memory name,
-    string memory symbol,
+    string calldata name,
+    string calldata symbol,
     address _attestationToken,
     uint _ketlTeamTokenId,
     address _allowedCaller,
-    string memory _version
+    string calldata _version
   ) public initializer {
     __ERC20_init(name, symbol);
     KetlGuarded.initialize(_attestationToken, _ketlTeamTokenId, _allowedCaller);
     version = _version;
   }
 
-  function setVersion(string memory _version) public onlyOwner {
+  function setVersion(string calldata _version) public onlyOwner {
     version = _version;
   }
 

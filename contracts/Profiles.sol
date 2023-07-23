@@ -63,14 +63,14 @@ import "./superclasses/Posts.sol";
 
 contract Profiles is Posts {
   // State
-  mapping(address => CID) public profiles;
+  mapping(address user => CID) public profiles;
 
   // Events
   event ProfileSet(address indexed profile, CID metadata);
 
   function setProfile(
     address sender,
-    CID memory profileMetadata
+    CID calldata profileMetadata
   ) external onlyAllowedCaller onlyKetlTokenOwners(sender) {
     profiles[sender] = profileMetadata;
     emit ProfileSet(sender, profileMetadata);

@@ -77,13 +77,13 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
   Profiles public profiles;
   Feeds public feeds;
   /// @custom:oz-renamed-from karmaGranted
-  mapping(uint => mapping(uint => mapping(uint => mapping(address => bool))))
+  mapping(uint feedId => mapping(uint postId => mapping(uint commentId => mapping(address sender => bool))))
     public kredGranted;
 
   // Constructor
   function initialize(
     address _forwarder,
-    string memory _version,
+    string calldata _version,
     address _kred,
     address _profiles,
     address _feeds
@@ -118,17 +118,17 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
     _setTrustedForwarder(_forwarder);
   }
 
-  function setVersion(string memory _version) public onlyOwner {
+  function setVersion(string calldata _version) public onlyOwner {
     version = _version;
   }
 
   // Profiles
 
-  function setProfile(CID memory profileMetadata) external {
+  function setProfile(CID calldata profileMetadata) external {
     profiles.setProfile(_msgSender(), profileMetadata);
   }
 
-  function addProfilePost(CID memory postMetadata) external {
+  function addProfilePost(CID calldata postMetadata) external {
     uint feedId = uint(keccak256(abi.encodePacked(_msgSender())));
     profiles.addPost(_msgSender(), PostRequest(feedId, postMetadata));
     kred.mint(_msgSender(), 5);
@@ -139,27 +139,27 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
     profiles.pinOrUnpinPost(_msgSender(), feedId, postId, pin);
   }
 
-  function addProfileComment(CommentRequest memory commentRequest) external {
+  function addProfileComment(CommentRequest calldata commentRequest) external {
     profiles.addComment(_msgSender(), commentRequest);
     kred.mint(_msgSender(), 5);
   }
 
   function addProfileReaction(
-    AddReactionRequest memory reactionRequest
+    AddReactionRequest calldata reactionRequest
   ) external payable {
     profiles.addReaction(_msgSender(), reactionRequest);
     grantKred(reactionRequest);
   }
 
   function removeProfileReaction(
-    RemoveReactionRequest memory reactionRequest
+    RemoveReactionRequest calldata reactionRequest
   ) external {
     profiles.removeReaction(_msgSender(), reactionRequest);
   }
 
   // Feeds
 
-  function addFeedPost(PostRequest memory postRequest) public {
+  function addFeedPost(PostRequest calldata postRequest) public {
     feeds.addPost(_msgSender(), postRequest);
     kred.mint(_msgSender(), 5);
   }
@@ -168,19 +168,19 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
     feeds.pinOrUnpinPost(_msgSender(), feedId, postId, pin);
   }
 
-  function addBatchFeedPosts(PostRequest[] memory postRequests) public {
+  function addBatchFeedPosts(PostRequest[] calldata postRequests) public {
     for (uint i = 0; i < postRequests.length; i++) {
       addFeedPost(postRequests[i]);
     }
   }
 
-  function addFeedComment(CommentRequest memory commentRequest) public {
+  function addFeedComment(CommentRequest calldata commentRequest) public {
     feeds.addComment(_msgSender(), commentRequest);
     kred.mint(_msgSender(), 5);
   }
 
   function addBatchFeedComments(
-    CommentRequest[] memory commentRequests
+    CommentRequest[] calldata commentRequests
   ) public {
     for (uint i = 0; i < commentRequests.length; i++) {
       addFeedComment((commentRequests[i]));
@@ -188,21 +188,21 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
   }
 
   function addFeedReaction(
-    AddReactionRequest memory reactionRequest
+    AddReactionRequest calldata reactionRequest
   ) public payable {
     feeds.addReaction(_msgSender(), reactionRequest);
     grantKred(reactionRequest);
   }
 
   function removeFeedReaction(
-    RemoveReactionRequest memory reactionRequest
+    RemoveReactionRequest calldata reactionRequest
   ) public {
     feeds.removeReaction(_msgSender(), reactionRequest);
   }
 
   function batchAddRemoveReactions(
-    AddReactionRequest[] memory addReactionRequests,
-    RemoveReactionRequest[] memory removeReactionRequests
+    AddReactionRequest[] calldata addReactionRequests,
+    RemoveReactionRequest[] calldata removeReactionRequests
   ) public {
     for (uint i = 0; i < addReactionRequests.length; i++) {
       addFeedReaction(addReactionRequests[i]);
@@ -213,10 +213,10 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
   }
 
   function batchFeedAddPostsCommentsReactions(
-    PostRequest[] memory postRequests,
-    CommentRequest[] memory commentRequests,
-    AddReactionRequest[] memory addReactionRequests,
-    RemoveReactionRequest[] memory removeReactionRequests
+    PostRequest[] calldata postRequests,
+    CommentRequest[] calldata commentRequests,
+    AddReactionRequest[] calldata addReactionRequests,
+    RemoveReactionRequest[] calldata removeReactionRequests
   ) external {
     addBatchFeedPosts(postRequests);
     addBatchFeedComments(commentRequests);
@@ -225,7 +225,7 @@ contract OBSSStorage is OwnableUpgradeable, ERC2771Recipient {
 
   // Kred
 
-  function grantKred(AddReactionRequest memory reactionRequest) internal {
+  function grantKred(AddReactionRequest calldata reactionRequest) internal {
     Post memory post = feeds.getPost(
       reactionRequest.feedId,
       reactionRequest.postId
