@@ -77,7 +77,7 @@ async function main() {
     },
   })
 
-  console.log('Deploying Kred v1.1.0')
+  console.log('Deploying Kred v1.1.1')
   // (not upgrading previous one because we want to reset data)
   const kredConstructorArguments = [
     'Kred',
@@ -94,21 +94,21 @@ async function main() {
     initializer: 'initializeKred',
   })) as Kred
 
-  console.log('Upgrading Feeds to v1.1.0')
+  // console.log('Upgrading Feeds to v1.1.1')
   await upgradeContract({
     proxyAddress: feedsProxyAddress as string,
     contractName: 'Feeds',
     chainName,
   })
 
-  console.log('Upgrading Profiles to v1.1.0')
+  // console.log('Upgrading Profiles to v1.1.1')
   await upgradeContract({
     proxyAddress: profilesProxyAddress as string,
     contractName: 'Profiles',
     chainName,
   })
 
-  console.log('Upgrading OBSSStorage to v1.1.0')
+  console.log('Upgrading OBSSStorage to v1.1.1')
   const obssStorage = (await upgradeContract({
     proxyAddress: obssProxyAddress as string,
     contractName: 'OBSSStorage',
