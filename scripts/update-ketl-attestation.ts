@@ -2,9 +2,11 @@ import {
   DEV_KETL_ATTESTATION_CONTRACT,
   DEV_KETL_CRED_CONTRACT_ADDRESS,
   DEV_KETL_FEEDS_CONTRACT_ADDRESS,
+  DEV_KETL_PROFILES_CONTRACT_ADDRESS,
   PROD_KETL_ATTESTATION_CONTRACT,
   PROD_KETL_CRED_CONTRACT_ADDRESS,
   PROD_KETL_FEEDS_CONTRACT_ADDRESS,
+  PROD_KETL_PROFILES_CONTRACT_ADDRESS,
 } from '@big-whale-labs/constants'
 import { ethAddressRegex } from './helpers/data'
 import { ethers } from 'hardhat'
@@ -45,8 +47,8 @@ async function main() {
         message: 'Profiles proxy address',
         pattern: ethAddressRegex,
         default: isProduction
-          ? '0x95fcaf414e2ad4ca949eb725e684fd196af1fba5'
-          : '0x39d8EA89705B02bc020B9E1dF369C4d746761e44',
+          ? PROD_KETL_PROFILES_CONTRACT_ADDRESS
+          : DEV_KETL_PROFILES_CONTRACT_ADDRESS,
       },
       feedsProxyAddress: {
         required: true,

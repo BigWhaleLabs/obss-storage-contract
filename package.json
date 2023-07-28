@@ -34,7 +34,7 @@
     "update-ketl-attestation": "yarn hardhat run --network deploy scripts/update-ketl-attestation.ts"
   },
   "devDependencies": {
-    "@big-whale-labs/constants": "0.2.12",
+    "@big-whale-labs/constants": "0.2.13",
     "@big-whale-labs/ketl-attestation-token": "0.1.0",
     "@big-whale-labs/versioned-contract": "^1.0.2",
     "@ethersproject/providers": "^5.7.2",
