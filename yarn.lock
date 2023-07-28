@@ -72,17 +72,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@big-whale-labs/constants@npm:^0.1.85":
-  version: 0.1.85
-  resolution: "@big-whale-labs/constants@npm:0.1.85"
-  checksum: ff7f61f8c4779f1f1ccdc62f7639e32f5c3ac5c45209905c0598e0feca10fca55cdb620e531371eb7ba7721f4b9e211d8e6848190097949266b9db14f010c069
+"@big-whale-labs/constants@npm:0.2.13":
+  version: 0.2.13
+  resolution: "@big-whale-labs/constants@npm:0.2.13"
+  checksum: a04c81dc0c8c6bc0c9f4a4d493373807412041ba6157e9261507dc16b1c3022cdca163acf8a68df3a89477b083a0fd6685016c0b648ebad31951bd8a755e3263
   languageName: node
   linkType: hard
 
-"@big-whale-labs/constants@npm:^0.2.0":
-  version: 0.2.3
-  resolution: "@big-whale-labs/constants@npm:0.2.3"
-  checksum: adddc1d42306ad578d304b902bc026fe2cff42ed92885ba4f0335965d3204809a35a8e3dd0538753aa042953e7d4de6c76f7552315ea1b15e0259f7d2ad493ca
+"@big-whale-labs/constants@npm:^0.2.10":
+  version: 0.2.12
+  resolution: "@big-whale-labs/constants@npm:0.2.12"
+  checksum: 9bc15041ac9819bfdf15cf068c6e440304b9bf65e65d0ab00169fd09f50581d077f6b32bf311be19019c75eb9aada411759ca763ac4c695365e18286fa0b1043
   languageName: node
   linkType: hard
 
@@ -100,17 +100,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@big-whale-labs/ketl-attestation-token@npm:^0.0.15":
-  version: 0.0.15
-  resolution: "@big-whale-labs/ketl-attestation-token@npm:0.0.15"
+"@big-whale-labs/ketl-attestation-token@npm:0.1.0":
+  version: 0.1.0
+  resolution: "@big-whale-labs/ketl-attestation-token@npm:0.1.0"
   dependencies:
-    "@big-whale-labs/constants": ^0.2.0
+    "@big-whale-labs/constants": ^0.2.10
     "@big-whale-labs/ketl-allow-map-contract": ^0.0.3
     "@big-whale-labs/versioned-contract": ^1.0.2
+    "@openzeppelin/hardhat-upgrades": ^1.26.0
     "@zk-kit/incremental-merkle-tree": ^1.1.0
     "@zk-kit/incremental-merkle-tree.sol": ^1.7.0
+    n-readlines: ^1.0.1
     prompt: ^1.3.0
-  checksum: 2ce4504e6c6b1b73b3facbe72f9dc723aeadbe6ce5dc476ae254bb91d92a61edbfafeea086c9815f4df426aa911056628e332ade21737956dbbee6fed8e66378
+  checksum: 2b09899a4b1af97d67fe8940f10a0c84ff383ea1e0ca6e468d5994ffa4cb2b04b4d39d4fc6eb9e40a68d3198469d9fa11a687795504eae35d44e3ac33e3c9f9f
   languageName: node
   linkType: hard
 
@@ -118,9 +120,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@big-whale-labs/obss-storage-contract@workspace:."
   dependencies:
-    "@big-whale-labs/constants": ^0.1.85
+    "@big-whale-labs/constants": 0.2.13
     "@big-whale-labs/gsn-paymaster-contract": ^0.1.1
-    "@big-whale-labs/ketl-attestation-token": ^0.0.15
+    "@big-whale-labs/ketl-attestation-token": 0.1.0
     "@big-whale-labs/versioned-contract": ^1.0.2
     "@ethersproject/providers": ^5.7.2
     "@nomiclabs/hardhat-ethers": ^2.2.3
@@ -11258,6 +11260,13 @@ __metadata:
   version: 0.0.8
   resolution: "mute-stream@npm:0.0.8"
   checksum: ff48d251fc3f827e5b1206cda0ffdaec885e56057ee86a3155e1951bc940fd5f33531774b1cc8414d7668c10a8907f863f6561875ee6e8768931a62121a531a1
+  languageName: node
+  linkType: hard
+
+"n-readlines@npm:^1.0.1":
+  version: 1.0.3
+  resolution: "n-readlines@npm:1.0.3"
+  checksum: d098ee8cda91d6fe0b2d6fe599a9bc28ac1856e85922c1354b70455ad444328493932124e98ce703ace05c4d556e3873c34138d136afbe1b854757807ab265de
   languageName: node
   linkType: hard
 

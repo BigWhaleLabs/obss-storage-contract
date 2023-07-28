@@ -30,11 +30,12 @@
     "lint": "prettier --check . && eslint --max-warnings 0 --ext ts scripts test && yarn eth-lint",
     "prettify": "prettier --write .",
     "release": "np",
-    "prepublishOnly": "yarn build && yarn tsc"
+    "prepublishOnly": "yarn build && yarn tsc",
+    "update-ketl-attestation": "yarn hardhat run --network deploy scripts/update-ketl-attestation.ts"
   },
   "devDependencies": {
-    "@big-whale-labs/constants": "^0.1.85",
-    "@big-whale-labs/ketl-attestation-token": "^0.0.15",
+    "@big-whale-labs/constants": "0.2.13",
+    "@big-whale-labs/ketl-attestation-token": "0.1.0",
     "@big-whale-labs/versioned-contract": "^1.0.2",
     "@ethersproject/providers": "^5.7.2",
     "@nomiclabs/hardhat-ethers": "^2.2.3",
